@@ -1,0 +1,20 @@
+# Secretos
+.env
+
+# Python basura
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# Datos y Resultados (Demasiado pesados para GitHub)
+TFM_GSE*
+*.soft.gz
+*.csv
+*.png
+*.html
+SINTESIS_MOLECULAR.json
+
+# Sistema
+.DS_Store
