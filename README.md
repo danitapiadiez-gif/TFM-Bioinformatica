@@ -75,4 +75,4 @@ python agentes/paso9_mega_dashboard.py
 *   **`MEGA_DASHBOARD_CONSENSO_PULMON.html`**: El informe final interactivo y visual.
 
 ---
-*Trabajo de Fin de Máster (TFM) - 2024*
+*Trabajo de Fin de Máster (TFM)*
