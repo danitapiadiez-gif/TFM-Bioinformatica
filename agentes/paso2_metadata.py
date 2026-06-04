@@ -116,7 +116,7 @@ RESPONDE ÚNICAMENTE CON UN OBJETO JSON:
             mapeo_ia = respuesta_ia.get("mapeo")
             
             if col_ia in meta.columns and mapeo_ia:
-                print(f" ✅ IA seleccionó columna: '{col_ia}'")
+                print(f"  IA seleccionó columna: '{col_ia}'")
                 
                 # Mapeo insensible a mayúsculas/espacios
                 mapeo_clean = {str(k).strip().lower(): v for k, v in mapeo_ia.items()}
@@ -129,7 +129,7 @@ RESPONDE ÚNICAMENTE CON UN OBJETO JSON:
                 return grupos
                 
         except Exception as e:
-            print(f" ⚠️ Error en IA (Paso 2): {e}. Usando sistema heurístico de respaldo...")
+            print(f"  Error en IA (Paso 2): {e}. Usando sistema heurístico de respaldo...")
     
     # --- SISTEMA DE RESPALDO (Heurística) si la IA falla ---
     return asignar_grupos_heuristico(meta)
