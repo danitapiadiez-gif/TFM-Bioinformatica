@@ -243,7 +243,7 @@ RESPONDE SOLO EN JSON:
     ruta_html = os.path.join(BASE_PATH, "MEGA_DASHBOARD_CONSENSO_PULMON.html")
     with open(ruta_html, "w", encoding="utf-8") as f:
         f.write(html_content)
-    print(f"\n ✅ DASHBOARD DE CONSENSO ACTUALIZADO (Métrica de Magnitud): {ruta_html}")
+    print(f"\n  DASHBOARD DE CONSENSO ACTUALIZADO (Métrica de Magnitud): {ruta_html}")
 
 if __name__ == "__main__":
     generar_dashboard_consenso()
