@@ -15,7 +15,7 @@ def generar_informe(gse_id, genes_sig, gse):
     PASO 4: Genera un informe biológico usando IA (Groq) a partir de los genes significativos
     e incluye una interpretación básica de PCA, volcano y heatmap.
     """
-    print(f"\n✍️ PASO 4: Generando informe biológico automático ({gse_id})...")
+    print(f"\n PASO 4: Generando informe biológico automático ({gse_id})...")
     base_path = os.path.join(os.path.expanduser("~"), "Desktop", f"TFM_{gse_id}")
     os.makedirs(base_path, exist_ok=True)
     
