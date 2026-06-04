@@ -50,7 +50,7 @@ def generar_dashboard(gse_id):
         resultados = pd.read_csv(os.path.join(base_path, "resultados_completos.csv"))
         tiene_adj = 'adj_pvalue' in resultados.columns and len(resultados) > 0
     except Exception as e:
-        print(f"⚠️ No se pudo cargar resultados_completos.csv: {e}")
+        print(f" No se pudo cargar resultados_completos.csv: {e}")
         resultados = pd.DataFrame()
         tiene_adj = False
     
@@ -140,7 +140,7 @@ def generar_dashboard(gse_id):
                 index=False, classes='table table-striped table-hover table-sm',
                 escape=False, justify='left')
         except Exception as e:
-            print(f"⚠️ No se pudo cargar resultados_ml.csv: {e}")
+            print(f" No se pudo cargar resultados_ml.csv: {e}")
             tabla_ml_html = "<p>No se pudieron cargar las métricas de ML.</p>"
     else:
         tabla_ml_html = "<p>No hay resultados de ML disponibles para este GSE.</p>"
@@ -175,7 +175,7 @@ def generar_dashboard(gse_id):
             else:
                 tabla_top20_html = "<p>El fichero de top 20 de ML no tiene las columnas esperadas.</p>"
         except Exception as e:
-            print(f"⚠️ No se pudo cargar top20_genes_ml_{gse_id}.csv: {e}")
+            print(f" No se pudo cargar top20_genes_ml_{gse_id}.csv: {e}")
             tabla_top20_html = "<p>No se pudieron cargar los genes importantes de ML.</p>"
     else:
         tabla_top20_html = "<p>No hay información de genes importantes de ML para este GSE.</p>"
@@ -593,4 +593,4 @@ if (imageModal) {
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
     
-    print(f"✅ Dashboard generado: {out_path}")
+    print(f" Dashboard generado: {out_path}")
