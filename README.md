@@ -1,4 +1,4 @@
-# Genomic Intelligence Framework (TFM) 🧬🔬
+# Genomic Intelligence Framework (TFM) 
 
 > **Pipeline Automatizado para el Análisis y Síntesis de Datos Genómicos: Aplicación en la Identificación de Biomarcadores en Cáncer de Pulmón**
 
