@@ -62,6 +62,6 @@ def ejecutar_diferencial(gse_id, df_norm, meta):
     
     resultados.to_csv(os.path.join(path, "resultados_completos.csv"), index=False)
     sig = resultados[resultados['adj_pvalue'] < 0.05]
-    print(f" ✅ Genes significativos encontrados: {len(sig)}")
+    print(f" Genes significativos encontrados: {len(sig)}")
     
     return sig
