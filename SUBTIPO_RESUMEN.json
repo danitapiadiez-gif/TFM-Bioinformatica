@@ -1,0 +1,13 @@
+{
+  "tarea": "ADC vs Escamoso (subtipo histologico)",
+  "cohortes": [
+    "GSE30219",
+    "GSE50081",
+    "GSE19188"
+  ],
+  "n_total": 388,
+  "balanced_accuracy_media": 0.9403333333333332,
+  "auc_media": 0.9665,
+  "ganancia_media_vs_baseline": 0.29613333333333336,
+  "n_genes_firma_replicada": 1174
+}
