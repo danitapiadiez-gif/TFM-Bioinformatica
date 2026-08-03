@@ -1,117 +1,126 @@
+"""
+Paso 11: interfaz conversacional de consulta de resultados (terminal).
+
+Reescrito respecto a la version anterior, que presentaba tres defectos:
+
+  - Leia los resultados de ~/Desktop en lugar del directorio del proyecto, no
+    encontraba ningun fichero y construia un contexto vacio bajo el encabezado
+    "SISTEMA DE CONOCIMIENTO". El modelo respondia entonces desde su
+    conocimiento parametrico, presentandolo como resultados del trabajo.
+  - Inyectaba la cadena fija "Rendimiento ML Local: Alta Precision reportada."
+    sin leer ninguna metrica.
+  - Imprimia parte de la clave de API por pantalla.
+
+El contexto se construye ahora en contexto_tfm.py a partir de los CSV de
+resultados, y el programa no arranca si faltan.
+"""
+
 import os
-import pandas as pd
-import glob
-from groq import Groq
+import sys
+
 from dotenv import load_dotenv
+from groq import Groq
 
-# Cargar configuración - Forzamos el override por si hay basura en el entorno
-load_dotenv(override=True)
-api_key = os.getenv("GROQ_API_KEY")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from contexto_tfm import (  # noqa: E402
+    BASE_DIR,
+    FaltanResultados,
+    inventario,
+    prompt_sistema,
+)
 
-if api_key:
-    api_key = api_key.strip().replace('"', '').replace("'", "")
+MODELO = "llama-3.3-70b-versatile"
+TEMPERATURA = 0.0          # consulta de datos: sin creatividad
+MAX_HISTORIAL = 12         # turnos conservados
 
-if not api_key or not api_key.startswith("gsk_"):
-    print(" AVISO: No se detectó una API Key válida en el archivo .env")
-    api_key = input("Introduce tu GROQ_API_KEY manualmente (empieza por gsk_): ").strip()
 
-if not api_key.startswith("gsk_"):
-    print(" ERROR: La clave introducida no tiene el formato correcto de Groq (debe empezar por gsk_)")
-    exit()
+def obtener_cliente():
+    """Devuelve un cliente de Groq, o None si no hay credencial utilizable."""
+    # Ruta explicita: find_dotenv() depende del directorio de invocacion.
+    load_dotenv(os.path.join(BASE_DIR, ".env"), override=True)
+    clave = os.getenv("GROQ_API_KEY")
+    if clave:
+        clave = clave.strip().strip('"').strip("'")
 
-print(f"Usando API Key: {api_key[:7]}...{api_key[-4:]}")
-client = Groq(api_key=api_key)
+    if not clave:
+        print("No se encontro GROQ_API_KEY en el archivo .env.")
+        print("Anade la linea  GROQ_API_KEY=...  al fichero .env del proyecto.")
+        return None
+    if not clave.startswith("gsk_"):
+        print("La clave encontrada no tiene el formato de Groq (debe empezar por gsk_).")
+        return None
 
-def generar_contexto_tfm():
-    """Recopila toda la información de los agentes y resultados en un solo resumen."""
-    desktop = os.path.expanduser("~/Desktop")
-    contexto = "SISTEMA DE CONOCIMIENTO - FRAMEWORK TRANSCRIPTÓMICO TFM\n\n"
-    
-    # 1. Cargar la Firma de Consenso (La joya de la corona)
-    ruta_firma = os.path.join(desktop, "FIRMA_CONSENSO_FINAL_TFM.csv")
-    if os.path.exists(ruta_firma):
-        df_firma = pd.read_csv(ruta_firma).head(30) # Los top 30 son suficientes para el chat
-        contexto += "TOP 30 BIOMARCADORES DE LA FIRMA DE CONSENSO (Estadística + ML):\n"
-        contexto += df_firma.to_string(index=False) + "\n\n"
-    
-    # 2. Resumen de Estudios Procesados
-    carpetas = glob.glob(os.path.join(desktop, "TFM_GSE*"))
-    contexto += f"ESTUDIOS ANALIZADOS ({len(carpetas)} datasets):\n"
-    
-    for cap in carpetas:
-        gse_id = os.path.basename(cap).replace("TFM_", "")
-        contexto += f"\n--- Estudio {gse_id} ---\n"
-        
-        # Metadata (lo que dijo la IA)
-        meta_path = os.path.join(cap, "metadata_procesada.csv")
-        if os.path.exists(meta_path):
-            df_meta = pd.read_csv(meta_path)
-            if 'grupo_analisis' in df_meta.columns:
-                conteo = df_meta['grupo_analisis'].value_counts().to_dict()
-                contexto += f"Composición de muestras: {conteo}\n"
-        
-        # Resultados ML local
-        res_ml = os.path.join(cap, "resultados_ml.csv") # Suponiendo que existe un resumen
-        if os.path.exists(res_ml):
-            # Podríamos leer el Accuracy local
-            contexto += "Rendimiento ML Local: Alta Precisión reportada.\n"
+    # No se imprime la clave, ni parcialmente.
+    print("Credencial de Groq cargada correctamente.")
+    return Groq(api_key=clave)
 
-    # 3. Metodología empleada (para que sepa cómo responder)
-    contexto += "\nMETODOLOGÍA DEL PROYECTO:\n"
-    contexto += "- Curación de metadatos con Llama 3.\n"
-    contexto += "- Normalización por cuantiles y Log2.\n"
-    contexto += "- Validación LODO (Leave-One-Dataset-Out) con 11 estudios.\n"
-    contexto += "- Selección de genes mediante penalización Lasso (L1).\n"
-    
-    return contexto
 
-def chat_interactivo():
-    contexto = generar_contexto_tfm()
-    print("\n" + "="*50)
-    print(" GENOMIC INTELLIGENCE CHATBOT - SOPORTE TFM")
-    print("="*50)
-    print("El asistente tiene acceso a tus resultados de Consenso y ML.")
-    print("Escribe 'salir' para finalizar.\n")
+def main():
+    print("=" * 74)
+    print(" ASISTENTE DE CONSULTA DE RESULTADOS - TFM AUDITORIA DE REPRODUCIBILIDAD")
+    print("=" * 74)
 
-    # Definimos el comportamiento base con ejemplos (Few-Shot) para que aprenda el patrón de bloqueo
-    history = [
-        {"role": "system", "content": f"""Eres un sistema de consulta de datos estrictamente limitado al TFM de Cáncer de Pulmón.
+    try:
+        sistema = prompt_sistema()
+    except FaltanResultados as e:
+        print(f"\nNo se puede iniciar el asistente.\n\n{e}")
+        return 1
 
-    REGLA DE ORO: Si la pregunta NO trata sobre los datos del TFM, los genes de la firma o el cáncer de pulmón, responde ÚNICAMENTE: 'ERROR DE ÁMBITO: Esta consulta no pertenece a la investigación del TFM de Cáncer de Pulmón.'
+    inv = inventario()
+    cargados = [n for n, ok in inv.items() if ok]
+    ausentes = [n for n, ok in inv.items() if not ok]
+    print(f"\nResultados cargados ({len(cargados)}):")
+    for n in cargados:
+        print(f"  - {n}")
+    if ausentes:
+        print(f"\nNo disponibles ({len(ausentes)}); el asistente lo indicara si se "
+              f"le pregunta por ellos:")
+        for n in ausentes:
+            print(f"  - {n}")
 
-    CONOCIMIENTO DEL TFM:
-    {contexto}"""},
-        # Ejemplo de bloqueo 1
-        {"role": "user", "content": "¿Qué es una piscina?"},
-        {"role": "assistant", "content": "ERROR DE ÁMBITO: Esta consulta no pertenece a la investigación del TFM de Cáncer de Pulmón."},
-        # Ejemplo de bloqueo 2
-        {"role": "user", "content": "Dime algo sobre el cáncer de mama"},
-        {"role": "assistant", "content": "ERROR DE ÁMBITO: Esta consulta no pertenece a la investigación del TFM de Cáncer de Pulmón."},
-        # Ejemplo de bloqueo 3
-        {"role": "user", "content": "Hola, ¿quién eres?"},
-        {"role": "assistant", "content": "Soy el asistente técnico del TFM sobre Cáncer de Pulmón. Puedo ayudarte a interpretar los resultados genómicos y la firma de consenso identificada."}
-    ]
+    cliente = obtener_cliente()
+    if cliente is None:
+        return 1
 
+    print("\nEl asistente responde solo con lo que figura en esos resultados.")
+    print("No da consejo medico ni diagnostico.")
+    print("Escribe 'salir' para terminar.\n")
+    print("Ejemplos de consulta:")
+    print("  - ¿Que rendimiento real tiene el clasificador tumor frente a sano?")
+    print("  - ¿Que paso con SLC6A4?")
+    print("  - ¿Por que tres cohortes no son evaluables?")
+    print("  - ¿Que hipotesis no se confirmaron?\n")
+
+    historial = []
     while True:
-        pregunta = input("\n[Investigador]: ")
-        if pregunta.lower() in ['salir', 'exit', 'quit']:
+        try:
+            pregunta = input("[Consulta]: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+        if not pregunta:
+            continue
+        if pregunta.lower() in ("salir", "exit", "quit"):
             break
 
-        history.append({"role": "user", "content": pregunta})
+        historial.append({"role": "user", "content": pregunta})
+        mensajes = [{"role": "system", "content": sistema}] + historial[-MAX_HISTORIAL:]
 
         try:
-            completion = client.chat.completions.create(
-                messages=history,
-                model="llama-3.3-70b-versatile",
-                temperature=0.0,
-                max_tokens=500
+            resp = cliente.chat.completions.create(
+                messages=mensajes, model=MODELO, temperature=TEMPERATURA,
+                max_tokens=900,
             )
-            
-            respuesta = completion.choices[0].message.content
-            print(f"\n[Asistente TFM]: {respuesta}")
-            history.append({"role": "assistant", "content": respuesta})
+            texto = resp.choices[0].message.content
+            print(f"\n[Asistente]: {texto}\n")
+            historial.append({"role": "assistant", "content": texto})
         except Exception as e:
-            print(f"Error en el chat: {e}")
+            print(f"\nError al consultar el modelo: {e}\n")
+            historial.pop()
+
+    print("Sesion finalizada.")
+    return 0
+
 
 if __name__ == "__main__":
-    chat_interactivo()
+    raise SystemExit(main())
