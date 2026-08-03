@@ -1,0 +1,12 @@
+Cohorte,Declarada_en_datasets_txt,Plataforma,N_Total,N_Sano,N_Enfermo,N_Sin_Clasificar,Tasa_Exito_Curacion,Alineamiento,N_Muestras_Desalineadas,Clases_Presentes,Evaluable_Como_Test,Baseline_Si_Test
+GSE118370,False,GPL570,12,6,6,0,1.0,OK,0,2,True,0.5
+GSE140797,False,GPL13497,14,0,7,7,0.5,OK,0,1,False,1.0
+GSE18842,True,GPL570,91,45,46,0,1.0,OK,0,2,True,0.5055
+GSE19188,True,GPL570,156,65,91,0,1.0,OK,0,2,True,0.5833
+GSE19804,True,GPL570,120,60,60,0,1.0,OK,0,2,True,0.5
+GSE23066,True,GPL570,10,5,5,0,1.0,OK,0,2,True,0.5
+GSE30219,True,GPL570,307,0,307,0,1.0,DESALINEADO,307,1,False,1.0
+GSE31210,True,GPL570,246,20,226,0,1.0,OK,0,2,True,0.9187
+GSE40791,True,GPL570,194,10,2,182,0.0619,OK,0,2,True,0.8333
+GSE50081,True,GPL570,181,0,181,0,1.0,OK,0,1,False,1.0
+GSE7670,True,GPL96,66,8,7,51,0.2273,OK,0,2,True,0.5333

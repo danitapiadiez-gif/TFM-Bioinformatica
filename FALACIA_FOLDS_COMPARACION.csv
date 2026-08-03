@@ -1,0 +1,3 @@
+metodo,genes_seleccionados_alguna_vez,genes_seleccionados_en_todas,genes_acuerdo_signo_perfecto,pct_de_los_seleccionados,concordancia_pareja_media
+(a) folds LODO solapados (k=8),724,10,10,1.38,1.0
+(b) cohortes independientes (k=8),309,0,0,0.0,0.7397619047619048
