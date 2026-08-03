@@ -28,6 +28,11 @@
 \usepackage[expansion=false]{microtype}
 \usepackage[hidelinks]{hyperref}
 
+% Cifras generadas desde los CSV de resultados (generar_tablas_latex.py).
+% La prosa de los capitulos las usa como macros, de modo que no puede citar
+% un numero que los analisis no contengan.
+\input{tablas_auditoria/cifras_auditoria}
+
 \captionsetup{font=small,labelfont=bf}
 \setlength{\parskip}{0.4em}
 

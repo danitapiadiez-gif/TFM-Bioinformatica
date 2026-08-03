@@ -37,7 +37,8 @@ from utils_cohortes import (
     score_panel,
 )
 
-MODELO = dict(solver="liblinear", l1_ratio=1, C=0.5, max_iter=2000)
+MODELO = dict(solver="liblinear", l1_ratio=1, C=0.5, max_iter=2000,
+              random_state=0)
 UMBRAL_RHO = 0.7
 
 

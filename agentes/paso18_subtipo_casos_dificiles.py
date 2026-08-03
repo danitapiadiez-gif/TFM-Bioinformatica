@@ -16,6 +16,7 @@ Metrica pre-registrada: porcentaje de muestras ambiguas con probabilidad > 0.9 o
 pertenecen. Cuanto mas alto, menos utilizable es el modelo en la practica.
 """
 
+import json
 import os
 
 import numpy as np
@@ -58,7 +59,7 @@ CONFIG = {
 }
 
 MODELO = dict(solver="liblinear", l1_ratio=1, C=0.1, max_iter=5000,
-              class_weight="balanced")
+              class_weight="balanced", random_state=0)
 
 
 def cargar(gse, cfg):
@@ -198,7 +199,24 @@ def main():
     res.to_csv(os.path.join(BASE_DIR, "SUBTIPO_CASOS_DIFICILES.csv"), index=False)
     pd.concat(por_muestra, ignore_index=True).to_csv(
         os.path.join(BASE_DIR, "SUBTIPO_PROBS_AMBIGUAS.csv"), index=False)
-    print("\n  Guardado: SUBTIPO_CASOS_DIFICILES.csv, SUBTIPO_PROBS_AMBIGUAS.csv")
+
+    # Resumen para que la memoria y la interfaz no citen cifras a mano.
+    n_neuro = int(neuro["n"].sum()) if not neuro.empty else 0
+    pct_adc_neuro = (
+        100 - (neuro["Pct_Asignadas_Escamoso"] * neuro["n"]).sum() / n_neuro
+        if n_neuro else float("nan"))
+    with open(os.path.join(BASE_DIR, "SUBTIPO_DIFICILES_RESUMEN.json"), "w") as fh:
+        json.dump({
+            "n_entrenables": int(n_ent),
+            "n_ambiguas": int(n_amb),
+            "pct_excluidas": 100 * n_amb / (n_ent + n_amb),
+            "pct_alta_confianza_ambiguas": float(pct),
+            "pct_alta_confianza_vistas": 100 * float(ext_ent),
+            "n_neuroendocrinos": n_neuro,
+            "pct_neuro_a_adenocarcinoma": float(pct_adc_neuro),
+        }, fh, indent=2)
+    print("\n  Guardado: SUBTIPO_CASOS_DIFICILES.csv, SUBTIPO_PROBS_AMBIGUAS.csv, "
+          "SUBTIPO_DIFICILES_RESUMEN.json")
     print("=" * 78)
 
 

@@ -261,6 +261,102 @@ Histologia & Cohorte & $n$ & $P$(esc.) mediana & Alta conf. & A escamoso \\\\
 """)
 
 
+def cifras_en_macros():
+    """Escribe las cifras citadas en prosa como macros LaTeX.
+
+    Motivo: las tablas se regeneran desde los CSV, pero las cifras citadas en el
+    texto corrido no. Al fijar random_state en los modelos varias de ellas
+    cambiaron (la concordancia entre mitades disjuntas paso de 73,98 a 77,33, por
+    ejemplo) y la prosa quedo desincronizada. Definirlas como macros elimina esa
+    posibilidad: la memoria no puede citar una cifra que los resultados no
+    contengan.
+    """
+    import json
+
+    d = {}
+    l = pd.read_csv(os.path.join(BASE_DIR, "LODO_HONESTO_RESULTADOS.csv"))
+    ev = l[l["Evaluable"]]
+    d |= {
+        "balacc": num(ev["Balanced_Accuracy"].mean()),
+        "aucmedia": num(ev["AUC"].mean()),
+        "sensmedia": num(ev["Sensibilidad"].mean()),
+        "especmedia": num(ev["Especificidad"].mean()),
+        "basemedia": num(ev["Baseline_Mayoritaria"].mean()),
+        "gananciamedia": num(ev["Ganancia_vs_Baseline"].mean()),
+        "accundece": num(l["Accuracy"].mean()),
+        "nev": str(len(ev)),
+        "ncohortes": str(len(l)),
+        "nosuperan": str(int((~ev["Supera_Baseline"]).sum())),
+    }
+    a = pd.read_csv(os.path.join(BASE_DIR, "AUDITORIA_COHORTES.csv"))
+    tot, sin_c = int(a["N_Total"].sum()), int(a["N_Sin_Clasificar"].sum())
+    d |= {
+        "nmuestras": str(tot),
+        "sinclasificar": str(sin_c),
+        "pctsinclasificar": num(100 * sin_c / tot, 1),
+        "ndesalineadas": str(int(a["N_Muestras_Desalineadas"].fillna(0).sum())),
+        "nmonoclase": str(int((~a["Evaluable_Como_Test"]).sum())),
+    }
+    c = pd.read_csv(os.path.join(BASE_DIR, "COMPOSICION_VS_BIOLOGIA.csv"))
+    v = c["Rho_SOLO_TUMORES_vs_PulmonNormal"].dropna()
+    pr = c["Rho_SOLO_TUMORES_vs_Proliferacion"].dropna()
+    d |= {
+        "rhotumores": num(v.mean()),
+        "rhotumoresabs": num(abs(v.mean())),
+        "nrho": str(len(v)),
+        "nrhosupera": str(int((v.abs() > 0.7).sum())),
+        "rhomax": num(v.min()),
+        "rhoprolifmin": num(pr.min()),
+        "rhoprolifmax": num(pr.max()),
+    }
+    f = pd.read_csv(os.path.join(BASE_DIR, "FALACIA_FOLDS_COMPARACION.csv"))
+    cl = f.iloc[0]["concordancia_pareja_media"] * 100
+    cd = f.iloc[1]["concordancia_pareja_media"] * 100
+    d |= {
+        "conclodo": num(cl, 1),
+        "concdisjunta": num(cd, 2),
+        "caidaconc": num(cl - cd, 0),
+        "genesfolds": str(f.iloc[0]["genes_acuerdo_signo_perfecto"]),
+        "genesdisjuntas": str(f.iloc[1]["genes_acuerdo_signo_perfecto"]),
+    }
+    s = pd.read_csv(os.path.join(BASE_DIR, "SUBTIPO_LODO_RESULTADOS.csv"))
+    d |= {
+        "balaccsub": num(s["Balanced_Accuracy"].mean()),
+        "aucsub": num(s["AUC"].mean()),
+        "gananciasub": num(s["Ganancia_vs_Baseline"].mean()),
+        "nsub": str(int(s["n_test"].sum())),
+    }
+    ruta_j = os.path.join(BASE_DIR, "SUBTIPO_DIFICILES_RESUMEN.json")
+    if os.path.exists(ruta_j):
+        with open(ruta_j) as fh:
+            j = json.load(fh)
+        d |= {
+            "nambiguas": str(j["n_ambiguas"]),
+            "pctexcluidas": num(j["pct_excluidas"], 1),
+            "pctconfambiguas": num(j["pct_alta_confianza_ambiguas"], 1),
+            "pctconfvistas": num(j["pct_alta_confianza_vistas"], 1),
+            "nneuro": str(j["n_neuroendocrinos"]),
+            "pctneuroadc": num(j["pct_neuro_a_adenocarcinoma"], 0),
+        }
+    # Valores por cohorte citados en el texto corrido.
+    li = l.set_index("Cohorte_Test")
+    for gse, alias in [("GSE23066", "aa"), ("GSE31210", "bb"), ("GSE40791", "cc")]:
+        if gse in li.index:
+            d[f"acc{alias}"] = num(li.loc[gse, "Accuracy"])
+            d[f"base{alias}"] = num(li.loc[gse, "Baseline_Mayoritaria"])
+
+    firma = os.path.join(BASE_DIR, "SUBTIPO_FIRMA_REPLICADA.csv")
+    if os.path.exists(firma):
+        d["ngenesfirma"] = str(len(pd.read_csv(firma)))
+
+    lineas = ["% Generado por agentes/generar_tablas_latex.py. No editar a mano.",
+              "% Cada macro procede de un CSV de resultados: la prosa de la memoria",
+              "% no puede citar una cifra que los analisis no contengan.", ""]
+    lineas += [f"\\newcommand{{\\{k}}}{{{v}}}" for k, v in d.items()]
+    escribir("cifras_auditoria.tex", "\n".join(lineas) + "\n")
+    return d
+
+
 if __name__ == "__main__":
     print("Generando tablas en tablas_auditoria/")
     tabla_auditoria()
@@ -269,4 +365,5 @@ if __name__ == "__main__":
     tabla_falacia()
     tabla_subtipo()
     tabla_dificiles()
+    cifras_en_macros()
     print("Listo.")

@@ -32,7 +32,10 @@ from utils_cohortes import BASE_DIR, cargar_cohorte, genes_comunes, listar_cohor
 
 # Especificacion del modelo original (ml_meta_validacion.py), conservada a
 # proposito: L1, C=0.5, sin ponderacion de clases.
-MODELO = dict(solver="liblinear", l1_ratio=1, C=0.5, max_iter=2000)
+# random_state fijado: liblinear baraja coordenadas y sin semilla los
+# resultados varian entre ejecuciones.
+MODELO = dict(solver="liblinear", l1_ratio=1, C=0.5, max_iter=2000,
+              random_state=0)
 
 
 def main():

@@ -31,10 +31,13 @@ AZUL, ROJO, GRIS, VERDE = "#2c5f8a", "#b5453b", "#9aa0a6", "#3d7a5a"
 
 
 def guardar(fig, nombre):
+    """Guarda en PDF (para LaTeX) y en PNG (para la interfaz web)."""
     ruta = os.path.join(FIG_DIR, nombre)
     fig.savefig(ruta)
+    png = ruta.replace(".pdf", ".png")
+    fig.savefig(png, dpi=170, transparent=True)
     plt.close(fig)
-    print(f"  {nombre}")
+    print(f"  {nombre} + {os.path.basename(png)}")
 
 
 def fig_curacion_llm():

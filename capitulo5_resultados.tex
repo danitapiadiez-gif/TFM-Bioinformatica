@@ -56,7 +56,7 @@ ausencia genuina de señal biológica.
 etiquetas mediante modelo de lenguaje funcionó de forma completa en ocho de las
 once cohortes, pero falló de manera severa en dos: en GSE40791 dejó sin
 clasificar 182 de 194 muestras (93,8\,\%) y en GSE7670, 51 de 66 (77,3\,\%). En
-conjunto, 240 de las 1397 muestras disponibles (17,2\,\%) quedaron fuera del
+conjunto, \sinclasificar{} de las \nmuestras{} muestras disponibles (\pctsinclasificar\,\%) quedaron fuera del
 análisis por esta vía. La figura~\ref{fig:curacion} muestra la distribución por
 cohorte. El patrón es relevante: el fallo no es gradual sino bimodal --- la
 curación funciona casi perfectamente o se colapsa --- lo que sugiere
@@ -98,11 +98,11 @@ propio \emph{baseline}. La tabla~\ref{tab:lodo-honesto} recoge el resultado.
 \input{tablas_auditoria/tabla_lodo_honesto}
 
 La hipótesis se confirmó. Sobre las ocho cohortes evaluables, la
-\emph{balanced accuracy} media fue de 0,773 y la ganancia media respecto al azar
-informado, de $+$0,116. Tres de las ocho cohortes evaluables no superan su
-propio \emph{baseline}: GSE23066 lo iguala (0,500 frente a 0,500), GSE31210
-queda ligeramente por debajo (0,898 frente a 0,919) y GSE40791 lo hace de forma
-drástica (0,167 frente a 0,833). La figura~\ref{fig:lodo} representa cada
+\emph{balanced accuracy} media fue de \balacc{} y la ganancia media respecto al azar
+informado, de $+$\gananciamedia{}. \nosuperan{} de las \nev{} cohortes evaluables no superan su
+propio \emph{baseline}: GSE23066 lo iguala (\accaa{} frente a \baseaa{}), GSE31210
+queda ligeramente por debajo (\accbb{} frente a \basebb{}) y GSE40791 lo hace de forma
+drástica (\acccc{} frente a \basecc{}). La figura~\ref{fig:lodo} representa cada
 cohorte frente a su umbral trivial.
 
 \begin{figure}[htbp]
@@ -121,16 +121,16 @@ carece de contenido.}
 
 El análisis produjo un resultado que no formaba parte de la hipótesis registrada
 y que resultó ser el más informativo del capítulo. Sobre las mismas ocho
-cohortes evaluables, el AUC medio fue de 0,925 mientras que la
-\emph{balanced accuracy} media se quedó en 0,773. La divergencia entre ambas
+cohortes evaluables, el AUC medio fue de \aucmedia{} mientras que la
+\emph{balanced accuracy} media se quedó en \balacc{}. La divergencia entre ambas
 métricas es sistemática, no anecdótica, y alcanza su expresión más extrema en
-GSE40791: \emph{accuracy} de 0,167 con un AUC de 1,000.
+GSE40791: \emph{accuracy} de \acccc{} con un AUC de 1,000.
 
 Un AUC de 1,000 indica que el modelo ordena perfectamente las muestras: existe
 un umbral que las separa sin error. Una \emph{accuracy} de 0,167 indica que el
 umbral empleado --- el valor por defecto de 0,5 --- no es ese. Las columnas de
 sensibilidad y especificidad de la tabla~\ref{tab:lodo-honesto} identifican la
-causa: la sensibilidad media es de 0,983 y la especificidad media, de 0,563. El
+causa: la sensibilidad media es de \sensmedia{} y la especificidad media, de \especmedia{}. El
 modelo clasifica como tumoral casi todo lo que recibe. Ese sesgo es coherente
 con la composición del conjunto de entrenamiento, que reúne 938 muestras
 tumorales frente a 219 controles.
@@ -177,8 +177,8 @@ fue $|\rho|>0{,}7$.
 \input{tablas_auditoria/tabla_composicion}
 
 \textbf{La hipótesis no se confirmó al umbral establecido.} La correlación media
-entre muestras tumorales fue de $\rho=-0{,}637$, por debajo del criterio fijado,
-y solo dos de las cuatro cohortes con tumores suficientes lo superan
+entre muestras tumorales fue de $\rho=-\rhotumoresabs$, por debajo del criterio fijado,
+y solo \nrhosupera{} de las \nrho{} cohortes con tumores suficientes lo superan
 individualmente. El umbral no se ha modificado a posteriori.
 
 La lectura que sostienen los datos es intermedia y más matizada que la
@@ -187,7 +187,7 @@ la señal --- en GSE31210, la cohorte con más tumores evaluables ($n=226$), la
 correlación alcanza $\rho=-0{,}870$ con $p=7\times10^{-71}$ --- pero no la
 totalidad. Además, el análisis reveló un segundo eje no previsto: entre muestras
 tumorales, el \emph{score} del clasificador correlaciona positivamente con un
-panel de proliferación ($\rho$ entre $+0{,}267$ y $+0{,}719$). El clasificador
+panel de proliferación ($\rho$ entre $+\rhoprolifmin$ y $+\rhoprolifmax$). El clasificador
 no lee un único fenómeno, sino al menos dos: cuánto parénquima normal conserva
 la muestra y con qué intensidad proliferan sus células.
 
@@ -228,9 +228,9 @@ variando únicamente el solapamiento entre ellos.
 
 La hipótesis se confirmó, y el control descarta la explicación alternativa. Las
 28 parejas de \emph{folds} LODO presentan una concordancia de signo del
-100,0\,\% --- perfecta, en todos los pares sin excepción ---, mientras que
+\conclodo\,\% --- perfecta, en todos los pares sin excepción ---, mientras que
 parejas de mitades disjuntas de tamaño comparable ($n\approx328$ cada una)
-concuerdan al 73,98\,\%. La caída de 26 puntos es atribuible al solapamiento y
+concuerdan al \concdisjunta\,\%. La caída de \caidaconc{} puntos es atribuible al solapamiento y
 no a la esparsidad del modelo. Una métrica que no puede tomar valores bajos no
 aporta información: la consistencia de signo entre \emph{folds} LODO mide la
 reproducibilidad del procedimiento de ajuste, no la del fenómeno biológico.
@@ -271,8 +271,8 @@ microcítico en GSE30219, entidades clínicamente opuestas.
 \input{tablas_auditoria/tabla_subtipo}
 
 El rendimiento es sustancialmente superior al de la tarea tumor frente a sano:
-\emph{balanced accuracy} media de 0,940 y AUC media de 0,967, con una ganancia
-media de $+$0,296 sobre el azar informado. Se derivó además una firma de 1174
+\emph{balanced accuracy} media de \balaccsub{} y AUC media de \aucsub{}, con una ganancia
+media de $+$\gananciasub{} sobre el azar informado. Se derivó además una firma de \ngenesfirma{}
 genes con $|d|>0{,}8$ y signo concordante en las tres cohortes calculadas de
 forma independiente.
 
@@ -295,7 +295,7 @@ detectar el desalineamiento descrito en la sección~\ref{sec:auditoria}.
 \subsubsection{Límites del clasificador ante histologías no observadas}
 \label{sec:dificiles}
 
-El resultado anterior se obtuvo excluyendo 177 muestras --- el 31,3\,\% de los
+El resultado anterior se obtuvo excluyendo \nambiguas{} muestras --- el \pctexcluidas\,\% de los
 tumores disponibles --- correspondientes a histologías que no son adenocarcinoma
 ni escamoso: neuroendocrino de célula grande, basaloide, carcinoide,
 microcítico, célula grande y adenoescamoso. Se excluyeron, por tanto,
@@ -309,8 +309,8 @@ $P<0{,}1$, y la hipótesis registrada, que superaría el 50\,\%.
 
 \input{tablas_auditoria/tabla_casos_dificiles}
 
-\textbf{La hipótesis no se confirmó.} Solo el 29,9\,\% de las muestras ambiguas
-recibe una asignación de alta confianza, frente al 62,6\,\% de las muestras que
+\textbf{La hipótesis no se confirmó.} Solo el \pctconfambiguas\,\% de las muestras ambiguas
+recibe una asignación de alta confianza, frente al \pctconfvistas\,\% de las muestras que
 sí pertenecen a alguna de las dos clases. El modelo es, por tanto, más prudente
 ante lo que no ha visto de lo que se había previsto.
 
@@ -319,8 +319,8 @@ figura~\ref{fig:dificiles} separa. El carcinoma basaloide recibe una mediana de
 $P(\text{escamoso})=0{,}937$ y se asigna a escamoso en el 89,7\,\% de los casos;
 esto no constituye necesariamente un error, dado que varias clasificaciones lo
 consideran una variante de carcinoma escamoso, de modo que el modelo puede estar
-recuperando la biología correcta. En cambio, de los 101 tumores neuroendocrinos
-(neuroendocrino de célula grande, microcítico y carcinoide), el 93\,\% se asigna
+recuperando la biología correcta. En cambio, de los \nneuro{} tumores neuroendocrinos
+(neuroendocrino de célula grande, microcítico y carcinoide), el \pctneuroadc\,\% se asigna
 a adenocarcinoma. Este sí es un fallo con consecuencia clínica directa: el
 carcinoma microcítico recibe un tratamiento completamente distinto al del cáncer
 de pulmón no microcítico, y el modelo lo etiqueta como adenocarcinoma sin
@@ -336,7 +336,7 @@ delimitan las regiones de alta confianza.}
 \label{fig:dificiles}
 \end{figure}
 
-El AUC de 0,967 de la sección~\ref{sec:subtipo} es válido únicamente sobre
+El AUC de \aucsub{} de la sección~\ref{sec:subtipo} es válido únicamente sobre
 tumores previamente confirmados como adenocarcinoma o escamoso. El modelo no
 puede emplearse como primer filtro sobre un caso sin diagnosticar.
 
@@ -347,25 +347,25 @@ Los cinco análisis permiten establecer lo siguiente:
 
 \begin{enumerate}
 \item Los datos presentan cuatro modos de fallo silencioso y cuantificables:
-      tres cohortes declaradas nunca procesadas, 307 muestras con etiqueta
-      cruzada, 240 muestras (17,2\,\%) perdidas en la curación automatizada y
-      tres cohortes de una sola clase empleadas como conjunto de test. Ninguno
+      tres cohortes declaradas nunca procesadas, \ndesalineadas{} muestras con etiqueta
+      cruzada, \sinclasificar{} muestras (\pctsinclasificar\,\%) perdidas en la curación automatizada y
+      \nmonoclase{} cohortes de una sola clase empleadas como conjunto de test. Ninguno
       generó un error en tiempo de ejecución.
 \item En la tarea tumor frente a sano, la \emph{balanced accuracy} media sobre
-      cohortes evaluables es de 0,773, con tres de ocho por debajo de su propio
+      cohortes evaluables es de \balacc{}, con \nosuperan{} de \nev{} por debajo de su propio
       \emph{baseline}.
 \item La firma transfiere su capacidad de ordenación entre cohortes (AUC medio
-      0,925) pero no su umbral de decisión (especificidad media 0,563), un
+      \aucmedia{}) pero no su umbral de decisión (especificidad media \especmedia{}), un
       problema de calibración inducido por el desbalance del entrenamiento.
 \item La composición tisular explica una parte sustancial de la señal
-      ($\rho=-0{,}637$ entre tumores) sin agotarla, y coexiste con un eje de
+      ($\rho=-\rhotumoresabs$ entre tumores) sin agotarla, y coexiste con un eje de
       proliferación no previsto.
 \item La consistencia de signo entre \emph{folds} LODO no mide reproducibilidad
-      biológica: alcanza el 100,0\,\% frente al 73,98\,\% de modelos disjuntos
+      biológica: alcanza el \conclodo\,\% frente al \concdisjunta\,\% de modelos disjuntos
       comparables, y ninguno de los siete genes destacados por esa métrica
       replica de forma independiente.
 \item El marco metodológico sí recupera biología reproducible cuando existe
-      (subtipo histológico, AUC 0,967, con los doce marcadores de
+      (subtipo histológico, AUC \aucsub{}, con los doce marcadores de
       inmunohistoquímica recuperados), con la limitación de no reconocer las
       histologías ausentes del entrenamiento.
 \end{enumerate}

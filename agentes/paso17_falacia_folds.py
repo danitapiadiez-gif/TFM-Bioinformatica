@@ -29,7 +29,8 @@ from sklearn.preprocessing import StandardScaler
 
 from utils_cohortes import BASE_DIR, cargar_cohorte, genes_comunes, listar_cohortes
 
-MODELO = dict(solver="liblinear", l1_ratio=1, C=0.5, max_iter=2000)
+MODELO = dict(solver="liblinear", l1_ratio=1, C=0.5, max_iter=2000,
+              random_state=0)
 
 
 def main():

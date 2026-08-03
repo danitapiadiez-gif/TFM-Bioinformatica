@@ -139,7 +139,7 @@ def main():
 
         modelo = LogisticRegression(
             solver="liblinear", l1_ratio=1, C=0.1, max_iter=5000,
-            class_weight="balanced",
+            class_weight="balanced", random_state=0,
         )
         modelo.fit(X_tr, y_tr)
 
