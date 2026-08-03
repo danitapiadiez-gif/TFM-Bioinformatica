@@ -6,8 +6,12 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
+# Raiz del proyecto, derivada de la ubicacion de este fichero: el pipeline ya no
+# depende de que los datos esten en el escritorio de una maquina concreta.
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Configuración
-BASE_DIR = "/Users/danieltapiadiez/Desktop"
+BASE_DIR = _RAIZ
 RUTA_BIOMARCADORES = os.path.join(BASE_DIR, "BIOMARCADORES_DE_ORO_CONSENSO.csv")
 RUTA_PDF_RED = os.path.join(BASE_DIR, "RED_BIOLOGICA_FINAL.pdf")
 STRING_API_URL = "https://string-db.org/api"

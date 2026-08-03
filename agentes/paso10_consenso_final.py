@@ -3,6 +3,10 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Raiz del proyecto, derivada de la ubicacion de este fichero: el pipeline ya no
+# depende de que los datos esten en el escritorio de una maquina concreta.
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 def generar_consenso_tfm():
     """
     Script de síntesis final para el TFM.
@@ -11,7 +15,7 @@ def generar_consenso_tfm():
     print("Iniciando análisis de consenso final...")
     
     # Rutas de archivos
-    desktop = os.path.expanduser("~/Desktop")
+    desktop = _RAIZ
     ruta_est = os.path.join(desktop, "BIOMARCADORES_UNIVERSALES_CANCER_PULMON.csv")
     ruta_ml = os.path.join(desktop, "BIOMARCADORES_DE_ORO_CONSENSO.csv")
     ruta_salida = os.path.join(desktop, "FIRMA_CONSENSO_FINAL_TFM.csv")

@@ -1,0 +1,21 @@
+{
+  "tarea": "tumor_vs_sano",
+  "n_cohortes": 11,
+  "n_evaluables": 8,
+  "balanced_accuracy_media": 0.7721786295071693,
+  "auc_media": 0.925156400521232,
+  "sensibilidad_media": 0.982872216279296,
+  "especificidad_media": 0.5614850427350427,
+  "baseline_medio": 0.609274211560797,
+  "ganancia_media": 0.11481980925578483,
+  "n_no_superan_baseline": 3,
+  "accuracy_media_ingenua": 0.7780103573255172,
+  "n_genes_evaluados": 12145,
+  "n_genes_validados": 143,
+  "panel_minimo": 3,
+  "panel_minimo_genes": [
+    "RAMP3",
+    "CFD",
+    "VIPR1"
+  ]
+}

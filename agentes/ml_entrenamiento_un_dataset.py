@@ -9,8 +9,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, classification_report
 
+# Raiz del proyecto, derivada de la ubicacion de este fichero: el pipeline ya no
+# depende de que los datos esten en el escritorio de una maquina concreta.
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-BASE_DESKTOP = "/Users/danieltapiadiez/Desktop"
+
+BASE_DESKTOP = _RAIZ
 
 
 def rutas_gse(gse_id):

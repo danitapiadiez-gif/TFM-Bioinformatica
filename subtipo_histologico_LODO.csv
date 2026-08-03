@@ -1,0 +1,4 @@
+Cohorte_Test,n_test,n_Sano,n_Enfermo,n_train,Evaluable,Baseline_Mayoritaria,Accuracy,Balanced_Accuracy,AUC,Sensibilidad,Especificidad,Ganancia_vs_Baseline,Supera_Baseline,Genes_Seleccionados
+GSE30219,146,85,61,242,True,0.5822,0.9726,0.9672,0.9956,0.9344,1.0,0.3904,True,39
+GSE50081,170,127,43,218,True,0.7471,0.9118,0.8871,0.911,0.8372,0.937,0.1647,True,30
+GSE19188,72,45,27,316,True,0.625,0.9583,0.9667,0.9984,1.0,0.9333,0.3333,True,47

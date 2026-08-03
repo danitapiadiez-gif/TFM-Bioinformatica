@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tfm-transcriptomica"
+version = "1.0.0"
+description = "Framework transcriptomico para la identificacion y validacion de biomarcadores en cancer de pulmon"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "Daniel Tapia Diez"}]
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "scikit-learn>=1.3",
+    "scipy>=1.10",
+    "matplotlib>=3.7",
+    "pyyaml>=6.0",
+    "GEOparse>=2.0",
+    "python-dotenv>=1.0",
+    "groq>=0.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+web = ["streamlit>=1.30"]
+
+[project.scripts]
+tfm = "tfm.cli:main"
+
+[tool.setuptools]
+packages = ["tfm"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]

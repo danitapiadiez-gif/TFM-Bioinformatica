@@ -3,10 +3,14 @@ import pandas as pd
 import os
 import re
 
+# Raiz del proyecto, derivada de la ubicacion de este fichero: el pipeline ya no
+# depende de que los datos esten en el escritorio de una maquina concreta.
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 def clasificar_dataset(gse_id):
     """Detecta tipo de dataset y ruta de análisis óptima."""
     print(f"\n PASO 0: CLASIFICANDO {gse_id}...")
-    path = os.path.join(os.path.expanduser("~"), "Desktop", f"TFM_{gse_id}")
+    path = os.path.join(_RAIZ, f"TFM_{gse_id}")
     os.makedirs(path, exist_ok=True)
     
     # Intentar cargar localmente primero

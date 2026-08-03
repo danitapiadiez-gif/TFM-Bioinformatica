@@ -6,8 +6,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score
 import glob
 
+# Raiz del proyecto, derivada de la ubicacion de este fichero: el pipeline ya no
+# depende de que los datos esten en el escritorio de una maquina concreta.
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Configuración de rutas
-BASE_DIR = "/Users/danieltapiadiez/Desktop"
+BASE_DIR = _RAIZ
 
 def detectar_datasets():
     """Detecta carpetas de datasets que tienen los archivos necesarios."""

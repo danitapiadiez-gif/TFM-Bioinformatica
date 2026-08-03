@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import os
 
+# Raiz del proyecto, derivada de la ubicacion de este fichero: el pipeline ya no
+# depende de que los datos esten en el escritorio de una maquina concreta.
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def procesar_metadata(gse_id, gse, df_raw, ruta_analisis):
     """
@@ -14,7 +18,7 @@ def procesar_metadata(gse_id, gse, df_raw, ruta_analisis):
       meta     -> metadata con columna 'grupo_analisis'
     """
     print(f"\n PASO 2: Procesando metadata y normalizando ({gse_id}) [{ruta_analisis}]...")
-    base_path = os.path.join(os.path.expanduser("~"), "Desktop", f"TFM_{gse_id}")
+    base_path = os.path.join(_RAIZ, f"TFM_{gse_id}")
     os.makedirs(base_path, exist_ok=True)
     
     # 1. Copiar metadata y limpiar nombres de columnas

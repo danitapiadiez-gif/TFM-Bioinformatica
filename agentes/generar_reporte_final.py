@@ -4,8 +4,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.backends.backend_pdf import PdfPages
 
+# Raiz del proyecto, derivada de la ubicacion de este fichero: el pipeline ya no
+# depende de que los datos esten en el escritorio de una maquina concreta.
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Configuración
-BASE_DIR = "/Users/danieltapiadiez/Desktop"
+BASE_DIR = _RAIZ
 RUTA_RESULTADOS = os.path.join(BASE_DIR, "META_VALIDACION_ML_RESULTADOS.csv")
 RUTA_BIOMARCADORES = os.path.join(BASE_DIR, "BIOMARCADORES_DE_ORO_CONSENSO.csv")
 RUTA_PDF = os.path.join(BASE_DIR, "REPORTE_FINAL_ML_TFM.pdf")

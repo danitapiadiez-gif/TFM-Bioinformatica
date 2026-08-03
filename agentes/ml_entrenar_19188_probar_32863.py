@@ -4,8 +4,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, classification_report
 
+# Raiz del proyecto, derivada de la ubicacion de este fichero: el pipeline ya no
+# depende de que los datos esten en el escritorio de una maquina concreta.
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Rutas base (las mismas que en ml_entrenamiento_un_dataset.py)
-BASE_DESKTOP = "/Users/danieltapiadiez/Desktop"
+BASE_DESKTOP = _RAIZ
 
 def rutas_gse(gse_id):
     if gse_id == "GSE19188":

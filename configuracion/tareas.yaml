@@ -1,0 +1,77 @@
+# Tareas biologicas del framework.
+#
+# Anadir una pregunta nueva es anadir una entrada aqui: no hace falta escribir
+# codigo. El framework se encarga de cargar las cohortes con alineamiento por
+# geo_accession, ejecutar las comprobaciones previas, validar con LODO y derivar
+# la firma.
+#
+# Los codigos de histologia NO son consistentes entre estudios: en GSE30219
+# «SCC» significa carcinoma microcitico (small cell) y en GSE19188 significa
+# carcinoma escamoso (squamous cell), entidades clinicamente opuestas. Por eso el
+# mapa es explicito por cohorte y no global.
+
+tareas:
+
+  tumor_vs_sano:
+    descripcion: >
+      Tejido tumoral frente a parenquima pulmonar sano adyacente. Se conserva
+      como brazo de control: la distincion la resuelve el examen
+      histopatologico convencional, de modo que su valor aqui es metodologico.
+    relevancia_clinica: >
+      Nula en la practica: un patologo lo resuelve con una H&E sobre la misma
+      muestra, con fiabilidad superior y coste incomparablemente menor.
+    clases:
+      0: sano
+      1: enfermo
+    modelo:
+      C: 0.5
+      max_iter: 2000
+    cohortes:
+      - {gse: GSE118370, columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE140797, columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE18842,  columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE19188,  columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE19804,  columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE23066,  columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE30219,  columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE31210,  columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE40791,  columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE50081,  columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+      - {gse: GSE7670,   columna: grupo_analisis, mapa: {sano: 0, enfermo: 1}}
+
+  subtipo_histologico:
+    descripcion: >
+      Adenocarcinoma frente a carcinoma escamoso. Es la tarea con consecuencia
+      terapeutica y la que el framework entrega como resultado validado.
+    relevancia_clinica: >
+      Pemetrexed y bevacizumab estan contraindicados en histologia escamosa, y
+      hasta un tercio de los casos es ambiguo morfologicamente.
+    clases:
+      0: adenocarcinoma
+      1: escamoso
+    modelo:
+      C: 0.1
+      max_iter: 5000
+      class_weight: balanced
+    cohortes:
+      - gse: GSE30219
+        columna: characteristics_ch1_3_histology
+        mapa: {ADC: 0, SQC: 1}
+        # SCC aqui es microcitico, LCNE neuroendocrino de celula grande,
+        # BAS basaloide, CARCI carcinoide, NTL pulmon no tumoral.
+        descartar: [LCNE, BAS, CARCI, SCC, LCC, NTL, Other]
+      - gse: GSE50081
+        columna: characteristics_ch1_1_histology
+        mapa:
+          adenocarcinoma: 0
+          squamous cell carcinoma: 1
+          squamous cell carcinoma x2: 1
+        descartar:
+          - large cell carcinoma
+          - adenosquamous carcinoma
+          - nsclarge cell carcinoma-mixed
+          - nsclc-favor adenocarcinoma
+      - gse: GSE19188
+        columna: characteristics_ch1_1_cell_type
+        mapa: {ADC: 0, SCC: 1}   # SCC aqui SI es escamoso
+        descartar: [LCC, healthy]
