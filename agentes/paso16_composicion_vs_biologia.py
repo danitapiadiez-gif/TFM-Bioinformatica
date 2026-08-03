@@ -74,7 +74,7 @@ def main():
                 print(f"    {r['GENE_SYMBOL']:<10} LogFC={r['LogFC_Medio']:+.2f}")
 
     print("\n[2] Contraste por cohorte (LODO, score sobre la cohorte held-out)")
-    filas = []
+    filas, por_muestra = [], []
     for test_id in datos:
         X_te_raw, y_te = datos[test_id]
         train_ids = [g for g in datos if g != test_id]
@@ -97,6 +97,17 @@ def main():
 
         es_tumor = y_te == 1
         n_tum = int(es_tumor.sum())
+
+        # Volcado por muestra, para las figuras de dispersion.
+        por_muestra.append(pd.DataFrame({
+            "Cohorte": test_id,
+            "Muestra": X_te_raw.index,
+            "Score_Clasificador": score_tumor,
+            "Score_PulmonNormal": s_norm.values,
+            "Score_Proliferacion": (
+                s_prol.values if s_prol is not None else np.nan),
+            "Es_Tumor": es_tumor,
+        }))
 
         # Correlacion sobre TODAS las muestras: alta por construccion, no informativa.
         rho_todas, p_todas = spearmanr(score_tumor, s_norm.values)
@@ -163,7 +174,10 @@ def main():
         print("      y debe revisarse.")
 
     res.to_csv(os.path.join(BASE_DIR, "COMPOSICION_VS_BIOLOGIA.csv"), index=False)
-    print("\n  Guardado: COMPOSICION_VS_BIOLOGIA.csv")
+    pd.concat(por_muestra, ignore_index=True).to_csv(
+        os.path.join(BASE_DIR, "COMPOSICION_SCORES_POR_MUESTRA.csv"), index=False)
+    print("\n  Guardado: COMPOSICION_VS_BIOLOGIA.csv, "
+          "COMPOSICION_SCORES_POR_MUESTRA.csv")
     print("=" * 78)
     return res
 

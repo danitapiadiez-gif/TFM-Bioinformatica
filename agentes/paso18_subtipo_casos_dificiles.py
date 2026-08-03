@@ -112,13 +112,17 @@ def main():
           f"{int((modelo.coef_[0] != 0).sum())}")
 
     print("\n[2] Probabilidades asignadas a las muestras ambiguas")
-    filas = []
+    filas, por_muestra = [], []
     for gse in amb:
         Xa, etiquetas = amb[gse]
         if len(Xa) == 0:
             continue
         Xa_s = StandardScaler().fit_transform(Xa[genes])
         prob = modelo.predict_proba(Xa_s)[:, 1]   # P(escamoso)
+        por_muestra.append(pd.DataFrame({
+            "Cohorte": gse, "Muestra": Xa.index,
+            "Histologia": etiquetas, "P_Escamoso": prob,
+        }))
         for tipo in pd.unique(etiquetas):
             m = etiquetas == tipo
             p = prob[m]
@@ -192,7 +196,9 @@ def main():
         print(f"    puede usarse como primer filtro sobre un caso sin diagnosticar.")
 
     res.to_csv(os.path.join(BASE_DIR, "SUBTIPO_CASOS_DIFICILES.csv"), index=False)
-    print("\n  Guardado: SUBTIPO_CASOS_DIFICILES.csv")
+    pd.concat(por_muestra, ignore_index=True).to_csv(
+        os.path.join(BASE_DIR, "SUBTIPO_PROBS_AMBIGUAS.csv"), index=False)
+    print("\n  Guardado: SUBTIPO_CASOS_DIFICILES.csv, SUBTIPO_PROBS_AMBIGUAS.csv")
     print("=" * 78)
 
 

@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\caption[Histologias excluidas del clasificador de subtipo]{Comportamiento del
+clasificador de subtipo ante las histologias que no vio en el entrenamiento
+(grupos con $n\geq3$). \emph{Alta conf.} recoge el porcentaje de muestras con
+$P>0{,}9$ o $P<0{,}1$, es decir, asignadas con confianza a una categoria a la
+que no pertenecen.}
+\label{tab:dificiles}
+\small
+\begin{tabular}{llrrrr}
+\toprule
+Histologia & Cohorte & $n$ & $P$(esc.) mediana & Alta conf. & A escamoso \\
+\midrule
+neuroendocrino celula grande & GSE30219 & 56 & 0,161 & 32,1\,\% & 8,9\,\% \\
+basaloide & GSE30219 & 39 & 0,927 & 59,0\,\% & 89,7\,\% \\
+carcinoide & GSE30219 & 24 & 0,173 & 8,3\,\% & 4,2\,\% \\
+microcitico (small cell) & GSE30219 & 21 & 0,272 & 9,5\,\% & 4,8\,\% \\
+celula grande & GSE19188 & 19 & 0,409 & 10,5\,\% & 31,6\,\% \\
+celula grande & GSE50081 & 7 & 0,236 & 28,6\,\% & 42,9\,\% \\
+otro & GSE30219 & 4 & 0,392 & 50,0\,\% & 50,0\,\% \\
+celula grande & GSE30219 & 3 & 0,106 & 33,3\,\% & 0,0\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}

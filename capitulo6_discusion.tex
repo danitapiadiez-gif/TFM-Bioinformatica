@@ -1,0 +1,268 @@
+% =====================================================================
+% CAPITULO 6 - DISCUSION
+% Sustituye al capitulo 6 de la version anterior de la memoria.
+% =====================================================================
+
+\section{Discusión}
+\label{cap:discusion}
+
+\subsection{Reorientación del objeto de estudio}
+\label{sec:disc-reorientacion}
+
+El planteamiento inicial de este trabajo perseguía identificar biomarcadores
+transcriptómicos universales de cáncer de pulmón mediante la integración de
+múltiples cohortes públicas. Los resultados del capítulo anterior no sostienen
+ese objetivo, y conviene ser explícito sobre por qué.
+
+La firma derivada del contraste entre tejido tumoral y tejido sano adyacente
+reúne tres características que impiden interpretarla como un conjunto de
+biomarcadores: su señal procede en parte sustancial de la composición del tejido
+más que de biología tumoral específica (sección~\ref{sec:composicion}); su
+estabilidad aparente era un artefacto del diseño de validación
+(sección~\ref{sec:falacia}); y la tarea que resuelve no constituye un problema
+clínico, dado que la distinción entre tumor y parénquima normal la resuelve el
+examen histopatológico convencional con fiabilidad superior, coste
+incomparablemente menor y sobre la misma muestra ya disponible.
+
+Esto no invalida el framework desarrollado. Lo que invalida es la lectura que se
+había hecho de sus resultados. El pipeline descarga, normaliza, curó
+metadatos mediante modelos de lenguaje, ejecuta análisis diferencial, entrena
+modelos y valida de forma externa; todos esos componentes funcionan, y el
+control positivo de la sección~\ref{sec:subtipo} demuestra que recuperan biología
+reproducible cuando está presente. La contribución defendible de este trabajo no
+es, por tanto, una firma molecular, sino la caracterización sistemática de los
+modos en que estos pipelines fallan sin avisar, y un conjunto de controles
+concretos para detectarlos.
+
+\subsection{Los cuatro modos de fallo silencioso}
+\label{sec:disc-fallos}
+
+Los problemas documentados en la sección~\ref{sec:auditoria} comparten un rasgo
+que los hace especialmente peligrosos: ninguno interrumpe la ejecución. El
+pipeline termina, escribe sus ficheros y produce tablas de aspecto correcto.
+
+\paragraph{El desalineamiento como fallo indistinguible.} El caso de GSE30219 es
+instructivo porque su efecto imita exactamente el de una hipótesis nula
+verdadera. Un AUC de 0,56 sobre una cohorte de 146 tumores es perfectamente
+compatible con la conclusión «esta señal no generaliza a esta cohorte», y ese es
+el tipo de resultado que un trabajo honesto acepta y reporta. Solo la
+comparación con marcadores de referencia externos --- la observación de que KRT5
+mostraba una diferencia de $+0{,}90$ en esta cohorte frente a $+5{,}32$ y
+$+5{,}66$ en las otras dos --- reveló que la señal estaba presente pero
+desacoplada de las etiquetas. La lección metodológica es que la validación
+frente a conocimiento biológico previo no es un adorno interpretativo, sino un
+control de integridad de los datos.
+
+Resulta pertinente señalar que el análisis original no se vio afectado por este
+error, y la razón es instructiva: GSE30219 contiene una sola clase, de modo que
+intercambiar etiquetas idénticas entre sí no altera nada. El fallo permaneció
+latente y solo se manifestó al plantear una pregunta que utilizara la
+información clínica. Un pipeline puede arrastrar errores de este tipo durante
+todo su ciclo de vida sin que se manifiesten, hasta que alguien formula la
+pregunta adecuada.
+
+\paragraph{La curación automatizada como fuente de sesgo de selección.} El
+empleo de modelos de lenguaje para homogeneizar metadatos clínicos heterogéneos
+es una de las aportaciones metodológicamente más interesantes del framework, y
+su comportamiento bimodal --- éxito prácticamente completo en ocho cohortes,
+colapso en dos --- merece una lectura cuidadosa. El problema no es la tasa
+global del 82,8\,\%, sino que las pérdidas no son aleatorias: se concentran en
+cohortes concretas y, dentro de ellas, afectan a la práctica totalidad de las
+muestras. GSE40791 pasó de 194 muestras a 12, y las 12 supervivientes presentan
+una composición de clases (10 controles y 2 tumores) que no representa al
+estudio original. El resultado es un sesgo de selección introducido por una capa
+de procesamiento automático, no declarado como tal en ningún punto del
+pipeline. La recomendación que se deriva es que cualquier etapa de curación
+automatizada debe reportar su tasa de éxito por cohorte como parte de los
+resultados, y que las cohortes con tasas bajas deben excluirse explícitamente en
+lugar de participar con su fracción superviviente.
+
+\paragraph{Cohortes de una sola clase.} Que GSE30219 y GSE50081 no contengan
+controles no es un defecto de esas cohortes: son estudios de supervivencia,
+diseñados para correlacionar expresión con evolución clínica, y su composición es
+la correcta para su propósito. El error consiste en emplearlas como conjunto de
+test de un clasificador binario. Este fallo es además el más fácil de detectar
+automáticamente --- basta comprobar el número de clases presentes antes de
+evaluar --- y el más fácil de pasar por alto cuando la métrica reportada es
+únicamente la \emph{accuracy}, porque produce precisamente los valores más altos
+de la tabla.
+
+\subsection{Discriminación y decisión como propiedades independientes}
+\label{sec:disc-calibracion}
+
+El hallazgo de la sección~\ref{sec:calibracion} no estaba previsto y es, a
+nuestro juicio, el resultado de mayor utilidad práctica del trabajo. La
+coexistencia de un AUC medio de 0,925 con una \emph{balanced accuracy} media de
+0,773, y su expresión extrema en GSE40791 (\emph{accuracy} 0,167 con AUC 1,000),
+descompone lo que habitualmente se trata como un único atributo --- «el modelo
+generaliza» o «no generaliza» --- en dos propiedades que transfieren de forma
+independiente entre cohortes.
+
+La capacidad de ordenación transfiere bien: la firma sitúa consistentemente las
+muestras tumorales por encima de los controles en cohortes que nunca ha visto. El
+umbral de decisión no transfiere: el punto de corte aprendido sobre una
+distribución de clases determinada (938 tumores frente a 219 controles) deja de
+ser adecuado cuando la cohorte de destino presenta otra composición. La
+sensibilidad media de 0,983 frente a una especificidad media de 0,563 describe un
+modelo que ha aprendido, razonablemente dada su dieta de entrenamiento, que
+predecir «tumor» casi siempre acierta.
+
+Esta lectura reinterpreta un patrón que el análisis original registraba sin
+explicar. Los casos de \emph{accuracy} próxima a 0,5 acompañada de AUC próximo a
+1,0 se habían atribuido a la dificultad intrínseca del problema, al tamaño
+muestral reducido o a particularidades técnicas de los estudios. No era ninguna
+de esas cosas: era un problema de calibración, y los problemas de calibración
+son corregibles. La vía inmediata es la ponderación de clases en el
+entrenamiento; la más robusta, reportar métricas independientes del umbral (AUC,
+precisión media) junto con métricas de decisión, y ajustar el punto de corte
+sobre la cohorte de destino cuando el escenario de aplicación lo permita.
+
+\subsection{Qué mide la firma: composición, proliferación y biología}
+\label{sec:disc-composicion}
+
+La hipótesis de que la firma tumor frente a sano capturase esencialmente
+composición tisular no se confirmó al umbral fijado de antemano
+($|\rho|>0{,}7$; obtenido $\rho=-0{,}637$). Mantener ese criterio obliga a una
+conclusión más matizada, y probablemente más correcta, que la hipótesis de
+partida.
+
+La composición tisular explica una fracción sustancial de la señal. La evidencia
+es convergente: la correlación entre el \emph{score} del clasificador y el
+contenido de pulmón normal persiste al restringir el análisis a muestras
+tumorales, alcanzando $\rho=-0{,}870$ ($p=7\times10^{-71}$) en la cohorte con
+mayor número de tumores evaluables; y cinco de los cincuenta genes principales de
+la firma son marcadores canónicos de epitelio alveolar y estroma pulmonar normal,
+con $\log$FC en torno a $-4$. Interpretados como biomarcadores tumorales, genes
+como AGER, CLDN18 o SFTPC informan principalmente de cuánto parénquima sano
+conserva la muestra.
+
+Pero no la agotan. El segundo eje detectado --- correlación positiva con
+proliferación, entre $+0{,}267$ y $+0{,}719$ --- indica que el clasificador
+integra al menos dos fenómenos distintos, y el segundo sí es biología tumoral en
+sentido estricto. La descripción más ajustada de lo que mide la firma es
+«pérdida de arquitectura alvéolo-capilar normal más ganancia de actividad
+proliferativa», una combinación real, reproducible y de escaso valor
+discriminativo por ser común a la práctica totalidad de los tumores sólidos.
+
+Debe señalarse una limitación de este análisis: solo cuatro cohortes reunían
+tumores suficientes ($n\geq8$) para el contraste restringido, y los estimadores
+presentan heterogeneidad notable entre ellas ($\rho$ de $-0{,}343$ a
+$-0{,}870$). Un abordaje más riguroso emplearía métodos de deconvolución celular
+para estimar la proporción de cada tipo celular, en lugar de un panel de
+marcadores promediado.
+
+\subsection{Implicaciones sobre el diseño de la validación externa}
+\label{sec:disc-lodo}
+
+La estrategia LODO es metodológicamente superior a la validación cruzada
+convencional dentro de un mismo estudio, y su adopción sigue siendo escasa en la
+literatura de biomarcadores transcriptómicos. Este trabajo no cuestiona esa
+elección, sino dos usos concretos que se hicieron de ella.
+
+El primero es de terminología con consecuencias conceptuales: LODO no corrige el
+efecto lote, lo \emph{mide}. Presentarla como mecanismo de superación del
+\emph{batch effect} confunde la naturaleza del procedimiento. En el pipeline
+analizado no existe corrección de lote alguna --- solo normalización por
+cuantiles dentro de cada estudio y estandarización por estudio ---, y la
+degradación de rendimiento entre cohortes que LODO revela \emph{es} la magnitud
+del problema, no su solución.
+
+El segundo es el uso de los \emph{folds} LODO como réplicas para medir
+estabilidad. La demostración de la sección~\ref{sec:falacia} es cuantitativa y,
+en nuestra opinión, generalizable más allá de este trabajo: cuando el número de
+cohortes es moderado, los conjuntos de entrenamiento de los distintos
+\emph{folds} comparten una mediana del 97,6\,\% de sus muestras, y la
+concordancia direccional resultante es del 100,0\,\% en la totalidad de los
+pares. Una métrica cuyo valor está determinado por el diseño no puede aportar
+evidencia sobre el fenómeno estudiado. El control con mitades disjuntas de
+tamaño comparable (73,98\,\%) delimita cuánto de ese 100\,\% procede del
+solapamiento.
+
+La consecuencia sobre los siete genes previamente destacados es contundente:
+ninguno replica al ajustar modelos independientes. Esto no significa que carezcan
+de interés biológico --- SLC6A4 y KANK3 son marcadores endoteliales pulmonares
+bien caracterizados, coherentes con la interpretación composicional de la
+sección anterior ---, sino que la evidencia aportada para priorizarlos no era
+evidencia. La alternativa empleada en la sección~\ref{sec:subtipo}, exigir
+concordancia de tamaño de efecto en cohortes ajustadas por separado, es más
+exigente y produjo una firma que recupera marcadores de uso clínico establecido.
+
+\subsection{Alcance y limitaciones del control positivo}
+\label{sec:disc-subtipo}
+
+La clasificación de subtipo histológico cumple su función como control positivo:
+demuestra que el marco metodológico detecta biología reproducible cuando existe,
+con AUC medio de 0,967 y recuperación completa de los doce marcadores de
+inmunohistoquímica diagnóstica. Conviene, no obstante, precisar tres límites.
+
+Primero, la distinción entre adenocarcinoma y carcinoma escamoso está
+extensamente caracterizada en transcriptómica y su recuperación no constituye una
+aportación original. Su valor es de verificación, no de descubrimiento.
+
+Segundo, el resultado se obtuvo excluyendo el 31,3\,\% de los tumores
+disponibles, precisamente los de histología ambigua. El análisis de la
+sección~\ref{sec:dificiles} muestra que el modelo es más prudente ante esas
+muestras de lo previsto (29,9\,\% de asignaciones de alta confianza frente al
+62,6\,\% en muestras de clase conocida; la hipótesis registrada no se confirmó),
+pero también que el 93\,\% de los 101 tumores neuroendocrinos se etiqueta como
+adenocarcinoma. Dado que el carcinoma microcítico requiere un abordaje
+terapéutico completamente distinto, esta es una limitación con consecuencia
+clínica y no meramente estadística.
+
+Tercero, las tres cohortes comparten plataforma (GPL570), de modo que el
+resultado no informa sobre transferencia entre tecnologías de medición. Las tres
+cohortes de RNA-seq que habrían permitido evaluarlo son precisamente las que el
+pipeline no llegó a procesar.
+
+\subsection{Recomendaciones metodológicas}
+\label{sec:disc-recomendaciones}
+
+De los resultados obtenidos se derivan seis controles concretos, aplicables a
+cualquier pipeline de descubrimiento de biomarcadores sobre repositorios
+públicos:
+
+\begin{enumerate}
+\item \textbf{Alinear muestras y metadatos por identificador explícito}, nunca
+      por posición, y verificar la correspondencia como paso previo a cualquier
+      análisis. La coincidencia de longitudes no implica coincidencia de orden.
+\item \textbf{Validar contra marcadores biológicos conocidos} antes de
+      interpretar cualquier resultado. Un panel de referencia de la patología
+      estudiada funciona como control de integridad de los datos y detecta
+      fallos que ninguna comprobación de formato revela.
+\item \textbf{Reportar el \emph{baseline} de clase mayoritaria} junto a toda
+      métrica de rendimiento, y excluir explícitamente las cohortes de una sola
+      clase de la evaluación, indicándolo en las tablas.
+\item \textbf{Separar métricas de discriminación y de decisión.} Informar AUC y
+      \emph{balanced accuracy} conjuntamente, con sensibilidad y especificidad
+      desglosadas; su divergencia identifica problemas de calibración que la
+      \emph{accuracy} agregada oculta.
+\item \textbf{Medir la estabilidad sobre particiones disjuntas}, no sobre
+      \emph{folds} solapados, y declarar la fracción de muestras compartidas
+      cuando se empleen estas últimas.
+\item \textbf{Cuantificar y reportar la tasa de éxito de toda etapa de curación
+      automatizada} por cohorte, tratando las pérdidas elevadas como criterio de
+      exclusión y no como merma silenciosa del tamaño muestral.
+\end{enumerate}
+
+\subsection{Líneas futuras}
+\label{sec:disc-futuro}
+
+Los datos ya descargados permiten abordar preguntas que este trabajo no ha
+explorado y que resultan más informativas que la comparación entre tumor y tejido
+sano. GSE30219 y GSE50081 disponen de seguimiento clínico completo (307 y 181
+tumores, con 200 y 75 eventos de mortalidad respectivamente), lo que habilita
+análisis de supervivencia con validación cruzada entre cohortes. GSE31210
+incluye el estado de los principales genes conductores --- 127 tumores con
+mutación de EGFR, 20 de KRAS, 11 con fusión de ALK y 68 sin ninguna de las tres
+alteraciones ---, lo que permite plantear la predicción de alteración
+conductora a partir del perfil de expresión. Ambas son preguntas cuya respuesta
+no se conoce de antemano por inspección de la muestra, condición que la tarea
+tumor frente a sano no cumplía.
+
+En el plano metodológico, tres extensiones mejorarían el rigor de los análisis
+presentados: el empleo de deconvolución celular en lugar de paneles de
+marcadores promediados para cuantificar composición tisular; la incorporación de
+corrección de lote explícita, con evaluación de su efecto sobre la transferencia
+entre cohortes; y la recuperación de las tres cohortes de RNA-seq no procesadas,
+que permitirían por primera vez evaluar la generalización entre plataformas de
+medición distintas.

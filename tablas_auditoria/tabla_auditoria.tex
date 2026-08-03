@@ -1,0 +1,31 @@
+\begin{table}[htbp]
+\centering
+\caption[Auditoria de integridad de las cohortes]{Auditoria de integridad de
+las once cohortes con datos procesados. La columna \emph{Desalin.} indica
+muestras cuya etiqueta clinica corresponde a otro paciente por asignacion
+posicional; \emph{Eval.} indica si la cohorte contiene ambas clases y por
+tanto es evaluable como conjunto de test.}
+\label{tab:auditoria}
+\small
+\begin{tabular}{llrrrrrcc}
+\toprule
+Cohorte & Plataforma & $n$ & Sanas & Enfermas & Sin clas. & Curacion & Desalin. & Eval. \\
+\midrule
+GSE118370 & GPL570 & 12 & 6 & 6 & 0 & 100,0\,\% & OK & si \\
+GSE140797 & GPL13497 & 14 & 0 & 7 & 7 & 50,0\,\% & OK & \textbf{no} \\
+GSE18842 & GPL570 & 91 & 45 & 46 & 0 & 100,0\,\% & OK & si \\
+GSE19188 & GPL570 & 156 & 65 & 91 & 0 & 100,0\,\% & OK & si \\
+GSE19804 & GPL570 & 120 & 60 & 60 & 0 & 100,0\,\% & OK & si \\
+GSE23066 & GPL570 & 10 & 5 & 5 & 0 & 100,0\,\% & OK & si \\
+GSE30219 & GPL570 & 307 & 0 & 307 & 0 & 100,0\,\% & \textbf{307/307} & \textbf{no} \\
+GSE31210 & GPL570 & 246 & 20 & 226 & 0 & 100,0\,\% & OK & si \\
+GSE40791 & GPL570 & 194 & 10 & 2 & 182 & 6,2\,\% & OK & si \\
+GSE50081 & GPL570 & 181 & 0 & 181 & 0 & 100,0\,\% & OK & \textbf{no} \\
+GSE7670 & GPL96 & 66 & 8 & 7 & 51 & 22,7\,\% & OK & si \\
+\midrule
+\textbf{Total} & & \textbf{1397} & 219 &
+938 & \textbf{240} &
+\textbf{82,8\,\%} & 307 & 8/11 \\
+\bottomrule
+\end{tabular}
+\end{table}
