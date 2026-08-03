@@ -18,3 +18,8 @@ SINTESIS_MOLECULAR.json
 
 # Sistema
 .DS_Store
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
