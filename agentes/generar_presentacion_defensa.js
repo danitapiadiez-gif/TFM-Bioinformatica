@@ -33,6 +33,9 @@ const dif = csv("SUBTIPO_CASOS_DIFICILES.csv");
 const resDif = JSON.parse(
   fs.readFileSync(path.join(RAIZ, "SUBTIPO_DIFICILES_RESUMEN.json"), "utf8")
 );
+const resFirma = JSON.parse(
+  fs.readFileSync(path.join(RAIZ, "FIRMA_VALIDADA_RESUMEN.json"), "utf8")
+);
 
 const D = {
   balAcc: media(ev.map((r) => num(r.Balanced_Accuracy))),
@@ -67,6 +70,14 @@ const D = {
   pctNeuro: resDif.pct_neuro_a_adenocarcinoma,
   nAmbiguas: resDif.n_ambiguas,
   pctExcl: resDif.pct_excluidas,
+  nValidados: resFirma.n_genes_validados,
+  pctValidados: resFirma.pct_genes_validados,
+  nValidadosTvS: resFirma.n_genes_validados_tumor_vs_sano,
+  panelMin: resFirma.panel_minimo,
+  aucPanel: resFirma.auc_panel_minimo,
+  ihcRec: Object.values(resFirma.ihc_recuperados).reduce((a, b) => a + b, 0),
+  ihcTot: Object.values(resFirma.ihc_total).reduce((a, b) => a + b, 0),
+  panelGenes: resFirma.panel_minimo_genes,
 };
 D.pctSinClas = (100 * D.sinClas) / D.nMuestras;
 
@@ -216,29 +227,32 @@ function veredicto(s, x, y, texto, color) {
     x: M, y: 1.5, w: W - 2 * M, h: 0.3,
     fontFace: SANS, fontSize: 11, bold: true, charSpacing: 2.6, color: MUDO, margin: 0,
   });
-  s.addText("Auditoría de reproducibilidad\nde firmas transcriptómicas\nen cáncer de pulmón", {
-    x: M, y: 2.05, w: 9.6, h: 2.5,
-    fontFace: SERIF, fontSize: 40, bold: true, color: BLANCO, margin: 0,
-    lineSpacingMultiple: 1.06, valign: "top",
+  s.addText("Framework transcriptómico basado en la integración\nde modelos de lenguaje y aprendizaje automático\npara la identificación de biomarcadores\nen cáncer de pulmón", {
+    x: M, y: 1.98, w: 11.2, h: 2.9,
+    fontFace: SERIF, fontSize: 31, bold: true, color: BLANCO, margin: 0,
+    lineSpacingMultiple: 1.1, valign: "top",
   });
-  s.addText("Cuándo una firma molecular parece funcionar y no funciona:\ncuatro modos de fallo silencioso en pipelines sobre datos públicos", {
-    x: M, y: 4.62, w: 9.4, h: 0.8,
+  s.addText("Identificación, validación y auditoría de firmas moleculares\nsobre 13 cohortes públicas de NCBI GEO", {
+    x: M, y: 4.98, w: 9.4, h: 0.76,
     fontFace: SERIF, fontSize: 15, color: "C3C2B7", italic: true, margin: 0,
     lineSpacingMultiple: 1.2,
   });
   s.addShape(pres.ShapeType.line, {
-    x: M, y: 5.72, w: 3.1, h: 0,
+    x: M, y: 5.94, w: 3.1, h: 0,
     line: { color: AZUL, width: 2.4 },
   });
   s.addText([
     { text: "Daniel Tapia Díez", options: { bold: true, color: BLANCO, fontSize: 14 } },
     { text: "\nTutor: Leonardo Dulcetti", options: { color: MUDO, fontSize: 12 } },
     { text: "\nUniversidad Alfonso X el Sabio  ·  Madrid, 2026", options: { color: MUDO, fontSize: 12 } },
-  ], { x: M, y: 5.95, w: 6, h: 1.1, fontFace: SANS, margin: 0, lineSpacingMultiple: 1.24 });
+  ], { x: M, y: 6.16, w: 6, h: 1.1, fontFace: SANS, margin: 0, lineSpacingMultiple: 1.24 });
   s.addNotes(
-    "Buenos dias. Presento un trabajo que empezo buscando biomarcadores de cancer de " +
-    "pulmon y termino auditando por que esas busquedas fallan. El giro no fue una " +
-    "eleccion de partida: fue lo que impusieron los datos."
+    "Buenos dias. Presento un framework que integra modelos de lenguaje y aprendizaje " +
+    "automatico para identificar biomarcadores transcriptomicos. Tiene tres capas: " +
+    "curacion clinica con LLM, identificacion de firmas, y una capa de validacion. " +
+    "La tesis del trabajo es que esa tercera capa es la que decide si las otras dos " +
+    "sirven de algo, y voy a demostrarlo aplicandola a dos tareas: una la supera y la " +
+    "otra no."
   );
 }
 
@@ -246,7 +260,7 @@ function veredicto(s, x, y, texto, color) {
 {
   const s = slideClara();
   antetitulo(s, "EL PROBLEMA");
-  titulo(s, "Una firma molecular que funciona en un estudio\nsuele no funcionar en el siguiente", { fontSize: 27 });
+  titulo(s, "Identificar biomarcadores es fácil. Que replique\nen otra cohorte, no", { fontSize: 27 });
   s.addText(
     "Los repositorios públicos como NCBI GEO ofrecen miles de cohortes " +
     "transcriptómicas reutilizables. Pero integrar estudios independientes " +
@@ -256,8 +270,8 @@ function veredicto(s, x, y, texto, color) {
     { x: M, y: 2.3, w: 6.5, h: 1.7, fontFace: SANS, fontSize: 14.5, color: TINTA_2, margin: 0, lineSpacingMultiple: 1.32 }
   );
   s.addText(
-    "La pregunta que este trabajo acabó respondiendo no es «qué genes» sino " +
-    "«por qué el pipeline no avisa cuando se equivoca».",
+    "De ahí el diseño del framework: la identificación no basta si no viene " +
+    "acompañada de una capa que decida cuándo la firma es creíble.",
     { x: M, y: 4.15, w: 6.5, h: 0.9, fontFace: SERIF, fontSize: 15, italic: true, color: TINTA, margin: 0, lineSpacingMultiple: 1.26 }
   );
 
@@ -277,39 +291,56 @@ function veredicto(s, x, y, texto, color) {
 // =========================================================== 3. EL GIRO
 {
   const s = slideClara();
-  antetitulo(s, "REORIENTACIÓN DEL OBJETO DE ESTUDIO");
-  titulo(s, "El planteamiento inicial no se sostuvo");
+  antetitulo(s, "ARQUITECTURA DEL FRAMEWORK");
+  titulo(s, "Tres capas, y la tercera decide si las otras dos sirven");
 
-  tarjeta(s, M, 2.05, 5.75, 3.9, CREMA);
-  s.addText("PLANTEAMIENTO INICIAL", {
-    x: M + 0.34, y: 2.34, w: 5.1, h: 0.28,
-    fontFace: SANS, fontSize: 10, bold: true, charSpacing: 1.8, color: MUDO, margin: 0,
+  const capas = [
+    ["1", "Curación clínica con LLM",
+     "Llama 3.3-70b interpreta metadatos no estandarizados de GEO y asigna grupos experimentales comparables. Sustituye una revisión manual de 1397 muestras.",
+     `Rendimiento medido: ${dec(100 - D.pctSinClas, 1)} % de éxito global, con fallo bimodal.`, CREMA, TINTA, TINTA_2],
+    ["2", "Identificación de firmas",
+     "Análisis diferencial por cohorte (t de Welch, FDR), meta-análisis de consistencia direccional y modelos supervisados con penalización L1 para seleccionar genes.",
+     `Salida: ${D.nValidados} genes validados, panel mínimo de ${D.panelMin}.`, CREMA, TINTA, TINTA_2],
+    ["3", "Validación",
+     "Tamaño de efecto por cohorte, replicación entre entrenamientos disjuntos, validación externa LODO con baseline declarado, y contraste con marcadores clínicos conocidos.",
+     "Es la capa que este trabajo aporta, y la que decide.", "1A1D21", BLANCO, "C3C2B7"],
+  ];
+  capas.forEach(([n, tit, txt, nota, relleno, cTit, cTxt], i) => {
+    const x = M + i * 4.06;
+    tarjeta(s, x, 2.05, 3.78, 4.05, relleno);
+    s.addShape(pres.ShapeType.ellipse, {
+      x: x + 0.32, y: 2.32, w: 0.44, h: 0.44,
+      fill: { color: relleno === "1A1D21" ? "262A30" : PAPEL },
+      line: { color: AZUL, width: 1 },
+    });
+    s.addText(n, {
+      x: x + 0.32, y: 2.32, w: 0.44, h: 0.44, fontFace: SERIF, fontSize: 14,
+      bold: true, color: AZUL, align: "center", valign: "middle", margin: 0,
+    });
+    s.addText(tit, {
+      x: x + 0.32, y: 2.9, w: 3.14, h: 0.4,
+      fontFace: SERIF, fontSize: 16, bold: true, color: cTit, margin: 0, valign: "top",
+    });
+    s.addText(txt, {
+      x: x + 0.32, y: 3.4, w: 3.14, h: 1.72,
+      fontFace: SANS, fontSize: 11.5, color: cTxt, margin: 0, valign: "top", lineSpacingMultiple: 1.24,
+    });
+    s.addText(nota, {
+      x: x + 0.32, y: 5.2, w: 3.14, h: 0.7,
+      fontFace: SANS, fontSize: 10.5, italic: true, bold: true,
+      color: relleno === "1A1D21" ? AZUL : TINTA, margin: 0, valign: "top", lineSpacingMultiple: 1.2,
+    });
   });
-  s.addText([
-    { text: "Identificar biomarcadores universales de cáncer de pulmón", options: { bold: true, color: TINTA, fontSize: 14 } },
-    { text: "\n\nMeta-análisis de 13 cohortes, consenso direccional, validación LODO. Firma final encabezada por SLC6A4, KANK3, TOX3 y S100A10.", options: { color: TINTA_2, fontSize: 12.5 } },
-  ], { x: M + 0.34, y: 2.72, w: 5.05, h: 3.0, fontFace: SANS, margin: 0, lineSpacingMultiple: 1.24, valign: "top" });
-
-  tarjeta(s, 6.98, 2.05, 5.6, 3.9, "1A1D21");
-  s.addText("LO QUE LOS DATOS PERMITÍAN AFIRMAR", {
-    x: 7.32, y: 2.34, w: 4.95, h: 0.28,
-    fontFace: SANS, fontSize: 10, bold: true, charSpacing: 1.8, color: MUDO, margin: 0,
-  });
-  s.addText([
-    { text: "Caracterizar cómo fallan los pipelines sin emitir ningún error", options: { bold: true, color: BLANCO, fontSize: 14 } },
-    { text: "\n\nLa firma medía composición del tejido, su estabilidad era un artefacto del diseño de validación, y distinguir tumor de pulmón sano no es un problema clínico: lo resuelve una H&E.", options: { color: "C3C2B7", fontSize: 12.5 } },
-  ], { x: 7.32, y: 2.72, w: 4.95, h: 3.0, fontFace: SANS, margin: 0, lineSpacingMultiple: 1.24, valign: "top" });
-
   s.addText(
-    "El framework no se descarta: funciona. Lo que se descarta es la lectura que se había hecho de sus resultados.",
-    { x: M, y: 6.22, w: W - 2 * M, h: 0.5, fontFace: SERIF, fontSize: 14.5, italic: true, color: TINTA, margin: 0 }
+    "Sin la tercera capa, el framework habría entregado una firma que no replica. Con ella, entrega una que sí.",
+    { x: M, y: 6.36, w: W - 2 * M, h: 0.5, fontFace: SERIF, fontSize: 14.5, italic: true, color: TINTA, margin: 0 }
   );
   s.addNotes(
-    "Este es el giro del trabajo y quiero ser explicito sobre el. El planteamiento " +
-    "inicial era el de la izquierda. Los analisis de validacion mostraron tres cosas " +
-    "que lo impiden: la firma mide composicion tisular, su estabilidad era artefacto " +
-    "del diseno, y la tarea no tiene valor clinico. El pipeline funciona; la " +
-    "interpretacion no se sostenia."
+    "El framework tiene tres capas. La primera y la segunda son las que anuncia el " +
+    "titulo: modelos de lenguaje para curar metadatos, y aprendizaje automatico para " +
+    "identificar firmas. La tercera es la aportacion de este trabajo. Y la tesis es " +
+    "esta: sin la capa de validacion el framework habria entregado una firma que no " +
+    "replica, y con ella entrega una que si. Voy a demostrar las dos cosas."
   );
 }
 
@@ -765,7 +796,56 @@ function veredicto(s, x, y, texto, color) {
   );
 }
 
-// =========================================================== 14. CONTROLES
+
+// ================================================ 14. EL ENTREGABLE
+{
+  const s = slideClara();
+  antetitulo(s, "SALIDA DEL FRAMEWORK");
+  titulo(s, "La firma que supera la capa de validación", { w: 9.5 });
+
+  s.addImage({
+    path: path.join(FIG, "fig_panel_minimo.png"),
+    x: 6.86, y: 1.98, w: 5.72, h: 5.72 * (3.5 / 6.4),
+  });
+
+  const ent = [
+    [String(D.nValidados), `genes validados de 22 880 evaluados (${dec(D.pctValidados, 1)} %): efecto grande y dirección concordante en las tres cohortes por separado`, AZUL],
+    [String(D.panelMin), `genes bastan para conservar el rendimiento: AUC ${dec(D.aucPanel)} en validación externa`, TINTA],
+    [`${D.ihcRec} / ${D.ihcTot}`, "marcadores de inmunohistoquímica clínica recuperados sin haber participado en la selección", AZUL],
+  ];
+  ent.forEach(([v, t, c], i) => {
+    const y = 2.0 + i * 1.32;
+    s.addText(v, {
+      x: M, y, w: 1.72, h: 0.7,
+      fontFace: SERIF, fontSize: 34, bold: true, color: c, margin: 0, valign: "top",
+    });
+    s.addText(t, {
+      x: M + 1.86, y: y + 0.06, w: 4.2, h: 1.1,
+      fontFace: SANS, fontSize: 11.5, color: TINTA_2, margin: 0, valign: "top", lineSpacingMultiple: 1.24,
+    });
+  });
+
+  tarjeta(s, M, 5.98, 5.94, 0.92, "1A1D21");
+  s.addText([
+    { text: "Panel mínimo:  ", options: { fontFace: SANS, fontSize: 10.5, color: MUDO } },
+    { text: D.panelGenes.slice(0, 10).join(" · "), options: { fontFace: SANS, fontSize: 10.5, color: BLANCO, bold: true } },
+    { text: " …", options: { fontFace: SANS, fontSize: 10.5, color: MUDO } },
+  ], { x: M + 0.32, y: 6.12, w: 5.3, h: 0.64, margin: 0, valign: "middle", lineSpacingMultiple: 1.2 });
+
+  pieDiapo(s, `La misma capa de validación retiene ${D.nValidadosTvS} genes en la tarea tumor frente a sano (${dec(100 * D.nValidadosTvS / 13237, 2)} % de los evaluados): discrimina entre tareas sin cambiar de criterio.`);
+  s.addNotes(
+    "Esta es la salida del framework. Mil ciento setenta y cuatro genes superan la " +
+    "validacion, y con solo veinte se conserva el rendimiento: AUC 0,966 en validacion " +
+    "externa. Eso es un panel utilizable, no una lista de mil genes. Y la validacion " +
+    "externa mas importante es la tercera: recupera dieciocho de veinte marcadores que " +
+    "se usan en inmunohistoquimica clinica, sin que hayan participado en la seleccion. " +
+    "El framework encuentra biologia conocida por su cuenta. En el pie esta el contraste: " +
+    "la misma capa, sin cambiar un criterio, retiene muchos menos genes en la tarea que " +
+    "no supera la validacion."
+  );
+}
+
+// =========================================================== 15. CONTROLES
 {
   const s = slideOscura();
   antetitulo(s, "APORTACIÓN METODOLÓGICA", MUDO);
@@ -815,9 +895,9 @@ function veredicto(s, x, y, texto, color) {
   titulo(s, "Qué sostienen los datos");
 
   const concl = [
-    [dec(D.balAcc), "balanced accuracy real sobre cohortes evaluables, frente al valor reportado sobre las once con las monoclase dentro", AZUL],
-    [`${D.genesDisj} de 7`, "genes de la firma previa que replican al ajustar modelos en cohortes disjuntas", ROJO],
-    [dec(D.aucSub), "AUC en subtipo histológico: el marco recupera biología reproducible cuando existe", AZUL],
+    [String(D.panelMin), `genes componen el panel entregado por el framework, con AUC ${dec(D.aucPanel)} en validación externa y ${D.ihcRec} de ${D.ihcTot} marcadores de inmunohistoquímica recuperados`, AZUL],
+    [`${D.genesDisj} de 7`, "genes de la firma inicial que superan la capa de validación: el framework rechaza su propio primer resultado", ROJO],
+    [dec(D.balAcc), "balanced accuracy real en tumor frente a sano, frente al valor que se obtenía incluyendo las tres cohortes de una sola clase", TINTA],
   ];
   concl.forEach(([v, t, c], i) => {
     const y = 1.9 + i * 1.4;
@@ -833,14 +913,15 @@ function veredicto(s, x, y, texto, color) {
 
   tarjeta(s, M, 6.06, 11.86, 0.92, "1A1D21");
   s.addText(
-    "El framework es válido. El hallazgo original no lo era —y aquí está por qué, medido.",
+    "Un framework que no puede rechazar su propio resultado no está validando: está confirmando.",
     { x: M + 0.4, y: 6.2, w: 11.1, h: 0.64, fontFace: SERIF, fontSize: 16, italic: true, color: BLANCO, margin: 0, valign: "middle" }
   );
   s.addNotes(
-    "Tres cifras resumen el trabajo. El rendimiento real es mas bajo que el reportado. " +
-    "Ninguno de los siete genes replica. Y el marco si detecta biologia cuando la hay. " +
-    "La conclusion es la de abajo: el framework es valido, el hallazgo no lo era, y lo " +
-    "he medido en lugar de afirmarlo."
+    "Tres cifras. La primera es lo que el framework entrega: un panel de veinte genes " +
+    "validado. La segunda es lo que rechaza: ninguno de los siete genes de mi primera " +
+    "firma supera la validacion. La tercera es cuanto se corrige el rendimiento al medir " +
+    "bien. Y la frase de abajo es la tesis: un framework que no puede rechazar su propio " +
+    "resultado no esta validando, esta confirmando."
   );
 }
 
@@ -957,7 +1038,7 @@ function veredicto(s, x, y, texto, color) {
 const salida = path.join(RAIZ, "DEFENSA_TFM.pptx");
 pres.writeFile({ fileName: salida }).then(() => {
   console.log("Escrito: " + salida);
-  console.log(`Diapositivas: 18`);
+  console.log(`Diapositivas: ${pres.slides.length}`);
   console.log(`Cifras leidas de los CSV -> balAcc ${dec(D.balAcc)}, auc ${dec(D.auc)}, ` +
     `rho ${dec(D.rho)}, concordancia ${dec(D.concLodo, 1)}/${dec(D.concDisj, 2)}, ` +
     `aucSub ${dec(D.aucSub)}`);

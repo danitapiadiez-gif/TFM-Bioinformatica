@@ -1,0 +1,53 @@
+{
+  "tarea_validada": "Adenocarcinoma frente a carcinoma escamoso",
+  "n_cohortes_independientes": 3,
+  "n_genes_evaluados": 22880,
+  "n_genes_validados": 1174,
+  "pct_genes_validados": 5.131118881118881,
+  "n_genes_validados_tumor_vs_sano": 151,
+  "panel_minimo": 20,
+  "auc_panel_minimo": 0.9656417810621764,
+  "auc_firma_completa": 0.9743655296659265,
+  "ihc_recuperados": {
+    "Escamoso": 12,
+    "Adenocarcinoma": 6
+  },
+  "ihc_total": {
+    "Escamoso": 12,
+    "Adenocarcinoma": 8
+  },
+  "top10": [
+    "DSG3",
+    "KRT5",
+    "CALML3",
+    "KRT6B",
+    "PKP1",
+    "FAT2",
+    "DAPL1",
+    "TRIM29",
+    "CLCA2",
+    "DSC3"
+  ],
+  "panel_minimo_genes": [
+    "DSG3",
+    "KRT5",
+    "CALML3",
+    "KRT6B",
+    "PKP1",
+    "FAT2",
+    "DAPL1",
+    "TRIM29",
+    "CLCA2",
+    "DSC3",
+    "S1PR5",
+    "KRT6A",
+    "KRT13",
+    "SERPINB5",
+    "TP63",
+    "GJB5",
+    "KRT16",
+    "BNC1",
+    "CERS3",
+    "TMEM40"
+  ]
+}

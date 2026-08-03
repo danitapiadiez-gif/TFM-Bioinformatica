@@ -14,6 +14,7 @@ todas las figuras:
     o etiquetas directas.
 """
 
+import json
 import os
 
 import matplotlib
@@ -312,6 +313,48 @@ def fig_neuroendocrinos():
     guardar(fig, "fig_histologias_excluidas.pdf")
 
 
+# --------------------------------------------------------------------------
+def fig_panel_minimo():
+    """Rendimiento frente al tamano del panel: cuantos genes bastan.
+
+    Forma: linea sobre magnitud creciente, con la banda entre el AUC medio y el
+    minimo entre cohortes. El minimo importa mas que la media: un panel util no
+    puede depender de que la cohorte de destino sea la favorable.
+    """
+    c = pd.read_csv(os.path.join(BASE_DIR, "PANEL_MINIMO_CURVA.csv"))
+    with open(os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")) as fh:
+        res = json.load(fh)
+    k = res["panel_minimo"]
+
+    fig, ax = plt.subplots(figsize=(6.4, 3.5))
+    ax.grid(axis="both", color=REJILLA, linewidth=0.6)
+    ax.fill_between(c["N_Genes"], c["AUC_Minima"], c["AUC_Media"],
+                    color=AZUL, alpha=0.16, zorder=2, linewidth=0)
+    ax.plot(c["N_Genes"], c["AUC_Media"], color=AZUL, lw=2,
+            marker="o", markersize=4.5, markeredgecolor="white",
+            markeredgewidth=1, zorder=4, label="AUC media entre cohortes")
+    ax.plot(c["N_Genes"], c["AUC_Minima"], color=INK_2, lw=1.1,
+            ls=(0, (3, 2)), zorder=3, label="AUC de la peor cohorte")
+
+    ax.axvline(k, color=ROJO, lw=1.1, zorder=5)
+    ax.annotate(f"panel mínimo\n{k} genes",
+                xy=(k, c["AUC_Minima"].min()), xytext=(6, 4),
+                textcoords="offset points", fontsize=7.6, color=ROJO,
+                weight="semibold", va="bottom")
+
+    ax.set_xscale("log")
+    ax.set_xticks([3, 10, 30, 100, 500])
+    ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
+    ax.set_xlabel("Genes en el panel (escala logarítmica)")
+    ax.set_ylabel("AUC en validación LODO")
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(coma))
+    ax.set_ylim(0.86, 1.005)
+    ax.legend(loc="lower right", ncol=1)
+    encabezado(ax, "Cuántos biomarcadores bastan",
+               "Con 20 genes el rendimiento ya no mejora de forma apreciable")
+    guardar(fig, "fig_panel_minimo.pdf")
+
+
 if __name__ == "__main__":
     print("Generando figuras en figuras_auditoria/")
     fig_curacion_llm()
@@ -320,4 +363,5 @@ if __name__ == "__main__":
     fig_concordancia_folds()
     fig_composicion()
     fig_neuroendocrinos()
+    fig_panel_minimo()
     print("Listo.")
