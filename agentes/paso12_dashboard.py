@@ -53,16 +53,20 @@ st.markdown("""
     --ink:        #0b0b0b;
     --ink-2:      #52514e;
     --ink-mute:   #898781;
-    --linea:      #e1e0d9;
-    --superficie: #fcfcfb;
-    --plano:      #f4f3ef;
-    --azul:       #2a78d6;
-    --naranja:    #eb6834;
+    --linea:      #e2e0d8;
+    --superficie: #ffffff;
+    --plano:      #fafaf7;
+    /* Paleta verde terminal, coherente con la portada data.lung.
+       El azul editorial paso a ser verde terminal; naranja paso a ambar. */
+    --azul:       #1c8a3f;
+    --azul-2:     #146a2f;
+    --naranja:    #c78a1e;
     --rojo:       #d03b3b;
     --neutro:     #898781;
     --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
              "Times New Roman", serif;
     --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
   }
 
   /* Retirar el cromo por defecto de Streamlit: es el principal delator.
@@ -87,15 +91,48 @@ st.markdown("""
   }
   html, body, [class*="css"] { font-family: var(--sans); }
 
+  /* Restos de la landing que Streamlit no siempre limpia al cambiar de
+     pagina (terminal en vivo y SVG bio de fondo). Se ocultan aqui para que
+     no aparezcan como texto suelto en el dashboard. */
+  #terminal-bg, .bio-bg { display: none !important; }
+
+  /* ---------- Marca superior (coherencia con la portada data.lung) ---- */
+  .marca-top {
+    font-family: var(--mono); font-size: .85rem; color: var(--ink);
+    letter-spacing: -.01em; padding: .3rem 0 1.2rem;
+  }
+  .marca-top::before {
+    /* El ❯ va escrito en el propio texto para mantener el mismo tono verde
+       terminal de la portada; nada mas antes. */
+  }
+  .marca-top .punto { color: var(--azul); }
+  .marca-top .sep { color: var(--ink-mute); margin: 0 .4rem; }
+  .marca-top .crumb { color: var(--ink-2); }
+  /* Boton "← portada" del dashboard: fantasma, discreto */
+  [data-testid="stColumn"]:has(#btn_portada) .stButton button,
+  button[key="btn_portada"] {
+    background: transparent !important;
+    color: var(--ink-mute) !important;
+    border: 1px solid var(--linea) !important;
+    border-radius: 0 !important;
+    font-family: var(--mono) !important;
+    font-size: .78rem !important;
+  }
+  [data-testid="stColumn"]:has(#btn_portada) .stButton button:hover {
+    color: var(--azul) !important; border-color: var(--azul) !important;
+  }
+
   /* ---------- Portada ---------- */
   .portada { margin-bottom: 2.4rem; }
   .portada .filete {
-    height: 3px; background: var(--ink); width: 62px; margin-bottom: 1.1rem;
+    height: 3px; background: var(--azul); width: 62px; margin-bottom: 1.1rem;
   }
   .portada .kicker {
-    font-size: .7rem; font-weight: 650; letter-spacing: .16em;
-    text-transform: uppercase; color: var(--ink-mute); margin-bottom: .7rem;
+    font-family: var(--mono); font-size: .7rem; font-weight: 500;
+    letter-spacing: .08em; text-transform: none;
+    color: var(--azul); margin-bottom: .7rem;
   }
+  .portada .kicker::before { content: "❯ "; color: var(--azul); }
   .portada h1 {
     font-family: var(--serif); font-size: 1.85rem; font-weight: 400;
     line-height: 1.2; letter-spacing: -.012em; color: var(--ink);
@@ -266,9 +303,50 @@ st.markdown("""
     text-transform: uppercase; color: var(--ink-mute);
     margin: 0 0 .6rem;
   }
+  /* --- Chat estilo conversacion iMessage ---
+     Mensaje del asistente: burbuja gris clara a la IZQUIERDA.
+     Mensaje del usuario: burbuja verde a la DERECHA.
+     Streamlit no expone user/assistant en el DOM con un data-testid, asi
+     que un script (mas abajo) etiqueta cada stChatMessage con .msg-user o
+     .msg-asst segun el emoji del avatar. Aqui estilamos por esas clases. */
   div[data-testid="stChatMessage"] {
-    background: var(--plano); border: 1px solid var(--linea);
-    border-radius: 0; padding: .9rem 1.05rem; margin-bottom: .7rem;
+    background: transparent !important; border: none !important;
+    padding: 0 !important; margin-bottom: .7rem;
+    display: flex !important; align-items: flex-start; gap: .55rem;
+  }
+  div[data-testid="stChatMessage"] > div:first-child {
+    flex-shrink: 0; width: 32px; height: 32px;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 16px;
+    background: var(--superficie); border: 1px solid var(--linea);
+    overflow: hidden;
+  }
+  div[data-testid="stChatMessage"] > [data-testid="stChatMessageContent"] {
+    padding: .75rem 1rem !important;
+    max-width: 78%; border-radius: 16px !important;
+  }
+  div[data-testid="stChatMessage"] p {
+    margin: 0 !important; font-size: .9rem; line-height: 1.55;
+  }
+  /* Asistente: izquierda, burbuja clara */
+  div[data-testid="stChatMessage"].msg-asst { flex-direction: row; }
+  div[data-testid="stChatMessage"].msg-asst
+      > [data-testid="stChatMessageContent"] {
+    background: var(--superficie) !important; color: var(--ink) !important;
+    border: 1px solid var(--linea) !important;
+    border-top-left-radius: 4px !important;
+  }
+  /* Usuario: derecha, burbuja verde */
+  div[data-testid="stChatMessage"].msg-user { flex-direction: row-reverse; }
+  div[data-testid="stChatMessage"].msg-user
+      > [data-testid="stChatMessageContent"] {
+    background: var(--azul) !important; color: #fff !important;
+    border: 1px solid var(--azul) !important;
+    border-top-right-radius: 4px !important;
+  }
+  div[data-testid="stChatMessage"].msg-user
+      > [data-testid="stChatMessageContent"] * {
+    color: #fff !important;
   }
   div[data-testid="stChatMessage"] p { font-size: .88rem; line-height: 1.65; }
   .stButton button, .stFormSubmitButton button {
@@ -281,19 +359,29 @@ st.markdown("""
     border-color: var(--ink); color: var(--ink); background: var(--superficie);
   }
   .stFormSubmitButton button {
-    text-align: center; background: var(--ink); color: #fff;
-    border-color: var(--ink);
+    text-align: center;
+    background: var(--azul) !important; color: #fff !important;
+    border: 1px solid var(--azul) !important;
+    font-family: var(--mono) !important;
+    border-radius: 20px !important;
+    padding: .6rem 1.2rem !important;
   }
   .stFormSubmitButton button:hover {
-    background: var(--ink-2); color: #fff; border-color: var(--ink-2);
+    background: var(--azul-2) !important; color: #fff !important;
+    border-color: var(--azul-2) !important;
+  }
+  .stFormSubmitButton button p {
+    color: #fff !important; margin: 0 !important;
   }
   .stTextInput input {
-    border-radius: 0 !important; border: 1px solid var(--linea) !important;
-    background: var(--plano) !important; font-size: .88rem !important;
-    padding: .7rem .85rem !important;
+    border-radius: 20px !important;
+    border: 1px solid var(--linea) !important;
+    background: var(--superficie) !important;
+    font-size: .9rem !important;
+    padding: .7rem 1rem !important;
   }
   .stTextInput input:focus {
-    border-color: var(--ink) !important; box-shadow: none !important;
+    border-color: var(--azul) !important; box-shadow: none !important;
   }
 
   /* ---------- Texto largo ---------- */
@@ -331,8 +419,9 @@ st.markdown("""
 # --------------------------------------------------------------------------
 # Datos
 # --------------------------------------------------------------------------
-@st.cache_data(show_spinner="Cargando resultados del proyecto…")
 def cargar_sistema():
+    """No cacheamos el system prompt: es barato de construir y asi cualquier
+    edicion en contexto_tfm.py se refleja inmediatamente sin reiniciar."""
     return prompt_sistema()
 
 
@@ -374,6 +463,22 @@ cliente = Groq(api_key=_clave) if hay_clave else None
 # --------------------------------------------------------------------------
 # Portada
 # --------------------------------------------------------------------------
+# Barra superior con marca "data.lung > framework" y enlace de vuelta a la
+# portada, coherente con la landing.
+c_marca, c_volver = st.columns([4, 1])
+with c_marca:
+    st.markdown(
+        """<div class="marca-top">
+        ❯ data<span class="punto">.</span>lung
+        <span class="sep">·</span>
+        <span class="crumb">framework</span>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+with c_volver:
+    if st.button("← portada", key="btn_portada"):
+        st.switch_page("paso12_landing.py")
+
 rf_portada = resumen_firma()
 st.markdown(f"""
 <div class="portada">
@@ -527,7 +632,7 @@ if not st.session_state.mensajes and not pendiente:
             st.rerun()
 
 for msg in st.session_state.mensajes:
-    avatar = "◫" if msg["role"] == "assistant" else "▪"
+    avatar = "🧬" if msg["role"] == "assistant" else "👤"
     with st.chat_message(msg["role"], avatar=avatar):
         st.markdown(msg["content"])
 
@@ -549,9 +654,9 @@ pregunta = pendiente or (entrada if enviar else None)
 
 if pregunta:
     st.session_state.mensajes.append({"role": "user", "content": pregunta})
-    with st.chat_message("user", avatar="▪"):
+    with st.chat_message("user", avatar="👤"):
         st.markdown(pregunta)
-    with st.chat_message("assistant", avatar="◫"):
+    with st.chat_message("assistant", avatar="🧬"):
         try:
             flujo = cliente.chat.completions.create(
                 messages=([{"role": "system", "content": sistema}]
@@ -572,6 +677,33 @@ if st.session_state.mensajes:
         st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
+
+
+# Etiquetar cada burbuja del chat con msg-user / msg-asst segun el emoji del
+# avatar, para poder estilar con CSS (Streamlit no distingue user/assistant en
+# el DOM con un data-testid estable). Re-observa el body para pillar los
+# mensajes que se anaden despues del primer render.
+components.html(
+    """
+    <script>
+      const doc = window.parent.document;
+      function marcar() {
+        doc.querySelectorAll('[data-testid="stChatMessage"]').forEach(m => {
+          if (m.dataset.tagged) return;
+          const av = m.children[0];
+          const t = (av?.textContent || "").trim();
+          if (t === '👤') m.classList.add('msg-user');
+          else if (t === '🧬') m.classList.add('msg-asst');
+          m.dataset.tagged = '1';
+        });
+      }
+      marcar();
+      const obs = new MutationObserver(marcar);
+      obs.observe(doc.body, {childList: true, subtree: true});
+    </script>
+    """,
+    height=0,
+)
 
 
 # --------------------------------------------------------------------------

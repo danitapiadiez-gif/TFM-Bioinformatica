@@ -8,6 +8,7 @@ un boton para entrar al framework. Todo el detalle vive en la pagina siguiente.
 
 import os
 import sys
+from urllib.parse import quote
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -25,6 +26,83 @@ except FaltanResultados as e:
     st.code(str(e))
     st.stop()
 
+
+# --------------------------------------------------------------------------
+# SVG decorativo: pulmones, doble helice, bases A-T-G-C y adenina.
+# Se inyecta como background-image data-URI porque Streamlit sanea las
+# etiquetas <line>, <polygon> y <text> dentro de un <svg> inline; el data-URI
+# se sirve tal cual, sin sanitizacion.
+# --------------------------------------------------------------------------
+_svg_bio = (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 720" '
+    'stroke="#1c8a3f" fill="none" stroke-width="1.4" '
+    'stroke-linecap="round" stroke-linejoin="round">'
+    # Pulmones
+    '<g transform="translate(100, 90)">'
+    '<line x1="0" y1="-40" x2="0" y2="-8" stroke-width="2"/>'
+    '<line x1="-10" y1="-8" x2="10" y2="-8" stroke-width="2"/>'
+    '<path d="M -8 -6 Q -45 15 -48 55 Q -50 78 -30 78 Q -12 78 -8 60 Z" stroke-width="1.6"/>'
+    '<path d="M 8 -6 Q 45 15 48 55 Q 50 78 30 78 Q 12 78 8 60 Z" stroke-width="1.6"/>'
+    '<path d="M -12 5 Q -25 15 -30 30 M -30 30 Q -35 40 -38 55 M -30 30 Q -25 45 -18 55"/>'
+    '<path d="M 12 5 Q 25 15 30 30 M 30 30 Q 35 40 38 55 M 30 30 Q 25 45 18 55"/>'
+    '</g>'
+    # Doble helice
+    '<g transform="translate(100, 260)">'
+    '<path d="M -35 0 Q 0 25 35 50 Q 0 75 -35 100 Q 0 125 35 150 Q 0 175 -35 200" stroke-width="1.6"/>'
+    '<path d="M 35 0 Q 0 25 -35 50 Q 0 75 35 100 Q 0 125 -35 150 Q 0 175 35 200" stroke-width="1.6"/>'
+    '<line x1="-28" y1="10" x2="28" y2="10"/>'
+    '<line x1="-16" y1="30" x2="16" y2="30"/>'
+    '<line x1="-3" y1="50" x2="3" y2="50"/>'
+    '<line x1="16" y1="70" x2="-16" y2="70"/>'
+    '<line x1="28" y1="90" x2="-28" y2="90"/>'
+    '<line x1="16" y1="110" x2="-16" y2="110"/>'
+    '<line x1="3" y1="130" x2="-3" y2="130"/>'
+    '<line x1="-16" y1="150" x2="16" y2="150"/>'
+    '<line x1="-28" y1="170" x2="28" y2="170"/>'
+    '<line x1="-16" y1="190" x2="16" y2="190"/>'
+    '</g>'
+    # Letras A-T, G-C, C-G, T-A (emparejamiento de bases)
+    '<g transform="translate(100, 510)" font-family="ui-monospace,Menlo,monospace" '
+    'font-size="22" font-weight="500" fill="#1c8a3f" stroke="none" text-anchor="middle">'
+    '<text x="-45" y="0">A</text>'
+    '<line x1="-32" y1="-6" x2="-13" y2="-6" stroke="#1c8a3f" stroke-dasharray="2 2"/>'
+    '<text x="0" y="0">T</text>'
+    '<text x="-45" y="35">G</text>'
+    '<line x1="-32" y1="29" x2="-13" y2="29" stroke="#1c8a3f" stroke-dasharray="2 2"/>'
+    '<text x="0" y="35">C</text>'
+    '<text x="-45" y="70">C</text>'
+    '<line x1="-32" y1="64" x2="-13" y2="64" stroke="#1c8a3f" stroke-dasharray="2 2"/>'
+    '<text x="0" y="70">G</text>'
+    '<text x="-45" y="105">T</text>'
+    '<line x1="-32" y1="99" x2="-13" y2="99" stroke="#1c8a3f" stroke-dasharray="2 2"/>'
+    '<text x="0" y="105">A</text>'
+    '</g>'
+    # Adenina esquematica (dos anillos fusionados)
+    '<g transform="translate(100, 660)">'
+    '<polygon points="-30,-15 -15,-25 5,-15 5,5 -15,15 -30,5" stroke-width="1.4"/>'
+    '<polygon points="5,-15 22,-18 32,-5 22,10 5,5" stroke-width="1.4"/>'
+    '<circle cx="-33" cy="10" r="1.8" fill="#1c8a3f"/>'
+    '<circle cx="8" cy="-22" r="1.8" fill="#1c8a3f"/>'
+    '<text x="60" y="3" font-family="ui-monospace,Menlo,monospace" '
+    'font-size="10" fill="#1c8a3f" stroke="none" text-anchor="middle">adenina</text>'
+    '</g>'
+    '</svg>'
+)
+_svg_bio_url = quote(_svg_bio, safe="")
+
+st.markdown(
+    f"""
+<style>
+  .bio-bg {{
+    background-image: url("data:image/svg+xml,{_svg_bio_url}");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }}
+</style>
+    """,
+    unsafe_allow_html=True,
+)
 
 st.markdown(
     """
@@ -56,8 +134,8 @@ st.markdown(
      muy baja, degradado en los extremos para que se funda con el fondo.
      Usa div (no pre) porque Streamlit sanea <pre>. */
   .terminal-bg {
-    position: fixed; inset: 0;
-    padding: 1.4vh 2.5vw;
+    position: fixed; top: 0; bottom: 0; left: 0; right: 32%;
+    padding: 1.4vh 2vw;
     font-family: var(--mono); font-size: 10.5px; line-height: 1.55;
     color: #1c8a3f;
     opacity: .32;
@@ -66,11 +144,26 @@ st.markdown(
     overflow: hidden;
     white-space: pre;
     -webkit-mask-image: linear-gradient(to bottom,
-      transparent 0%, black 4%, black 100%);
+      transparent 0%, black 4%, black 96%, transparent 100%);
     mask-image: linear-gradient(to bottom,
-      transparent 0%, black 4%, black 100%);
+      transparent 0%, black 4%, black 96%, transparent 100%);
   }
-  .portada, div[data-testid="stPageLink"], .pie {
+
+  /* Panel decorativo derecho: iconografia bio (pulmon, ADN, bases). Opacidad
+     baja, mismo tono verde que el terminal. */
+  .bio-bg {
+    position: fixed; top: 0; bottom: 0; right: 0; width: 30%;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; z-index: 0;
+    opacity: .14;
+    padding: 2rem 1.5rem;
+  }
+  .bio-bg svg { width: 100%; height: 100%; max-width: 360px; }
+  @media (max-width: 900px) {
+    .bio-bg { display: none; }
+    .terminal-bg { right: 0; }
+  }
+  .portada, .stButton, .pie {
     position: relative; z-index: 2;
   }
   /* Tokens del terminal (coloreados desde el generador de lineas). */
@@ -88,20 +181,27 @@ st.markdown(
   @keyframes parpadeo { 50% { opacity: 0; } }
 
   .portada {
-    min-height: 82vh;
+    min-height: 68vh;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     text-align: center;
-    padding: 3rem 1.5rem;
+    padding: 2rem 1.5rem 1rem;
   }
   .portada .marca {
     font-family: var(--mono); font-size: .82rem; font-weight: 500;
     color: var(--ink-mute); letter-spacing: .04em;
     margin-bottom: 3.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; max-width: 720px;
   }
-  .portada .marca::before {
+  .portada .marca .izq::before {
     content: "❯ "; color: var(--verde);
   }
+  .portada .marca .der {
+    font-size: .72rem; color: var(--ink-mute);
+    letter-spacing: .06em; text-transform: uppercase;
+  }
+  .portada .marca .der .autor { color: var(--ink); font-weight: 500; }
   .portada .brand {
     font-family: var(--mono);
     font-size: clamp(4rem, 15vw, 10rem);
@@ -124,33 +224,28 @@ st.markdown(
     margin: 0 auto 2.5rem;
   }
 
-  /* Boton CTA: verde terminal, presencia clara. Streamlit page_link vive en
-     data-testid="stPageLink"; sobreescribimos con !important porque su CSS
-     por defecto pisa lo demas. */
-  div[data-testid="stPageLink"] { display: flex; justify-content: center; }
-  div[data-testid="stPageLink"] a {
+  /* Boton CTA: verde terminal, presencia clara. Aplica al st.button que
+     dispara st.switch_page en la landing. */
+  .stButton button, [data-testid="stBaseButton-secondary"] {
     background: var(--verde) !important; color: #fff !important;
     border: 1px solid var(--verde) !important; border-radius: 0 !important;
     font-family: var(--mono) !important;
     font-size: .95rem !important; font-weight: 500 !important;
     letter-spacing: .02em !important;
-    padding: 1rem 2.4rem !important;
-    text-decoration: none !important;
+    padding: 1rem 1.8rem !important;
     transition: all .18s ease !important;
   }
-  div[data-testid="stPageLink"] a:hover {
+  .stButton button:hover,
+  [data-testid="stBaseButton-secondary"]:hover {
     background: var(--verde-2) !important;
     border-color: var(--verde-2) !important;
+    color: #fff !important;
     transform: translateY(-1px);
   }
-  div[data-testid="stPageLink"] a p {
-    margin: 0 !important; padding: 0 !important;
+  .stButton button p, [data-testid="stBaseButton-secondary"] p {
     color: #fff !important; font-family: var(--mono) !important;
+    margin: 0 !important;
   }
-  div[data-testid="stPageLink"] a::before {
-    content: "❯ "; color: #fff; margin-right: .35rem;
-  }
-  div[data-testid="stPageLink"] a svg { display: none !important; }
 
   .pie {
     text-align: center;
@@ -176,9 +271,15 @@ st.markdown(
 st.markdown(
     """
 <div class="terminal-bg" id="terminal-bg"></div>
+<div class="bio-bg"></div>
 
 <div class="portada">
-  <div class="marca">data.lung</div>
+  <div class="marca">
+    <div class="izq">data.lung</div>
+    <div class="der">
+      <span class="autor">Daniel Tapia Díez</span> · TFM · Bioinformática · UAX
+    </div>
+  </div>
   <div class="brand">data<span class="punto">.</span>lung</div>
   <div class="filete"></div>
   <p class="tagline">Biomarcadores pulmonares que replican en cohortes
@@ -195,8 +296,14 @@ components.html(
     """
     <script>
       const doc = window.parent.document;
-      const bg = doc.getElementById("terminal-bg");
-      if (bg && !bg.dataset.started) {
+      function arrancar() {
+        const bg = doc.getElementById("terminal-bg");
+        if (!bg) { return setTimeout(arrancar, 150); }
+        if (bg.dataset.started) return;
+        inicializar(bg);
+      }
+      arrancar();
+      function inicializar(bg) {
         bg.dataset.started = "1";
         const gses = ["GSE118370","GSE18842","GSE19188","GSE19804",
           "GSE23066","GSE30219","GSE31210","GSE40791","GSE50081","GSE7670"];
@@ -303,13 +410,9 @@ components.html(
     height=0,
 )
 
-st.page_link("paso12_dashboard.py", label="Entrar al framework")
+c_izq, c_btn, c_der = st.columns([1, 2, 1])
+with c_btn:
+    if st.button("❯ Entrar al framework", use_container_width=True,
+                 key="btn_entrar"):
+        st.switch_page("paso12_dashboard.py")
 
-st.markdown(
-    """
-<div class="pie" style="margin-top: 4rem;">
-  Daniel Tapia Díez · TFM · Bioinformática · UAX
-</div>
-    """,
-    unsafe_allow_html=True,
-)
