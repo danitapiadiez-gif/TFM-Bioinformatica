@@ -252,6 +252,52 @@ st.markdown("""
     font-family: var(--serif); font-size: 1.02rem; color: var(--ink);
     font-variant-numeric: tabular-nums;
   }
+  /* --- Navegacion de capitulos en el sidebar --- */
+  .nav-marca {
+    font-family: var(--mono); font-size: 1.05rem; font-weight: 500;
+    color: var(--ink); margin: .2rem 0 1.4rem; letter-spacing: -.01em;
+  }
+  .nav-marca .punto { color: var(--azul); }
+  [data-testid="stSidebar"] .stButton button {
+    background: transparent !important; color: var(--ink-2) !important;
+    border: none !important; border-left: 2px solid transparent !important;
+    border-radius: 0 !important;
+    font-family: var(--mono) !important; font-size: .84rem !important;
+    font-weight: 400 !important; letter-spacing: 0 !important;
+    text-align: left !important;
+    padding: .5rem .8rem !important;
+    text-transform: none !important;
+  }
+  [data-testid="stSidebar"] .stButton button:hover {
+    background: var(--plano) !important; color: var(--ink) !important;
+    border-left-color: var(--linea) !important;
+  }
+  /* Boton activo (type="primary") en el sidebar: verde, borde izq, negrita */
+  [data-testid="stSidebar"] [data-testid="stBaseButton-primary"],
+  [data-testid="stSidebar"] .stButton button[kind="primary"] {
+    background: var(--plano) !important;
+    color: var(--azul) !important;
+    border: none !important;
+    border-left: 2px solid var(--azul) !important;
+    border-radius: 0 !important;
+    font-family: var(--mono) !important;
+    font-weight: 500 !important;
+    font-size: .84rem !important;
+    text-align: left !important;
+    padding: .5rem .8rem !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+  }
+  [data-testid="stSidebar"] [data-testid="stBaseButton-primary"]:hover,
+  [data-testid="stSidebar"] .stButton button[kind="primary"]:hover {
+    background: var(--plano) !important;
+    color: var(--azul-2) !important;
+    border-left-color: var(--azul-2) !important;
+  }
+  [data-testid="stSidebar"] [data-testid="stBaseButton-primary"] p,
+  [data-testid="stSidebar"] .stButton button[kind="primary"] p {
+    color: var(--azul) !important;
+  }
 
   /* ---------- Pestanas ---------- */
   .stTabs [data-baseweb="tab-list"] {
@@ -554,47 +600,41 @@ components.html(
 # --------------------------------------------------------------------------
 # Barra lateral
 # --------------------------------------------------------------------------
+# Navegacion por capitulos: cada boton del sidebar cambia el estado y
+# renderiza solo la vista activa. Sustituye a st.tabs, mas discreto y con
+# el asistente como una vista mas (no fijo arriba de todo).
+CAPITULOS = [
+    ("asistente",    "Asistente"),
+    ("introduccion", "Introducción y objetivos"),
+    ("metodologia",  "Metodología"),
+    ("resultados",   "Resultados"),
+    ("conclusiones", "Conclusiones"),
+]
+if "capitulo" not in st.session_state:
+    st.session_state.capitulo = "introduccion"
+
 with st.sidebar:
-    st.markdown('<p class="lat-tit">Rendimiento del ML</p>',
-                unsafe_allow_html=True)
-    st.markdown("".join(
-        f'<div class="lat-fila"><span>{k}</span><span class="v">{v}</span></div>'
-        for k, v in [
-            ("AUC tumor vs sano", dec(m.get("auc", 0))),
-            ("AUC ADC vs escamoso", dec(m.get("auc_sub", 0))),
-            ("Balanced accuracy", dec(m.get("bal_acc", 0))),
-            ("Especificidad", dec(m.get("espec", 0))),
-        ]), unsafe_allow_html=True)
+    st.markdown(
+        """<div class="nav-marca">❯ data<span class="punto">.</span>lung</div>""",
+        unsafe_allow_html=True,
+    )
+    st.markdown('<p class="lat-tit">Navegación</p>', unsafe_allow_html=True)
+    for _key, _label in CAPITULOS:
+        es_activo = st.session_state.capitulo == _key
+        if st.button(
+            ("▸  " + _label) if es_activo else _label,
+            key=f"nav_{_key}",
+            use_container_width=True,
+            type=("primary" if es_activo else "secondary"),
+        ):
+            st.session_state.capitulo = _key
+            st.rerun()
 
-    _rf_sb = resumen_firma()
-    if _rf_sb is not None:
-        _ihc = sum(_rf_sb["ihc_recuperados"].values())
-        _ihc_tot = sum(_rf_sb["ihc_total"].values())
-        st.markdown('<p class="lat-tit" style="margin-top:1.7rem">Firma validada</p>',
-                    unsafe_allow_html=True)
-        st.markdown("".join(
-            f'<div class="lat-fila"><span>{k}</span><span class="v">{v}</span></div>'
-            for k, v in [
-                ("Genes replicados", str(_rf_sb["n_genes_validados"])),
-                ("Panel mínimo", str(_rf_sb["panel_minimo"])),
-                ("AUC del panel", dec(_rf_sb["auc_panel_minimo"])),
-                ("Marcadores IHC", f"{_ihc}/{_ihc_tot}"),
-            ]), unsafe_allow_html=True)
+    st.markdown("---")
+    if st.button("← Volver a la portada", key="nav_portada",
+                 use_container_width=True):
+        st.switch_page("paso12_landing.py")
 
-    st.markdown('<p class="lat-tit" style="margin-top:1.7rem">Datos</p>',
-                unsafe_allow_html=True)
-    n_ev = m.get("n_ev", 0)
-    n_coh = m.get("n_cohortes", 0)
-    n_mue = m.get("n_muestras", 0)
-    st.markdown("".join(
-        f'<div class="lat-fila"><span>{k}</span><span class="v">{v}</span></div>'
-        for k, v in [
-            ("Cohortes incluidas", f"{n_ev}/{n_coh}"),
-            ("Muestras analizadas", f"{n_mue:,}".replace(",", ".")),
-            ("Plataforma", "GPL570"),
-        ]), unsafe_allow_html=True)
-
-    st.caption(f"Asistente: `{MODELO}`")
     if not hay_clave:
         st.warning("Sin `GROQ_API_KEY` en `.env`: el asistente queda "
                    "deshabilitado; el resto funciona.")
@@ -604,12 +644,12 @@ with st.sidebar:
 # Asistente (siempre visible, sobre las pestanas)
 # --------------------------------------------------------------------------
 SUGERENCIAS = [
-    "¿Qué rendimiento real tiene el clasificador tumor frente a sano?",
-    "¿Qué pasó con SLC6A4 y los genes de la firma original?",
-    "¿Por qué tres cohortes no son evaluables como test?",
-    "¿Qué hipótesis no se confirmaron y por qué?",
-    "¿Qué mide realmente la firma de consenso?",
-    "Explica el bug de desalineamiento de GSE30219.",
+    "¿De qué trata el proyecto data.lung?",
+    "¿Qué biomarcadores identifica el framework?",
+    "¿Cuál es el rendimiento del clasificador tumor vs sano?",
+    "Explica los ejes biológicos de la firma.",
+    "¿Cuántos marcadores IHC se recuperan y cuáles son?",
+    "¿Qué genes forman el panel mínimo?",
 ]
 
 if "mensajes" not in st.session_state:
@@ -617,76 +657,80 @@ if "mensajes" not in st.session_state:
 
 pendiente = st.session_state.pop("pendiente", None)
 
-st.markdown('<div class="chat-panel">', unsafe_allow_html=True)
-st.markdown(f"""
-<div class="chat-cab">
-  <div class="av">◫</div>
-  <div class="id">
-    <div class="nombre">Asistente del trabajo</div>
-    <div class="estado">{'En línea · ' + MODELO if hay_clave else 'Sin clave API'}</div>
-  </div>
-</div>
-<p class="chat-aviso">Responde <b>únicamente</b> con lo que figura en los
-resultados del trabajo; si algo no está, lo dice. <b>No proporciona consejo
-médico ni diagnóstico</b>, y la firma estudiada no está validada para uso
-clínico.</p>
-""", unsafe_allow_html=True)
 
-if not st.session_state.mensajes and not pendiente:
-    st.markdown('<p class="chat-sug-tit">Por dónde empezar</p>',
-                unsafe_allow_html=True)
-    cols = st.columns(3, gap="small")
-    for i, sug in enumerate(SUGERENCIAS):
-        if cols[i % 3].button(sug, key=f"sug{i}", use_container_width=True):
-            st.session_state.pendiente = sug
+if st.session_state.capitulo == "asistente":
+    st.markdown('<div class="chat-panel">', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="chat-cab">
+      <div class="av">◫</div>
+      <div class="id">
+        <div class="nombre">Asistente del trabajo</div>
+        <div class="estado">{'En línea · ' + MODELO if hay_clave else 'Sin clave API'}</div>
+      </div>
+    </div>
+    <p class="chat-aviso">Responde <b>únicamente</b> con lo que figura en los
+    resultados del trabajo; si algo no está, lo dice. <b>No proporciona consejo
+    médico ni diagnóstico</b>, y la firma estudiada no está validada para uso
+    clínico.</p>
+    """, unsafe_allow_html=True)
+
+    if not st.session_state.mensajes and not pendiente:
+        st.markdown('<p class="chat-sug-tit">Por dónde empezar</p>',
+                    unsafe_allow_html=True)
+        cols = st.columns(3, gap="small")
+        for i, sug in enumerate(SUGERENCIAS):
+            if cols[i % 3].button(sug, key=f"sug{i}",
+                                  use_container_width=True):
+                st.session_state.pendiente = sug
+                st.rerun()
+
+    for msg in st.session_state.mensajes:
+        avatar = "🧬" if msg["role"] == "assistant" else "👤"
+        with st.chat_message(msg["role"], avatar=avatar):
+            st.markdown(msg["content"])
+
+    with st.form("form_chat", clear_on_submit=True):
+        col_txt, col_btn = st.columns([9, 1], gap="small")
+        with col_txt:
+            entrada = st.text_input(
+                "Escribe tu consulta sobre el trabajo…",
+                placeholder=("Escribe tu consulta sobre el trabajo…"
+                             if hay_clave
+                             else "Sin clave API: el asistente está deshabilitado"),
+                label_visibility="collapsed",
+                disabled=not hay_clave,
+            )
+        with col_btn:
+            enviar = st.form_submit_button("Enviar", use_container_width=True,
+                                           disabled=not hay_clave)
+
+    pregunta = pendiente or (entrada if enviar else None)
+
+    if pregunta:
+        st.session_state.mensajes.append({"role": "user", "content": pregunta})
+        with st.chat_message("user", avatar="👤"):
+            st.markdown(pregunta)
+        with st.chat_message("assistant", avatar="🧬"):
+            try:
+                flujo = cliente.chat.completions.create(
+                    messages=([{"role": "system", "content": sistema}]
+                              + st.session_state.mensajes[-12:]),
+                    model=MODELO, temperature=0.0, max_tokens=900, stream=True,
+                )
+                texto = st.write_stream(
+                    t.choices[0].delta.content or "" for t in flujo)
+                st.session_state.mensajes.append(
+                    {"role": "assistant", "content": texto})
+            except Exception as e:
+                st.error(f"Error al consultar el modelo: {e}")
+                st.session_state.mensajes.pop()
+
+    if st.session_state.mensajes:
+        if st.button("Limpiar conversación"):
+            st.session_state.mensajes = []
             st.rerun()
 
-for msg in st.session_state.mensajes:
-    avatar = "🧬" if msg["role"] == "assistant" else "👤"
-    with st.chat_message(msg["role"], avatar=avatar):
-        st.markdown(msg["content"])
-
-with st.form("form_chat", clear_on_submit=True):
-    col_txt, col_btn = st.columns([9, 1], gap="small")
-    with col_txt:
-        entrada = st.text_input(
-            "Escribe tu consulta sobre el trabajo…",
-            placeholder=("Escribe tu consulta sobre el trabajo…" if hay_clave
-                         else "Sin clave API: el asistente está deshabilitado"),
-            label_visibility="collapsed",
-            disabled=not hay_clave,
-        )
-    with col_btn:
-        enviar = st.form_submit_button("Enviar", use_container_width=True,
-                                       disabled=not hay_clave)
-
-pregunta = pendiente or (entrada if enviar else None)
-
-if pregunta:
-    st.session_state.mensajes.append({"role": "user", "content": pregunta})
-    with st.chat_message("user", avatar="👤"):
-        st.markdown(pregunta)
-    with st.chat_message("assistant", avatar="🧬"):
-        try:
-            flujo = cliente.chat.completions.create(
-                messages=([{"role": "system", "content": sistema}]
-                          + st.session_state.mensajes[-12:]),
-                model=MODELO, temperature=0.0, max_tokens=900, stream=True,
-            )
-            texto = st.write_stream(
-                t.choices[0].delta.content or "" for t in flujo)
-            st.session_state.mensajes.append(
-                {"role": "assistant", "content": texto})
-        except Exception as e:
-            st.error(f"Error al consultar el modelo: {e}")
-            st.session_state.mensajes.pop()
-
-if st.session_state.mensajes:
-    if st.button("Limpiar conversación"):
-        st.session_state.mensajes = []
-        st.rerun()
-
-st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # Etiquetar cada burbuja del chat con msg-user / msg-asst segun el emoji del
@@ -717,14 +761,12 @@ components.html(
 
 
 # --------------------------------------------------------------------------
-# Capitulos de la memoria
+# Capitulos de la memoria (uno visible a la vez, seleccionado en el sidebar)
 # --------------------------------------------------------------------------
-t_intro, t_met, t_res, t_con = st.tabs(
-    ["Introducción y objetivos", "Metodología", "Resultados", "Conclusiones"])
 
 
 # ---------- Introduccion y objetivos --------------------------------------
-with t_intro:
+if st.session_state.capitulo == "introduccion":
     seccion("I", "Contexto y motivación",
             "El cáncer de pulmón es la primera causa de mortalidad oncológica en el "
             "mundo. Su heterogeneidad histológica y molecular hace que la búsqueda "
@@ -801,7 +843,7 @@ y no artefacto técnico.</li>
 
 
 # ---------- Resultados -----------------------------------------------------
-with t_res:
+if st.session_state.capitulo == "resultados":
     rf = resumen_firma()
 
     # Cifras de cabecera: enfocadas en la firma validada + rendimiento ML,
@@ -994,7 +1036,7 @@ menos diferenciado y más proliferativo, que es la histología del NSCLC.</p>
 
 
 # ---------- Metodología ----------------------------------------------------
-with t_met:
+if st.session_state.capitulo == "metodologia":
     seccion("I", "Pipeline",
             "Ocho pasos secuenciales; cada uno vive en un módulo del paquete "
             "tfm/ o del directorio agentes/, y se ejecuta desde el orquestador "
@@ -1052,7 +1094,7 @@ python agentes/generar_tablas_latex.py""", language="bash")
 
 
 # ---------- Conclusiones ---------------------------------------------------
-with t_con:
+if st.session_state.capitulo == "conclusiones":
     rf = resumen_firma()
 
     seccion("I", "Biomarcadores identificados",
