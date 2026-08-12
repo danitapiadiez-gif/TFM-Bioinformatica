@@ -27,6 +27,7 @@ import sys
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 from dotenv import load_dotenv
 from groq import Groq
 
@@ -458,15 +459,50 @@ st.markdown(f"""
   biológica de los artefactos técnicos. El resultado es una firma génica
   replicada en tres cohortes independientes.</p>
   <div class="pie">
-    <div><b>{m.get('n_cohortes', 0)}</b>cohortes GEO</div>
-    <div><b>{m.get('n_muestras', 0)}</b>muestras</div>
-    <div><b>{rf_portada['n_genes_validados'] if rf_portada else '—'}</b>genes validados</div>
-    <div><b>{rf_portada['panel_minimo'] if rf_portada else '—'}</b>panel mínimo</div>
-    <div><b>{dec(m.get('auc', 0))}</b>AUC media LODO</div>
+    <div><b data-count="{m.get('n_cohortes', 0)}">{m.get('n_cohortes', 0)}</b>cohortes GEO</div>
+    <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b>muestras</div>
+    <div><b data-count="{rf_portada['n_genes_validados'] if rf_portada else 0}">{rf_portada['n_genes_validados'] if rf_portada else '—'}</b>genes validados</div>
+    <div><b data-count="{rf_portada['panel_minimo'] if rf_portada else 0}">{rf_portada['panel_minimo'] if rf_portada else '—'}</b>panel mínimo</div>
+    <div><b data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</b>AUC media LODO</div>
     <div style="margin-left:auto;align-self:flex-end">Daniel Tapia Díez</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Animacion de conteo al cargar la portada. El HTML muestra ya el valor final
+# (por si el iframe se bloquea); este script lo lleva a 0 y lo anima hasta el
+# target con easing cubico. data-done evita repetir la animacion en cada rerun
+# de Streamlit (cambio de pestana, envio de mensaje al chat, etc.).
+components.html(
+    """
+    <script>
+      const doc = window.parent.document;
+      const nodos = doc.querySelectorAll("[data-count]:not([data-done])");
+      const dur = 1200;
+      nodos.forEach((el) => {
+        const objetivo = parseFloat(el.dataset.count);
+        const dec = parseInt(el.dataset.dec || "0", 10);
+        const formato = (v) => dec === 0
+          ? Math.floor(v).toString()
+          : v.toFixed(dec).replace(".", ",");
+        el.textContent = formato(0);
+        const t0 = performance.now();
+        function paso(ahora) {
+          const t = Math.min((ahora - t0) / dur, 1);
+          const suave = 1 - Math.pow(1 - t, 3);
+          el.textContent = formato(objetivo * suave);
+          if (t < 1) requestAnimationFrame(paso);
+          else {
+            el.textContent = formato(objetivo);
+            el.setAttribute("data-done", "1");
+          }
+        }
+        requestAnimationFrame(paso);
+      });
+    </script>
+    """,
+    height=0,
+)
 
 
 # --------------------------------------------------------------------------
