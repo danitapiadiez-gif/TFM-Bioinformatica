@@ -19,6 +19,9 @@ SINTESIS_MOLECULAR.json
 # Sistema
 .DS_Store
 
+# Configuracion local de asistentes de codigo
+.claude/
+
 # R
 .Rhistory
 .RData
