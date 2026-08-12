@@ -469,36 +469,48 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Animacion de conteo al cargar la portada. El HTML muestra ya el valor final
-# (por si el iframe se bloquea); este script lo lleva a 0 y lo anima hasta el
-# target con easing cubico. data-done evita repetir la animacion en cada rerun
-# de Streamlit (cambio de pestana, envio de mensaje al chat, etc.).
+# Animacion de conteo para toda cifra con data-count. El HTML muestra ya el
+# valor final (por si el iframe se bloquea); este script lo lleva a 0 y lo
+# anima hasta el target con easing cubico. data-done evita repetir la
+# animacion en reruns de Streamlit (cambio de pestana, envio de mensaje al
+# chat, etc.). El MutationObserver anima tambien los data-count que Streamlit
+# monta despues del primer barrido (secciones dentro de otras pestanas).
 components.html(
     """
     <script>
       const doc = window.parent.document;
-      const nodos = doc.querySelectorAll("[data-count]:not([data-done])");
       const dur = 1200;
-      nodos.forEach((el) => {
+      function animar(el) {
+        if (el.hasAttribute("data-done")) return;
+        el.setAttribute("data-done", "1");
         const objetivo = parseFloat(el.dataset.count);
         const dec = parseInt(el.dataset.dec || "0", 10);
-        const formato = (v) => dec === 0
+        const fmt = (v) => dec === 0
           ? Math.floor(v).toString()
           : v.toFixed(dec).replace(".", ",");
-        el.textContent = formato(0);
+        el.textContent = fmt(0);
         const t0 = performance.now();
         function paso(ahora) {
           const t = Math.min((ahora - t0) / dur, 1);
           const suave = 1 - Math.pow(1 - t, 3);
-          el.textContent = formato(objetivo * suave);
+          el.textContent = fmt(objetivo * suave);
           if (t < 1) requestAnimationFrame(paso);
-          else {
-            el.textContent = formato(objetivo);
-            el.setAttribute("data-done", "1");
-          }
+          else el.textContent = fmt(objetivo);
         }
         requestAnimationFrame(paso);
+      }
+      doc.querySelectorAll("[data-count]").forEach(animar);
+      const obs = new MutationObserver((muts) => {
+        for (const m of muts) {
+          for (const n of m.addedNodes) {
+            if (n.nodeType !== 1) continue;
+            if (n.matches && n.matches("[data-count]")) animar(n);
+            if (n.querySelectorAll)
+              n.querySelectorAll("[data-count]").forEach(animar);
+          }
+        }
       });
+      obs.observe(doc.body, {childList: true, subtree: true});
     </script>
     """,
     height=0,
@@ -716,25 +728,25 @@ with t_res:
     <div class="cifras">
       <div class="cifra acento-azul">
         <div class="rotulo">Tumor vs. sano<br>balanced accuracy</div>
-        <div class="valor">{dec(m.get('bal_acc', 0))}</div>
+        <div class="valor"><span data-count="{m.get('bal_acc', 0)}" data-dec="3">{dec(m.get('bal_acc', 0))}</span></div>
         <div class="glosa">Sobre {m.get('n_ev', 0)} cohortes evaluables de
         {m.get('n_cohortes', 0)}. Baseline medio {dec(m.get('base', 0))}.</div>
       </div>
       <div class="cifra acento-nar">
         <div class="rotulo">AUC media</div>
-        <div class="valor">{dec(m.get('auc', 0))}</div>
+        <div class="valor"><span data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</span></div>
         <div class="glosa">Discrimina bien y decide mal: la especificidad media
         es {dec(m.get('espec', 0))}.</div>
       </div>
       <div class="cifra acento-rojo">
         <div class="rotulo">No superan su baseline</div>
-        <div class="valor">{m.get('no_superan', 0)}<span class="u"> / {m.get('n_ev', 0)}</span></div>
+        <div class="valor"><span data-count="{m.get('no_superan', 0)}">{m.get('no_superan', 0)}</span><span class="u"> / {m.get('n_ev', 0)}</span></div>
         <div class="glosa">Cohortes evaluables por debajo de su propio azar
         informado.</div>
       </div>
       <div class="cifra acento-neutro">
         <div class="rotulo">Control positivo<br>AUC de subtipo</div>
-        <div class="valor">{dec(m.get('auc_sub', 0))}</div>
+        <div class="valor"><span data-count="{m.get('auc_sub', 0)}" data-dec="3">{dec(m.get('auc_sub', 0))}</span></div>
         <div class="glosa">{m.get('n_sub', 0)} muestras, 3 cohortes. Recupera los
         12 marcadores de inmunohistoquímica.</div>
       </div>
@@ -858,21 +870,21 @@ with t_res:
         <div class="cifras">
           <div class="cifra acento-azul">
             <div class="rotulo">Genes validados</div>
-            <div class="valor">{rf['n_genes_validados']}</div>
+            <div class="valor"><span data-count="{rf['n_genes_validados']}">{rf['n_genes_validados']}</span></div>
             <div class="glosa">de {rf['n_genes_evaluados']} evaluados
             ({dec(rf['pct_genes_validados'], 1)} %) en
             {rf['n_cohortes_independientes']} cohortes independientes.</div>
           </div>
           <div class="cifra acento-nar">
             <div class="rotulo">Panel mínimo</div>
-            <div class="valor">{rf['panel_minimo']}</div>
+            <div class="valor"><span data-count="{rf['panel_minimo']}">{rf['panel_minimo']}</span></div>
             <div class="glosa">genes bastan para AUC
             {dec(rf['auc_panel_minimo'])}, frente a
             {dec(rf['auc_firma_completa'])} con la firma completa.</div>
           </div>
           <div class="cifra acento-neutro">
             <div class="rotulo">Marcadores IHC recuperados</div>
-            <div class="valor">{sum(rf['ihc_recuperados'].values())}<span class="u"> / {sum(rf['ihc_total'].values())}</span></div>
+            <div class="valor"><span data-count="{sum(rf['ihc_recuperados'].values())}">{sum(rf['ihc_recuperados'].values())}</span><span class="u"> / {sum(rf['ihc_total'].values())}</span></div>
             <div class="glosa">marcadores de inmunohistoquímica clínica que el
             framework recupera sin conocerlos de antemano.</div>
           </div>
