@@ -9,8 +9,7 @@ from paso4_informe import generar_informe
 from paso5_graficos import generar_graficos
 from paso6_dashboard import generar_dashboard
 
-# NUEVO: importamos la función de ML
-from ml_entrenamiento_un_dataset import entrenar_modelos_ml
+from paso5b_ml_entrenamiento import entrenar_modelos_ml
 
 
 def lanzar_analisis_completo(gse_id):
@@ -83,7 +82,7 @@ def lanzar_analisis_completo(gse_id):
     # PASO 5: GRÁFICOS
     generar_graficos(gse_id)
 
-    # PASO 7: MACHINE LEARNING
+    # PASO 5B: MACHINE LEARNING
     try:
         print("\n Ejecutando módulo de Machine Learning...")
         entrenar_modelos_ml(gse_id)

@@ -226,7 +226,7 @@ def entrenar_modelos_ml(gse_id):
 
 def main():
     if len(sys.argv) < 2:
-        print("Uso: python ml_entrenamiento_un_dataset.py GSE19188")
+        print("Uso: python paso5b_ml_entrenamiento.py GSE19188")
         sys.exit(1)
 
     gse_id = sys.argv[1]
