@@ -109,12 +109,14 @@ def test_asignar_por_posicion_destruye_la_senal_biologica():
 
 def test_todas_las_cohortes_quedan_alineadas_tras_cargar():
     """Invariante del framework: ninguna carga devuelve datos desalineados."""
-    revisadas = 0
-    for gse in cohortes.disponibles():
+    disponibles = cohortes.disponibles()
+    if not disponibles:
+        pytest.skip(
+            "No hay TFM_GSE*/ locales (los datos brutos no se versionan). "
+            "El test se ejecuta en local; en CI se salta por diseno.")
+    for gse in disponibles:
         X, meta = cohortes.cargar(gse, devolver_meta=True)
         assert list(X.index) == list(meta.index), f"{gse} quedo desalineada"
-        revisadas += 1
-    assert revisadas >= 1
 
 
 def test_las_etiquetas_corresponden_a_sus_muestras():
