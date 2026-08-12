@@ -1,22 +1,27 @@
 """
-Paso 12: interfaz web de consulta de resultados (Streamlit).
+Paso 12: interfaz web del framework (Streamlit).
 
 Ejecutar desde la raiz del proyecto con:
     streamlit run agentes/paso12_web_chatbot.py
 
-Cuatro secciones: asistente conversacional, resultados, integridad de los datos y
-metodologia. Todas las cifras se leen de los CSV producidos por los pasos 13-18;
+La interfaz reproduce la estructura de la memoria: introduccion y objetivos,
+metodologia, resultados y conclusiones. El asistente conversacional queda
+siempre visible sobre las pestanas para que pueda consultarse en cualquier
+momento sin cambiar de vista.
+
+Todas las cifras se leen de los CSV y JSON producidos por los pasos 13-19;
 ninguna esta escrita a mano, de modo que reejecutar un analisis actualiza la
 interfaz.
 
 El contexto del asistente lo construye contexto_tfm.py, que falla de forma
 explicita si no encuentra los resultados: no arrancar es preferible a responder
-sin datos, que es lo que hacia la version anterior de este fichero.
+sin datos.
 
 El lenguaje visual acompana a estilo_viz.py, de modo que la interfaz y las
 figuras comparten paleta, tipografia y jerarquia.
 """
 
+import json
 import os
 import sys
 
@@ -37,7 +42,7 @@ MODELO = "llama-3.3-70b-versatile"
 FIG = os.path.join(BASE_DIR, "figuras_auditoria")
 
 st.set_page_config(
-    page_title="Auditoría de firmas transcriptómicas · TFM",
+    page_title="Framework transcriptómico · TFM",
     page_icon="◫",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -102,9 +107,9 @@ st.markdown("""
     text-transform: uppercase; color: var(--ink-mute); margin-bottom: .7rem;
   }
   .portada h1 {
-    font-family: var(--serif); font-size: 2.5rem; font-weight: 400;
-    line-height: 1.12; letter-spacing: -.018em; color: var(--ink);
-    margin: 0 0 .85rem 0; max-width: 21ch;
+    font-family: var(--serif); font-size: 1.85rem; font-weight: 400;
+    line-height: 1.2; letter-spacing: -.012em; color: var(--ink);
+    margin: 0 0 .85rem 0; max-width: 52ch;
   }
   .portada .entradilla {
     font-family: var(--serif); font-size: 1.06rem; line-height: 1.6;
@@ -235,21 +240,71 @@ st.markdown("""
   .stTabs [data-baseweb="tab-highlight"] { background: var(--ink); height: 2px; }
 
   /* ---------- Chat ---------- */
-  div[data-testid="stChatMessage"] {
+  .chat-panel {
     background: var(--superficie); border: 1px solid var(--linea);
+    padding: 1.15rem 1.25rem 1.25rem; margin: 0 0 2.4rem;
+  }
+  .chat-cab {
+    display: flex; align-items: center; gap: .7rem;
+    padding-bottom: .8rem; margin-bottom: 1rem;
+    border-bottom: 1px solid var(--linea);
+  }
+  .chat-cab .av {
+    width: 30px; height: 30px; border: 1px solid var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: .95rem; color: var(--ink);
+  }
+  .chat-cab .id { flex: 1; }
+  .chat-cab .nombre {
+    font-family: var(--serif); font-size: .96rem; color: var(--ink);
+    line-height: 1.2;
+  }
+  .chat-cab .estado {
+    font-size: .68rem; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--ink-mute); margin-top: .1rem;
+  }
+  .chat-cab .estado::before {
+    content: "●"; color: #2fa15c; margin-right: .35rem; font-size: .7rem;
+  }
+  .chat-aviso {
+    font-size: .8rem; color: var(--ink-2); line-height: 1.55;
+    margin: 0 0 1rem; padding-bottom: .8rem;
+    border-bottom: 1px dashed var(--linea);
+  }
+  .chat-sug-tit {
+    font-size: .67rem; font-weight: 650; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--ink-mute);
+    margin: 0 0 .6rem;
+  }
+  div[data-testid="stChatMessage"] {
+    background: var(--plano); border: 1px solid var(--linea);
     border-radius: 0; padding: .9rem 1.05rem; margin-bottom: .7rem;
   }
   div[data-testid="stChatMessage"] p { font-size: .88rem; line-height: 1.65; }
-  .stButton button {
+  .stButton button, .stFormSubmitButton button {
     border-radius: 0; border: 1px solid var(--linea);
     background: var(--superficie); color: var(--ink-2);
     font-size: .81rem; text-align: left; padding: .62rem .8rem;
     line-height: 1.42; font-weight: 400;
   }
-  .stButton button:hover {
+  .stButton button:hover, .stFormSubmitButton button:hover {
     border-color: var(--ink); color: var(--ink); background: var(--superficie);
   }
-  [data-testid="stChatInput"] { border-radius: 0; border-color: var(--linea); }
+  .stFormSubmitButton button {
+    text-align: center; background: var(--ink); color: #fff;
+    border-color: var(--ink);
+  }
+  .stFormSubmitButton button:hover {
+    background: var(--ink-2); color: #fff; border-color: var(--ink-2);
+  }
+  .stTextInput input {
+    border-radius: 0 !important; border: 1px solid var(--linea) !important;
+    background: var(--plano) !important; font-size: .88rem !important;
+    padding: .7rem .85rem !important;
+  }
+  .stTextInput input:focus {
+    border-color: var(--ink) !important; box-shadow: none !important;
+  }
 
   /* ---------- Texto largo ---------- */
   .prosa { font-size: .89rem; color: var(--ink-2); line-height: 1.68;
@@ -338,6 +393,15 @@ def metricas():
     return m
 
 
+@st.cache_data
+def resumen_firma():
+    ruta = os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")
+    if not os.path.exists(ruta):
+        return None
+    with open(ruta) as fh:
+        return json.load(fh)
+
+
 def dec(v, n=3):
     return f"{v:.{n}f}".replace(".", ",")
 
@@ -380,21 +444,25 @@ cliente = Groq(api_key=_clave) if hay_clave else None
 # --------------------------------------------------------------------------
 # Portada
 # --------------------------------------------------------------------------
+rf_portada = resumen_firma()
 st.markdown(f"""
 <div class="portada">
   <div class="filete"></div>
   <div class="kicker">Trabajo de Fin de Máster · Bioinformática · UAX</div>
-  <h1>Auditoría de reproducibilidad de firmas transcriptómicas</h1>
-  <p class="entradilla">El objetivo no es proponer biomarcadores de cáncer de
-  pulmón. Es caracterizar de qué formas concretas fallan —&nbsp;sin emitir ningún
-  error&nbsp;— los <em>pipelines</em> que los derivan de repositorios públicos, y
-  qué controles los detectan.</p>
+  <h1>Framework transcriptómico basado en la integración de modelos de
+  lenguaje y aprendizaje automático para la identificación de biomarcadores
+  en cáncer de pulmón</h1>
+  <p class="entradilla">Pipeline automatizado que descarga cohortes de NCBI GEO,
+  cura los metadatos clínicos con un modelo de lenguaje, entrena clasificadores
+  supervisados y ejecuta los controles necesarios para separar la señal
+  biológica de los artefactos técnicos. El resultado es una firma génica
+  replicada en tres cohortes independientes.</p>
   <div class="pie">
     <div><b>{m.get('n_cohortes', 0)}</b>cohortes GEO</div>
     <div><b>{m.get('n_muestras', 0)}</b>muestras</div>
-    <div><b>5</b>hipótesis pre-registradas</div>
-    <div><b>3 / 2</b>confirmadas / no</div>
-    <div><b>4</b>modos de fallo silencioso</div>
+    <div><b>{rf_portada['n_genes_validados'] if rf_portada else '—'}</b>genes validados</div>
+    <div><b>{rf_portada['panel_minimo'] if rf_portada else '—'}</b>panel mínimo</div>
+    <div><b>{dec(m.get('auc', 0))}</b>AUC media LODO</div>
     <div style="margin-left:auto;align-self:flex-end">Daniel Tapia Díez</div>
   </div>
 </div>
@@ -441,72 +509,169 @@ with st.sidebar:
 
 
 # --------------------------------------------------------------------------
-t_chat, t_res, t_aud, t_met = st.tabs(
-    ["Asistente", "Resultados", "Integridad de los datos", "Metodología"])
+# Asistente (siempre visible, sobre las pestanas)
+# --------------------------------------------------------------------------
+SUGERENCIAS = [
+    "¿Qué rendimiento real tiene el clasificador tumor frente a sano?",
+    "¿Qué pasó con SLC6A4 y los genes de la firma original?",
+    "¿Por qué tres cohortes no son evaluables como test?",
+    "¿Qué hipótesis no se confirmaron y por qué?",
+    "¿Qué mide realmente la firma de consenso?",
+    "Explica el bug de desalineamiento de GSE30219.",
+]
 
+if "mensajes" not in st.session_state:
+    st.session_state.mensajes = []
 
-# ---------- Asistente ------------------------------------------------------
-with t_chat:
-    st.markdown("""<div class="nota">
-    Responde <b>únicamente</b> con lo que figura en los resultados del trabajo; si
-    algo no está, lo dice. <b>No proporciona consejo médico ni diagnóstico</b>, y
-    la firma estudiada no está validada para uso clínico.
-    </div>""", unsafe_allow_html=True)
+pendiente = st.session_state.pop("pendiente", None)
 
-    SUGERENCIAS = [
-        "¿Qué rendimiento real tiene el clasificador tumor frente a sano?",
-        "¿Qué pasó con SLC6A4 y los genes de la firma original?",
-        "¿Por qué tres cohortes no son evaluables como test?",
-        "¿Qué hipótesis no se confirmaron y por qué?",
-        "¿Qué mide realmente la firma de consenso?",
-        "Explica el bug de desalineamiento de GSE30219.",
-    ]
+st.markdown('<div class="chat-panel">', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="chat-cab">
+  <div class="av">◫</div>
+  <div class="id">
+    <div class="nombre">Asistente del trabajo</div>
+    <div class="estado">{'En línea · ' + MODELO if hay_clave else 'Sin clave API'}</div>
+  </div>
+</div>
+<p class="chat-aviso">Responde <b>únicamente</b> con lo que figura en los
+resultados del trabajo; si algo no está, lo dice. <b>No proporciona consejo
+médico ni diagnóstico</b>, y la firma estudiada no está validada para uso
+clínico.</p>
+""", unsafe_allow_html=True)
 
-    if "mensajes" not in st.session_state:
-        st.session_state.mensajes = []
-
-    pendiente = st.session_state.pop("pendiente", None)
-
-    if not st.session_state.mensajes and not pendiente:
-        st.markdown('<p class="lat-tit">Por dónde empezar</p>',
-                    unsafe_allow_html=True)
-        cols = st.columns(3, gap="small")
-        for i, sug in enumerate(SUGERENCIAS):
-            if cols[i % 3].button(sug, key=f"sug{i}", use_container_width=True):
-                st.session_state.pendiente = sug
-                st.rerun()
-
-    for msg in st.session_state.mensajes:
-        avatar = "◫" if msg["role"] == "assistant" else "▪"
-        with st.chat_message(msg["role"], avatar=avatar):
-            st.markdown(msg["content"])
-
-    entrada = st.chat_input("Consulta sobre los resultados…", disabled=not hay_clave)
-    pregunta = pendiente or entrada
-
-    if pregunta:
-        st.session_state.mensajes.append({"role": "user", "content": pregunta})
-        with st.chat_message("user", avatar="▪"):
-            st.markdown(pregunta)
-        with st.chat_message("assistant", avatar="◫"):
-            try:
-                flujo = cliente.chat.completions.create(
-                    messages=([{"role": "system", "content": sistema}]
-                              + st.session_state.mensajes[-12:]),
-                    model=MODELO, temperature=0.0, max_tokens=900, stream=True,
-                )
-                texto = st.write_stream(
-                    t.choices[0].delta.content or "" for t in flujo)
-                st.session_state.mensajes.append(
-                    {"role": "assistant", "content": texto})
-            except Exception as e:
-                st.error(f"Error al consultar el modelo: {e}")
-                st.session_state.mensajes.pop()
-
-    if st.session_state.mensajes:
-        if st.button("Limpiar conversación"):
-            st.session_state.mensajes = []
+if not st.session_state.mensajes and not pendiente:
+    st.markdown('<p class="chat-sug-tit">Por dónde empezar</p>',
+                unsafe_allow_html=True)
+    cols = st.columns(3, gap="small")
+    for i, sug in enumerate(SUGERENCIAS):
+        if cols[i % 3].button(sug, key=f"sug{i}", use_container_width=True):
+            st.session_state.pendiente = sug
             st.rerun()
+
+for msg in st.session_state.mensajes:
+    avatar = "◫" if msg["role"] == "assistant" else "▪"
+    with st.chat_message(msg["role"], avatar=avatar):
+        st.markdown(msg["content"])
+
+with st.form("form_chat", clear_on_submit=True):
+    col_txt, col_btn = st.columns([9, 1], gap="small")
+    with col_txt:
+        entrada = st.text_input(
+            "Escribe tu consulta sobre el trabajo…",
+            placeholder=("Escribe tu consulta sobre el trabajo…" if hay_clave
+                         else "Sin clave API: el asistente está deshabilitado"),
+            label_visibility="collapsed",
+            disabled=not hay_clave,
+        )
+    with col_btn:
+        enviar = st.form_submit_button("Enviar", use_container_width=True,
+                                       disabled=not hay_clave)
+
+pregunta = pendiente or (entrada if enviar else None)
+
+if pregunta:
+    st.session_state.mensajes.append({"role": "user", "content": pregunta})
+    with st.chat_message("user", avatar="▪"):
+        st.markdown(pregunta)
+    with st.chat_message("assistant", avatar="◫"):
+        try:
+            flujo = cliente.chat.completions.create(
+                messages=([{"role": "system", "content": sistema}]
+                          + st.session_state.mensajes[-12:]),
+                model=MODELO, temperature=0.0, max_tokens=900, stream=True,
+            )
+            texto = st.write_stream(
+                t.choices[0].delta.content or "" for t in flujo)
+            st.session_state.mensajes.append(
+                {"role": "assistant", "content": texto})
+        except Exception as e:
+            st.error(f"Error al consultar el modelo: {e}")
+            st.session_state.mensajes.pop()
+
+if st.session_state.mensajes:
+    if st.button("Limpiar conversación"):
+        st.session_state.mensajes = []
+        st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --------------------------------------------------------------------------
+# Capitulos de la memoria
+# --------------------------------------------------------------------------
+t_intro, t_met, t_res, t_con = st.tabs(
+    ["Introducción y objetivos", "Metodología", "Resultados", "Conclusiones"])
+
+
+# ---------- Introduccion y objetivos --------------------------------------
+with t_intro:
+    seccion("I", "Contexto y motivación",
+            "El cáncer de pulmón es la primera causa de mortalidad oncológica en el "
+            "mundo. Su heterogeneidad histológica y molecular hace que la búsqueda "
+            "de biomarcadores transcriptómicos sea un problema abierto, con firmas "
+            "propuestas cuya replicación entre cohortes independientes es la "
+            "excepción, no la regla.")
+
+    st.markdown("""<div class="prosa">
+<p>La base de datos NCBI GEO reúne cientos de estudios de expresión génica en
+cáncer de pulmón, obtenidos con plataformas distintas, protocolos distintos y
+metadatos clínicos redactados en texto libre. Integrarlos manualmente es
+inviable; automatizar la integración es factible, pero deja modos de fallo
+—muestras mal etiquetadas, cohortes que no comparan casos con controles,
+métricas infladas por composición de clases— que ningún error de ejecución
+delata.</p>
+
+<p>Este trabajo desarrolla un framework que automatiza el análisis y añade la
+capa de comprobaciones que separa la señal biológica del artefacto técnico.
+La combinación de tres elementos —modelo de lenguaje para curar los
+metadatos, aprendizaje automático para modelar la expresión y análisis
+estadístico clásico para validar— produce una firma génica cuya replicación
+puede sostenerse en tres cohortes independientes.</p>
+</div>""", unsafe_allow_html=True)
+
+    seccion("II", "Objetivo general",
+            "Diseñar un framework reproducible, y no una colección de scripts, que "
+            "integre los pasos habituales del análisis transcriptómico y añada los "
+            "controles metodológicos necesarios para que la firma de biomarcadores "
+            "resultante sea replicable.")
+
+    seccion("III", "Objetivos específicos")
+    st.markdown("""<div class="prosa">
+<ol>
+<li>Automatizar la descarga y normalización de cohortes de NCBI GEO,
+independientemente de la plataforma (microarray o RNA-seq).</li>
+<li>Emplear un modelo de lenguaje para curar los metadatos clínicos —texto
+libre— y asignar cada muestra a un grupo experimental sin intervención
+manual.</li>
+<li>Ejecutar análisis diferencial y modelos de clasificación supervisada con
+validación externa <em>Leave-One-Dataset-Out</em> sobre las cohortes
+compatibles.</li>
+<li>Diseñar y aplicar cuatro controles automáticos —alineamiento por
+identificador, composición tisular, estabilidad de la firma sobre particiones
+disjuntas, validación externa contra marcadores clínicos de referencia— para
+detectar los modos de fallo silencioso característicos de este tipo de
+análisis.</li>
+<li>Publicar la firma génica resultante, su panel mínimo replicable y un
+asistente conversacional que permita consultar los resultados sin necesidad
+de manipular los datos brutos.</li>
+</ol>
+</div>""", unsafe_allow_html=True)
+
+    seccion("IV", "Datos", "Cohortes públicas de NCBI GEO integradas en el análisis.")
+    if (a := tabla("AUDITORIA_COHORTES.csv")) is not None:
+        st.dataframe(
+            a[["Cohorte", "Plataforma", "N_Total", "N_Sano", "N_Enfermo",
+               "Tasa_Exito_Curacion", "Evaluable_Como_Test"]],
+            use_container_width=True, hide_index=True,
+            column_config={
+                "N_Total": st.column_config.NumberColumn("Muestras"),
+                "N_Sano": st.column_config.NumberColumn("Sanas"),
+                "N_Enfermo": st.column_config.NumberColumn("Enfermas"),
+                "Tasa_Exito_Curacion": st.column_config.ProgressColumn(
+                    "Curación LLM", min_value=0, max_value=1, format="%.2f"),
+                "Evaluable_Como_Test": st.column_config.CheckboxColumn("Evaluable"),
+            })
 
 
 # ---------- Resultados -----------------------------------------------------
@@ -540,7 +705,7 @@ with t_res:
     </div>
     """, unsafe_allow_html=True)
 
-    seccion("I", "Las cinco hipótesis",
+    seccion("I", "Rendimiento y hipótesis pre-registradas",
             "Cada análisis fijó su hipótesis y su umbral antes de ejecutarse. Dos "
             "no se confirmaron y se reportan como resultaron; los umbrales no se "
             "modificaron a posteriori.")
@@ -610,13 +775,10 @@ with t_res:
         with st.expander("Tabla completa de validación LODO"):
             st.dataframe(d, use_container_width=True, hide_index=True)
 
-
-# ---------- Integridad -----------------------------------------------------
-with t_aud:
-    seccion("III", "Cuatro modos de fallo silencioso",
-            "Los cuatro comparten el rasgo que los hace peligrosos: ninguno "
-            "interrumpe la ejecución. El <em>pipeline</em> termina, escribe sus "
-            "ficheros y produce tablas de aspecto correcto.")
+    seccion("III", "Integridad de los datos",
+            "Cuatro modos de fallo, ninguno con error en ejecución: el pipeline "
+            "termina, escribe sus ficheros y produce tablas de aspecto correcto. "
+            "Los controles del framework los identifican antes de interpretar nada.")
 
     if (a := tabla("AUDITORIA_COHORTES.csv")) is not None:
         st.dataframe(
@@ -640,19 +802,97 @@ with t_aud:
     st.markdown("""<div class="nota" style="margin-top:1.6rem">
     <b>El desalineamiento como fallo indistinguible.</b> En GSE30219 las 307
     columnas de la matriz están en orden distinto a las filas del metadata.
-    Asignar la etiqueta por posición adjudica a cada muestra los datos clínicos de
-    otro paciente. Efecto medido: el clasificador de subtipo daba AUC <b>0,56</b>
-    con el bug y <b>0,99</b> tras corregirlo, con los mismos datos y el mismo
-    modelo. Un AUC de 0,56 es indistinguible de una ausencia genuina de señal;
-    solo la comparación con marcadores de referencia externos lo reveló.
+    Asignar la etiqueta por posición adjudica a cada muestra los datos clínicos
+    de otro paciente. Efecto medido: el clasificador de subtipo daba AUC
+    <b>0,56</b> con el bug y <b>0,99</b> tras corregirlo, con los mismos datos
+    y el mismo modelo. Un AUC de 0,56 es indistinguible de una ausencia genuina
+    de señal; solo la comparación con marcadores de referencia externos lo
+    reveló.
     </div>""", unsafe_allow_html=True)
+
+    seccion("IV", "La firma validada",
+            "Un gen entra en la firma si mantiene el mismo signo de cambio, con "
+            "tamaño de efecto suficiente (d de Cohen), en las tres cohortes "
+            "independientes. Ningún gen se elige por su nombre ni por su función "
+            "conocida.")
+
+    rf = resumen_firma()
+    if rf is not None:
+        st.markdown(f"""
+        <div class="cifras">
+          <div class="cifra acento-azul">
+            <div class="rotulo">Genes validados</div>
+            <div class="valor">{rf['n_genes_validados']}</div>
+            <div class="glosa">de {rf['n_genes_evaluados']} evaluados
+            ({dec(rf['pct_genes_validados'], 1)} %) en
+            {rf['n_cohortes_independientes']} cohortes independientes.</div>
+          </div>
+          <div class="cifra acento-nar">
+            <div class="rotulo">Panel mínimo</div>
+            <div class="valor">{rf['panel_minimo']}</div>
+            <div class="glosa">genes bastan para AUC
+            {dec(rf['auc_panel_minimo'])}, frente a
+            {dec(rf['auc_firma_completa'])} con la firma completa.</div>
+          </div>
+          <div class="cifra acento-neutro">
+            <div class="rotulo">Marcadores IHC recuperados</div>
+            <div class="valor">{sum(rf['ihc_recuperados'].values())}<span class="u"> / {sum(rf['ihc_total'].values())}</span></div>
+            <div class="glosa">marcadores de inmunohistoquímica clínica que el
+            framework recupera sin conocerlos de antemano.</div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    top60 = tabla("FIRMA_VALIDADA_TOP60.csv")
+    completa = tabla("FIRMA_VALIDADA_COMPLETA.csv")
+
+    if completa is not None:
+        gen = st.text_input(
+            "Consultar un gen de la firma",
+            placeholder="p. ej. DSG3, KRT5, EGFR…",
+        ).strip().upper()
+
+        if gen:
+            filaC = completa[completa["ID_REF"] == gen]
+            fila60 = (top60[top60["ID_REF"] == gen]
+                      if top60 is not None else top60)
+            if filaC.empty:
+                st.warning(
+                    f"**{gen}** no supera el criterio de replicación en las tres "
+                    f"cohortes independientes (o no se evaluó en este análisis): "
+                    f"no forma parte de la firma validada.")
+            else:
+                r = filaC.iloc[0]
+                cols_coh = [c for c in completa.columns if c.startswith("GSE")]
+                efectos = "  ·  ".join(f"{c}: d={dec(r[c])}" for c in cols_coh)
+                if fila60 is not None and not fila60.empty:
+                    r60 = fila60.iloc[0]
+                    panel = rf["panel_minimo"] if rf else "—"
+                    st.success(
+                        f"**{gen}** — rango {int(r60['Rango'])} de la firma "
+                        f"validada. Dirección: {r['Direccion']}. {efectos}.  \n"
+                        f"{'Está' if r60['En_Panel_Minimo'] else 'No está'} en el "
+                        f"panel mínimo de {panel} genes. "
+                        f"{'Coincide' if r60['Marcador_IHC_Clinica'] else 'No coincide'} "
+                        f"con un marcador de referencia de inmunohistoquímica clínica.")
+                else:
+                    st.info(
+                        f"**{gen}** está entre los {rf['n_genes_validados'] if rf else ''} "
+                        f"genes validados, fuera del top 60 mostrado abajo. "
+                        f"Dirección: {r['Direccion']}. {efectos}.")
+
+        if top60 is not None:
+            with st.expander("Top 60 de la firma validada"):
+                st.dataframe(top60, use_container_width=True, hide_index=True)
 
 
 # ---------- Metodología ----------------------------------------------------
 with t_met:
-    seccion("IV", "Metodología")
+    seccion("I", "Pipeline",
+            "Ocho pasos secuenciales; cada uno vive en un módulo del paquete "
+            "tfm/ o del directorio agentes/, y se ejecuta desde el orquestador "
+            "o de forma aislada.")
     st.markdown("""<div class="prosa">
-<h4>Pipeline</h4>
 <ol>
 <li>Descarga de NCBI GEO con <code>GEOparse</code>; mapeo de sondas a símbolos génicos.</li>
 <li>Normalización log2 y por cuantiles <b>dentro de cada estudio</b>.</li>
@@ -664,22 +904,98 @@ with t_met:
 <li><code>random_state</code> fijado en todos los modelos: dos ejecuciones producen
 resultados idénticos.</li>
 </ol>
+</div>""", unsafe_allow_html=True)
 
-<h4>Sobre el efecto lote</h4>
+    seccion("II", "Curación clínica con modelo de lenguaje",
+            "Los metadatos clínicos vienen en texto libre. Llama 3.3-70b (vía "
+            "Groq) traduce cada muestra a una etiqueta binaria de grupo "
+            "experimental; la tasa de éxito se registra por cohorte y se "
+            "descartan los estudios donde la curación colapsa.")
+
+    seccion("III", "Sobre el efecto lote")
+    st.markdown("""<div class="prosa">
 <p>No existe corrección de lote en el <em>pipeline</em>, solo normalización dentro
 de estudio. LODO no corrige el efecto lote: lo <b>mide</b>. Presentarlo como
-mecanismo de superación del <em>batch effect</em> es un error conceptual que la
-versión previa de la memoria contenía.</p>
+mecanismo de superación del <em>batch effect</em> sería un error conceptual;
+las diferencias entre cohortes se cuantifican, no se ocultan.</p>
+</div>""", unsafe_allow_html=True)
 
-<h4>Sobre la paleta de las figuras</h4>
+    seccion("IV", "Sobre la paleta de las figuras")
+    st.markdown("""<div class="prosa">
 <p>Los colores se comprobaron con un validador de accesibilidad en modo claro y
 oscuro. El resultado condicionó el diseño: el par verde–rojo, habitual para
 «cumple / no cumple», da una separación de solo ΔE&nbsp;4,1 en deuteranopía y fue
 descartado. Las oposiciones usan la pareja divergente azul–rojo (ΔE&nbsp;23,8), y
 ninguna figura se apoya en el color en solitario: todas llevan leyenda o etiquetas
 directas.</p>
+</div>""", unsafe_allow_html=True)
 
-<h4>Seis controles recomendados</h4>
+    seccion("V", "Reproducir los resultados",
+            "Todos los CSV y figuras que se muestran en Resultados se generan "
+            "con estos comandos, en este orden, desde la raíz del proyecto.")
+    st.code("""python agentes/paso14_auditoria_datos.py
+python agentes/paso15_lodo_honesto.py
+python agentes/paso16_composicion_vs_biologia.py
+python agentes/paso17_falacia_folds.py
+python agentes/paso13_subtipo_lodo.py
+python agentes/paso18_subtipo_casos_dificiles.py
+python agentes/paso19_firma_validada.py
+python agentes/generar_figuras_auditoria.py
+python agentes/generar_tablas_latex.py""", language="bash")
+
+
+# ---------- Conclusiones ---------------------------------------------------
+with t_con:
+    seccion("I", "Qué demuestra el framework",
+            "La combinación de curación por LLM, modelos de clasificación con "
+            "validación externa y controles metodológicos produce una firma "
+            "génica cuya replicación puede sostenerse en cohortes que no "
+            "participaron en su construcción.")
+    rf = resumen_firma()
+    if rf is not None:
+        st.markdown(f"""<div class="prosa">
+<ul>
+<li><b>{rf['n_genes_validados']} genes</b> mantienen el mismo signo de cambio,
+con tamaño de efecto suficiente, en las
+{rf['n_cohortes_independientes']} cohortes independientes; el
+<b>{sum(rf['ihc_recuperados'].values())} de {sum(rf['ihc_total'].values())}</b>
+de los marcadores clínicos de inmunohistoquímica se recupera sin haber sido
+declarado.</li>
+<li>Un <b>panel mínimo de {rf['panel_minimo']} genes</b> conserva AUC
+{dec(rf['auc_panel_minimo'])} frente a {dec(rf['auc_firma_completa'])} de la
+firma completa: la señal biológica se concentra en pocas variables.</li>
+<li>La validación LODO reporta AUC <b>{dec(m.get('auc', 0))}</b> con
+balanced accuracy <b>{dec(m.get('bal_acc', 0))}</b>: la firma ordena bien,
+aunque el umbral de decisión no transfiere entre cohortes.</li>
+</ul>
+</div>""", unsafe_allow_html=True)
+
+    seccion("II", "Qué limitaciones se detectaron",
+            "Los controles del framework identifican tres modos de fallo que "
+            "en un pipeline sin ellos habrían pasado inadvertidos.")
+    st.markdown(f"""<div class="prosa">
+<ul>
+<li><b>Desalineamiento silencioso.</b> GSE30219 llevaba las columnas de la
+matriz en orden distinto a las filas del metadata; asignar por posición daba
+AUC 0,56 y por identificador daba 0,99. Sin comparación externa contra
+marcadores clínicos, el fallo era indistinguible de ausencia de señal.</li>
+<li><b>Composición tisular como confusor parcial.</b> Al umbral pre-registrado
+|ρ| &gt; 0,7 no se confirmó la hipótesis (ρ medio = {dec(m.get('rho', 0))}),
+pero {m.get('n_rho_sup', 0)} de {m.get('n_rho', 0)} cohortes lo superan
+individualmente: la composición explica una fracción de la señal sin
+agotarla.</li>
+<li><b>Estabilidad aparente.</b> Parejas de <em>folds</em> LODO que comparten
+el 98 % del entrenamiento concuerdan al {dec(m.get('conc_lodo', 0), 1)} %;
+mitades disjuntas de tamaño comparable, al {dec(m.get('conc_disj', 0), 2)} %.
+La estabilidad medida sobre <em>folds</em> solapados sobrestima la
+reproducibilidad real.</li>
+</ul>
+</div>""", unsafe_allow_html=True)
+
+    seccion("III", "Seis controles recomendados",
+            "Contribución metodológica extraíble para trabajos análogos, "
+            "independientemente del dominio biológico concreto.")
+    st.markdown("""<div class="prosa">
 <ol>
 <li>Alinear muestras y metadatos por identificador explícito, nunca por posición.</li>
 <li>Validar contra marcadores biológicos conocidos antes de interpretar nada.</li>
@@ -691,12 +1007,14 @@ excluir explícitamente las cohortes de una sola clase.</li>
 </ol>
 </div>""", unsafe_allow_html=True)
 
-    st.markdown('<div class="lamina-tit">Reproducir</div>', unsafe_allow_html=True)
-    st.code("""python agentes/paso14_auditoria_datos.py
-python agentes/paso15_lodo_honesto.py
-python agentes/paso16_composicion_vs_biologia.py
-python agentes/paso17_falacia_folds.py
-python agentes/paso13_subtipo_lodo.py
-python agentes/paso18_subtipo_casos_dificiles.py
-python agentes/generar_figuras_auditoria.py
-python agentes/generar_tablas_latex.py""", language="bash")
+    seccion("IV", "Trabajo futuro")
+    st.markdown("""<div class="prosa">
+<ul>
+<li>Validación prospectiva del panel mínimo sobre una cohorte independiente
+no incluida en la construcción de la firma.</li>
+<li>Ampliación del framework a otras patologías oncológicas con la misma
+estructura de pipeline y sistema de controles.</li>
+<li>Sustitución del modelo de lenguaje por variantes locales, para que la
+curación de metadatos no dependa de una API externa.</li>
+</ul>
+</div>""", unsafe_allow_html=True)
