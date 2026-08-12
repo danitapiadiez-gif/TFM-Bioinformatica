@@ -57,25 +57,32 @@ st.markdown(
      Usa div (no pre) porque Streamlit sanea <pre>. */
   .terminal-bg {
     position: fixed; inset: 0;
-    padding: 6vh 4vw;
-    font-family: var(--mono); font-size: 11px; line-height: 1.55;
-    color: var(--verde);
-    opacity: .11;
+    padding: 1.4vh 2.5vw;
+    font-family: var(--mono); font-size: 10.5px; line-height: 1.55;
+    color: #1c8a3f;
+    opacity: .32;
     pointer-events: none;
     z-index: 0;
     overflow: hidden;
     white-space: pre;
     -webkit-mask-image: linear-gradient(to bottom,
-      transparent 0%, black 18%, black 82%, transparent 100%);
+      transparent 0%, black 4%, black 100%);
     mask-image: linear-gradient(to bottom,
-      transparent 0%, black 18%, black 82%, transparent 100%);
+      transparent 0%, black 4%, black 100%);
   }
   .portada, div[data-testid="stPageLink"], .pie {
     position: relative; z-index: 2;
   }
+  /* Tokens del terminal (coloreados desde el generador de lineas). */
+  .terminal-bg .ts   { color: #4a7355; opacity: .70; }
+  .terminal-bg .gse  { color: #2d8fb8; }
+  .terminal-bg .num  { color: #c78a1e; }
+  .terminal-bg .tag  { color: #2fa15c; font-weight: 500; }
+  .terminal-bg .ok   { color: #3fbf5f; font-weight: 500; }
+  .terminal-bg .dim  { color: #5a7a63; }
   .terminal-bg .cur {
     display: inline-block; width: 7px; height: 12px;
-    background: var(--verde); vertical-align: -1px;
+    background: #3fbf5f; vertical-align: -1px;
     animation: parpadeo 1s steps(2) infinite;
   }
   @keyframes parpadeo { 50% { opacity: 0; } }
@@ -191,65 +198,105 @@ components.html(
       const bg = doc.getElementById("terminal-bg");
       if (bg && !bg.dataset.started) {
         bg.dataset.started = "1";
-        const lineas = [
-          "$ python -m tfm ejecutar tumor_vs_sano",
-          "[00:00:01] loading GSE118370  · 78 samples · GPL570",
-          "[00:00:02] loading GSE18842   · 91 samples · GPL570",
-          "[00:00:04] loading GSE19188   · 156 samples · GPL570",
-          "[00:00:06] loading GSE19804   · 120 samples · GPL570",
-          "[00:00:08] loading GSE23066   · 10 samples · GPL570",
-          "[00:00:10] loading GSE30219   · 307 samples · GPL570",
-          "[00:00:12] loading GSE31210   · 246 samples · GPL570",
-          "[00:00:15] loading GSE40791   · 194 samples · GPL570",
-          "[00:00:16] loading GSE50081   · 181 samples · GPL570",
-          "[00:00:18] aligning by geo_accession · integrity: ok",
-          "[00:00:20] mapping probes  → gene symbols · 22,883 probes",
-          "[00:00:23] llama-3.3-70b · curating clinical metadata...",
-          "[00:00:26] matched 1,397/1,637 samples · sano | enfermo",
-          "[00:00:29] differential expression · Welch t-test · FDR<0.05",
-          "[00:00:31] selected 217 significant genes per cohort",
-          "[00:00:33] training LogisticL1 · RandomForest · SVM",
-          "[00:00:38] LODO fold 1/8: AUC=0.943 · bal_acc=0.821",
-          "[00:00:41] LODO fold 2/8: AUC=0.887 · bal_acc=0.762",
-          "[00:00:44] LODO fold 3/8: AUC=0.951 · bal_acc=0.808",
-          "[00:00:47] LODO fold 4/8: AUC=0.929 · bal_acc=0.774",
-          "[00:00:50] LODO fold 5/8: AUC=0.910 · bal_acc=0.751",
-          "[00:00:53] LODO fold 6/8: AUC=0.968 · bal_acc=0.792",
-          "[00:00:56] gene DSG3   replicates · d=4.88 · 2.57 · 5.08 · escamoso",
-          "[00:00:58] gene KRT5   replicates · d=6.06 · 2.46 · 3.38 · escamoso",
-          "[00:00:59] gene CALML3 replicates · d=3.73 · 2.37 · 2.84 · escamoso",
-          "[00:01:01] gene NAPSA  replicates · d=-3.28 · -2.94 · -3.61 · adeno",
-          "[00:01:03] gene TP63   replicates · d=5.14 · 3.02 · 3.87 · escamoso",
-          "[00:01:05] gene SFTPC  replicates · d=-4.11 · -3.66 · -4.02 · adeno",
-          "[00:01:07] 1,174 genes validated across 3 independent cohorts",
-          "[00:01:09] minimum panel: 20 genes · AUC=0.966 · bal_acc=0.938",
-          "[00:01:11] IHC clinical markers recovered: 18/20",
-          "[00:01:12] writing FIRMA_VALIDADA_TOP60.csv",
-          "[00:01:13] writing FIRMA_VALIDADA_COMPLETA.csv",
-          "[00:01:14] writing FIRMA_VALIDADA_RESUMEN.json",
-          "[00:01:15] ✓ done",
-          ""
-        ];
-        let idx = 0, maxLineas = 32;
-        function agregar() {
-          if (idx >= lineas.length) {
-            setTimeout(() => {
-              bg.innerHTML = "";
-              idx = 0;
-              agregar();
-            }, 4500);
-            return;
-          }
-          const linea = lineas[idx++];
-          const cur = '<span class="cur"></span>';
-          const actual = bg.innerHTML.replace(cur, "");
-          bg.innerHTML = actual + linea + " " + cur + "\\n";
-          const partes = bg.innerHTML.split("\\n");
-          if (partes.length > maxLineas)
-            bg.innerHTML = partes.slice(-maxLineas).join("\\n");
-          setTimeout(agregar, 300 + Math.random() * 500);
+        const gses = ["GSE118370","GSE18842","GSE19188","GSE19804",
+          "GSE23066","GSE30219","GSE31210","GSE40791","GSE50081","GSE7670"];
+        const genesEsc = ["DSG3","KRT5","KRT6B","CALML3","PKP1","FAT2",
+          "DAPL1","TRIM29","CLCA2","DSC3","TP63","KRT14","S100A2","SPRR3"];
+        const genesAdeno = ["NAPSA","SFTPC","SFTPB","SFTA2","MUC1","ABCA3",
+          "CLDN18","LMO3","FOXA2","NKX2-1"];
+        const nSam = {"GSE118370":78,"GSE18842":91,"GSE19188":156,
+          "GSE19804":120,"GSE23066":10,"GSE30219":307,"GSE31210":246,
+          "GSE40791":194,"GSE50081":181,"GSE7670":66};
+
+        function ts(s) {
+          const m = String(Math.floor(s/60)).padStart(2,"0");
+          const ss = String(s%60).padStart(2,"0");
+          return '<span class="ts">[00:' + m + ':' + ss + ']</span>';
         }
-        agregar();
+        function rnd(a) { return a[Math.floor(Math.random()*a.length)]; }
+        function d() { return (Math.random()*4 + 2).toFixed(2); }
+        function auc() { return (0.85 + Math.random()*0.13).toFixed(3); }
+        function bal() { return (0.72 + Math.random()*0.15).toFixed(3); }
+        function G(x) { return '<span class="gse">' + x + '</span>'; }
+        function N(x) { return '<span class="num">' + x + '</span>'; }
+        function T(x) { return '<span class="tag">' + x + '</span>'; }
+        function OK(x){ return '<span class="ok">'  + x + '</span>'; }
+
+        let t = 0;
+        function siguienteLinea() {
+          t += Math.floor(Math.random()*3) + 1;
+          const c = Math.random();
+          if (c < 0.30) {
+            const g = rnd(gses);
+            return ts(t) + " loading " + G(g.padEnd(9))
+              + " · " + N(String(nSam[g]).padStart(3))
+              + " samples · GPL570";
+          } else if (c < 0.42) {
+            const g = rnd(gses);
+            return ts(t) + " aligning " + G(g)
+              + " by geo_accession · integrity: " + OK("ok");
+          } else if (c < 0.52) {
+            return ts(t) + " " + T("llama-3.3-70b")
+              + " · curating clinical metadata...";
+          } else if (c < 0.62) {
+            const n = Math.floor(Math.random()*300)+800;
+            return ts(t) + " matched " + N(n) + "/"
+              + N(n + Math.floor(Math.random()*20))
+              + " samples · sano | enfermo";
+          } else if (c < 0.72) {
+            const g = rnd(gses);
+            const n = Math.floor(Math.random()*400)+50;
+            return ts(t) + " " + G(g)
+              + " · Welch t-test + FDR<0.05 · " + N(n) + " significant";
+          } else if (c < 0.85) {
+            const fold = Math.floor(Math.random()*8)+1;
+            return ts(t) + " " + T("LODO fold " + fold + "/8")
+              + ": AUC=" + N(auc()) + " · bal_acc=" + N(bal());
+          } else if (c < 0.95) {
+            const escamoso = Math.random() < 0.55;
+            const g = rnd(escamoso ? genesEsc : genesAdeno);
+            const sig = escamoso ? "" : "-";
+            return ts(t) + " gene " + T(g.padEnd(7))
+              + " replicates · d=" + N(sig + d())
+              + " · " + N(sig + d()) + " · " + N(sig + d())
+              + " · " + (escamoso ? "escamoso" : "adeno");
+          } else {
+            const opciones = [
+              " " + N("1,174") + " genes validated across 3 independent cohorts",
+              " minimum panel: " + N("20") + " genes · AUC=" + N("0.966")
+                + " · bal_acc=" + N("0.938"),
+              " IHC clinical markers recovered: " + N("18") + "/" + N("20"),
+              " writing " + T("FIRMA_VALIDADA_TOP60.csv"),
+              " writing " + T("FIRMA_VALIDADA_RESUMEN.json"),
+              " " + OK("✓ pipeline done") + " · reset",
+              " $ python -m tfm ejecutar " + T("tumor_vs_sano")
+            ];
+            if (Math.random() < 0.15) t = 0;
+            return ts(t) + rnd(opciones);
+          }
+        }
+
+        // filas maximas segun viewport (line-height ~17px + padding)
+        const filasMax = () => Math.max(24,
+          Math.floor((window.parent.innerHeight - 40) / 17));
+
+        // Pre-carga instantanea para que la pantalla se vea llena desde
+        // el primer instante, en vez de ir goteando durante 20 segundos.
+        const cur = '<span class="cur"></span>';
+        const inicio = [];
+        for (let i = 0; i < filasMax() - 1; i++) inicio.push(siguienteLinea());
+        bg.innerHTML = inicio.join("\\n") + " " + cur;
+
+        function agregar() {
+          const actual = bg.innerHTML.replace(cur, "");
+          bg.innerHTML = actual + "\\n" + siguienteLinea() + " " + cur;
+          const partes = bg.innerHTML.split("\\n");
+          const max = filasMax();
+          if (partes.length > max)
+            bg.innerHTML = partes.slice(-max).join("\\n");
+          setTimeout(agregar, 350 + Math.random() * 550);
+        }
+        setTimeout(agregar, 400);
       }
     </script>
     """,
