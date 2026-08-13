@@ -525,29 +525,33 @@ with c_volver:
         st.switch_page("paso12_landing.py")
 
 rf_portada = resumen_firma()
-st.markdown(f"""
-<div class="portada">
-  <div class="filete"></div>
-  <div class="kicker">Trabajo de Fin de Máster · Bioinformática · UAX</div>
-  <h1>Framework transcriptómico basado en la integración de modelos de
-  lenguaje y aprendizaje automático para la identificación de biomarcadores
-  en cáncer de pulmón</h1>
-  <p class="entradilla">Framework de análisis transcriptómico y aprendizaje
-  automático aplicado a cáncer de pulmón. Integra cohortes públicas de NCBI
-  GEO, cura los metadatos clínicos con un modelo de lenguaje, entrena
-  clasificadores supervisados y entrega una firma génica de 1174 genes
-  replicados en cohortes independientes, con panel mínimo de 20 genes y
-  validación externa contra 18/20 marcadores de inmunohistoquímica clínica.</p>
-  <div class="pie">
-    <div><b data-count="{m.get('n_cohortes', 0)}">{m.get('n_cohortes', 0)}</b>cohortes GEO</div>
-    <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b>muestras</div>
-    <div><b data-count="{rf_portada['n_genes_validados'] if rf_portada else 0}">{rf_portada['n_genes_validados'] if rf_portada else '—'}</b>genes validados</div>
-    <div><b data-count="{rf_portada['panel_minimo'] if rf_portada else 0}">{rf_portada['panel_minimo'] if rf_portada else '—'}</b>panel mínimo</div>
-    <div><b data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</b>AUC media LODO</div>
-    <div style="margin-left:auto;align-self:flex-end">Daniel Tapia Díez</div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+# La portada del dashboard (titulo, entradilla, cifras) es la vista "inicio"
+# del menu lateral. En cualquier otro capitulo, no se muestra, para que el
+# capitulo elegido tenga la pagina para el solo.
+if st.session_state.get("capitulo", "inicio") == "inicio":
+    st.markdown(f"""
+    <div class="portada">
+      <div class="filete"></div>
+      <div class="kicker">Trabajo de Fin de Máster · Bioinformática · UAX</div>
+      <h1>Framework transcriptómico basado en la integración de modelos de
+      lenguaje y aprendizaje automático para la identificación de biomarcadores
+      en cáncer de pulmón</h1>
+      <p class="entradilla">Framework de análisis transcriptómico y aprendizaje
+      automático aplicado a cáncer de pulmón. Integra cohortes públicas de NCBI
+      GEO, cura los metadatos clínicos con un modelo de lenguaje, entrena
+      clasificadores supervisados y entrega una firma génica de 1174 genes
+      replicados en cohortes independientes, con panel mínimo de 20 genes y
+      validación externa contra 18/20 marcadores de inmunohistoquímica clínica.</p>
+      <div class="pie">
+        <div><b data-count="{m.get('n_cohortes', 0)}">{m.get('n_cohortes', 0)}</b>cohortes GEO</div>
+        <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b>muestras</div>
+        <div><b data-count="{rf_portada['n_genes_validados'] if rf_portada else 0}">{rf_portada['n_genes_validados'] if rf_portada else '—'}</b>genes validados</div>
+        <div><b data-count="{rf_portada['panel_minimo'] if rf_portada else 0}">{rf_portada['panel_minimo'] if rf_portada else '—'}</b>panel mínimo</div>
+        <div><b data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</b>AUC media LODO</div>
+        <div style="margin-left:auto;align-self:flex-end">Daniel Tapia Díez</div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Animacion de conteo para toda cifra con data-count. El HTML muestra ya el
 # valor final (por si el iframe se bloquea); este script lo lleva a 0 y lo
@@ -604,6 +608,7 @@ components.html(
 # renderiza solo la vista activa. Sustituye a st.tabs, mas discreto y con
 # el asistente como una vista mas (no fijo arriba de todo).
 CAPITULOS = [
+    ("inicio",       "Inicio"),
     ("asistente",    "Asistente"),
     ("introduccion", "Introducción y objetivos"),
     ("metodologia",  "Metodología"),
@@ -611,7 +616,7 @@ CAPITULOS = [
     ("conclusiones", "Conclusiones"),
 ]
 if "capitulo" not in st.session_state:
-    st.session_state.capitulo = "introduccion"
+    st.session_state.capitulo = "inicio"
 
 with st.sidebar:
     st.markdown(
