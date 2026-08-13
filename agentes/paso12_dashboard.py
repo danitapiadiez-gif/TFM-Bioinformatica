@@ -1057,18 +1057,28 @@ if st.session_state.capitulo == "resultados":
             "contraindicados en escamoso). El framework recupera de novo el "
             "panel diagnóstico usado en la clínica.")
 
-    st.markdown("""<div class="prosa">
-<p>Sobre 3 cohortes independientes GPL570 (388 muestras) validadas con LODO,
-el modelo alcanza <b>AUC 0,968</b> y <b>balanced accuracy 0,891</b>. Los
-<b>12 de 12 marcadores</b> usados en inmunohistoquímica diagnóstica se
-recuperan por el framework, en la dirección correcta y sin declarárselos:</p>
+    sqc_rec = rf["ihc_recuperados"]["Escamoso"] if rf else 0
+    sqc_tot = rf["ihc_total"]["Escamoso"] if rf else 0
+    adc_rec = rf["ihc_recuperados"]["Adenocarcinoma"] if rf else 0
+    adc_tot = rf["ihc_total"]["Adenocarcinoma"] if rf else 0
+    n_ihc_tot_ii = sqc_rec + adc_rec
+    st.markdown(f"""<div class="prosa">
+<p>Sobre 3 cohortes independientes GPL570 ({m.get('n_sub', 388)} muestras)
+validadas con LODO, el modelo alcanza <b>AUC {dec(m.get('auc_sub', 0))}</b>
+y <b>balanced accuracy {dec(m.get('bal_sub', 0))}</b>. De los <b>{sqc_tot + adc_tot}
+marcadores</b> usados en inmunohistoquímica diagnóstica el framework recupera
+<b>{n_ihc_tot_ii}</b>, en la dirección correcta y sin declarárselos:</p>
 
 <ul>
-<li><b>Escamoso (7/7)</b>: KRT5, KRT6A, TP63, DSG3, SOX2, PKP1, KRT14.
-Corresponden a queratinas de linaje basal, desmosomas y el factor de
-transcripción TP63.</li>
-<li><b>Adenocarcinoma (5/5)</b>: NAPSA, NKX2-1, SFTPB, SLC34A2, MUC1.
-Marcadores del programa alveolar tipo II.</li>
+<li><b>Escamoso ({sqc_rec}/{sqc_tot})</b>: KRT5, KRT6A, KRT6B, KRT13, KRT14,
+TP63, DSG3, DSC3, SOX2, PKP1, CALML3, S100A2. Queratinas de linaje basal,
+desmosomas (DSG3, DSC3, PKP1), factor de transcripción TP63 y proteínas de
+diferenciación escamosa (CALML3, S100A2).</li>
+<li><b>Adenocarcinoma ({adc_rec}/{adc_tot})</b>: NAPSA, NKX2-1, SFTPB,
+SLC34A2, MUC1, CEACAM6. Marcadores del programa alveolar tipo II y de
+diferenciación glandular. Los dos marcadores no recuperados —SFTPA1 y
+SFTPC— corresponden a proteínas del surfactante cuya expresión decae más
+en tumor que otros marcadores alveolares.</li>
 </ul>
 
 <p>El top del ranking por consenso multi-cohorte —DSG3, KRT5, CALML3, KRT6B,
@@ -1473,20 +1483,30 @@ if st.session_state.capitulo == "conclusiones":
             "y biológicamente interpretables. Se resumen aquí los grupos con "
             "mayor relevancia clínica.")
     if rf is not None:
+        _sqc_r = rf["ihc_recuperados"]["Escamoso"]
+        _sqc_t = rf["ihc_total"]["Escamoso"]
+        _adc_r = rf["ihc_recuperados"]["Adenocarcinoma"]
+        _adc_t = rf["ihc_total"]["Adenocarcinoma"]
         st.markdown(f"""<div class="prosa">
 <ul>
 <li><b>Linaje escamoso — desmosomas y queratinas basales</b>: DSG3, DSC3,
-PKP1 (desmosomas), KRT5, KRT6A, KRT6B, KRT14 (queratinas de célula basal) y
-TP63 (factor de transcripción maestro). Coincide con el panel diagnóstico
-usado en inmunohistoquímica clínica (7/7 marcadores escamosos recuperados).</li>
+PKP1 (desmosomas), KRT5, KRT6A, KRT6B, KRT13, KRT14 (queratinas de célula
+basal), TP63 (factor de transcripción maestro), SOX2, CALML3 y S100A2
+(diferenciación escamosa). Coincide con el panel diagnóstico usado en
+inmunohistoquímica clínica ({_sqc_r}/{_sqc_t} marcadores escamosos
+recuperados).</li>
 <li><b>Linaje adenocarcinoma — programa alveolar tipo II</b>: NAPSA
-(aspartil-proteasa alveolar), SFTPB y SFTPC (proteínas del surfactante),
-NKX2-1 (factor de transcripción del pulmón), MUC1 y SLC34A2 (5/5 marcadores
-adenocarcinoma recuperados).</li>
-<li><b>Firma de proliferación</b>: MKI67, TOP2A, MCM2, PCNA. Los tumores más
-proliferativos concentran valores más altos del score del clasificador.</li>
+(aspartil-proteasa alveolar), SFTPB (proteína del surfactante), NKX2-1
+(factor de transcripción del pulmón), MUC1, SLC34A2 y CEACAM6 (marcadores
+glandulares). {_adc_r}/{_adc_t} marcadores adenocarcinoma recuperados
+(no aparecen en la firma SFTPA1 y SFTPC).</li>
+<li><b>Firma de proliferación</b>: los tumores más proliferativos concentran
+valores más altos del score del clasificador.</li>
 <li><b>Marcadores de alvéolo sano</b> (perdidos en tumor): AGER, CLDN18,
-SFTPC, FABP4, WIF1. Sostienen el eje de pérdida de arquitectura normal.</li>
+SFTPC, FABP4, WIF1 son los usados para <em>definir</em> el eje de pérdida
+de arquitectura normal; la firma no los selecciona directamente pero
+los tumores con menos expresión de estos marcadores obtienen scores
+más altos.</li>
 </ul>
 
 <p>La coincidencia total es de <b>{sum(rf['ihc_recuperados'].values())} de
