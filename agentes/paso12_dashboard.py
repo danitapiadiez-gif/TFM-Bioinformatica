@@ -81,7 +81,14 @@ st.markdown("""
   }
   .stApp { background: var(--plano); }
   .block-container {
-    padding-top: 1.6rem; padding-bottom: 4rem; max-width: 1140px;
+    padding-top: 1.6rem; padding-bottom: 4rem;
+    padding-left: 2.2rem; padding-right: 2.2rem;
+    max-width: 1140px;
+  }
+  @media (max-width: 900px) {
+    .block-container {
+      padding-left: 1.2rem; padding-right: 1.2rem;
+    }
   }
   /* Control de la barra lateral: discreto pero visible */
   [data-testid="stSidebarCollapsedControl"] button,
@@ -355,9 +362,10 @@ st.markdown("""
     border-bottom: 1px solid var(--linea);
   }
   .chat-cab .av {
-    width: 30px; height: 30px; border: 1px solid var(--ink);
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid var(--linea); background: var(--superficie);
     display: flex; align-items: center; justify-content: center;
-    font-family: var(--serif); font-size: .95rem; color: var(--ink);
+    font-size: 1rem; line-height: 1;
   }
   .chat-cab .id { flex: 1; }
   .chat-cab .nombre {
@@ -389,8 +397,8 @@ st.markdown("""
      .msg-asst segun el emoji del avatar. Aqui estilamos por esas clases. */
   div[data-testid="stChatMessage"] {
     background: transparent !important; border: none !important;
-    padding: 0 !important; margin-bottom: .7rem;
-    display: flex !important; align-items: flex-start; gap: .55rem;
+    padding: 0 !important; margin-bottom: .9rem;
+    display: flex !important; align-items: flex-start; gap: .6rem;
   }
   div[data-testid="stChatMessage"] > div:first-child {
     flex-shrink: 0; width: 32px; height: 32px;
@@ -401,7 +409,12 @@ st.markdown("""
   }
   div[data-testid="stChatMessage"] > [data-testid="stChatMessageContent"] {
     padding: .75rem 1rem !important;
-    max-width: 78%; border-radius: 16px !important;
+    max-width: 68%; border-radius: 16px !important;
+  }
+  @media (max-width: 700px) {
+    div[data-testid="stChatMessage"] > [data-testid="stChatMessageContent"] {
+      max-width: 82%;
+    }
   }
   div[data-testid="stChatMessage"] p {
     margin: 0 !important; font-size: .9rem; line-height: 1.55;
@@ -441,8 +454,11 @@ st.markdown("""
     background: var(--azul) !important; color: #fff !important;
     border: 1px solid var(--azul) !important;
     font-family: var(--mono) !important;
-    border-radius: 20px !important;
-    padding: .6rem 1.2rem !important;
+    border-radius: 22px !important;
+    padding: .65rem 1.4rem !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
+    width: 100% !important;
   }
   .stFormSubmitButton button:hover {
     background: var(--azul-2) !important; color: #fff !important;
@@ -452,14 +468,23 @@ st.markdown("""
     color: #fff !important; margin: 0 !important;
   }
   .stTextInput input {
-    border-radius: 20px !important;
+    border-radius: 22px !important;
     border: 1px solid var(--linea) !important;
     background: var(--superficie) !important;
     font-size: .9rem !important;
-    padding: .7rem 1rem !important;
+    padding: .7rem 1.1rem !important;
+    min-height: 44px !important;
   }
   .stTextInput input:focus {
     border-color: var(--azul) !important; box-shadow: none !important;
+  }
+  /* Formulario del chat: aire extra arriba para separar de la ultima burbuja */
+  form[data-testid="stForm"] {
+    border: none !important;
+    border-top: 1px solid var(--linea) !important;
+    background: transparent !important;
+    padding: 1rem 0 .2rem !important;
+    margin-top: .6rem !important;
   }
 
   /* ---------- Texto largo ---------- */
@@ -695,7 +720,7 @@ pendiente = st.session_state.pop("pendiente", None)
 if st.session_state.capitulo == "asistente":
     st.markdown(f"""
     <div class="chat-cab">
-      <div class="av">◫</div>
+      <div class="av">🧬</div>
       <div class="id">
         <div class="nombre">Asistente del trabajo</div>
         <div class="estado">{'En línea · ' + MODELO if hay_clave else 'Sin clave API'}</div>
@@ -723,7 +748,7 @@ if st.session_state.capitulo == "asistente":
             st.markdown(msg["content"])
 
     with st.form("form_chat", clear_on_submit=True):
-        col_txt, col_btn = st.columns([9, 1], gap="small")
+        col_txt, col_btn = st.columns([6, 1], gap="medium")
         with col_txt:
             entrada = st.text_input(
                 "Escribe tu consulta sobre el trabajo…",
@@ -734,7 +759,7 @@ if st.session_state.capitulo == "asistente":
                 disabled=not hay_clave,
             )
         with col_btn:
-            enviar = st.form_submit_button("Enviar", use_container_width=True,
+            enviar = st.form_submit_button("Enviar ❯", use_container_width=True,
                                            disabled=not hay_clave)
 
     pregunta = pendiente or (entrada if enviar else None)
