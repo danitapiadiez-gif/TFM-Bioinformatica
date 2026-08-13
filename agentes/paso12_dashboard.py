@@ -107,20 +107,6 @@ st.markdown("""
   .marca-top .punto { color: var(--azul); }
   .marca-top .sep { color: var(--ink-mute); margin: 0 .4rem; }
   .marca-top .crumb { color: var(--ink-2); }
-  /* Boton "← portada" del dashboard: fantasma, discreto */
-  [data-testid="stColumn"]:has(#btn_portada) .stButton button,
-  button[key="btn_portada"] {
-    background: transparent !important;
-    color: var(--ink-mute) !important;
-    border: 1px solid var(--linea) !important;
-    border-radius: 0 !important;
-    font-family: var(--mono) !important;
-    font-size: .78rem !important;
-  }
-  [data-testid="stColumn"]:has(#btn_portada) .stButton button:hover {
-    color: var(--azul) !important; border-color: var(--azul) !important;
-  }
-
   /* ---------- Portada ---------- */
   .portada { margin-bottom: 2.4rem; }
   .portada .filete {
@@ -555,21 +541,16 @@ cliente = Groq(api_key=_clave) if hay_clave else None
 # --------------------------------------------------------------------------
 # Portada
 # --------------------------------------------------------------------------
-# Barra superior con marca "data.lung > framework" y enlace de vuelta a la
-# portada, coherente con la landing.
-c_marca, c_volver = st.columns([4, 1])
-with c_marca:
-    st.markdown(
-        """<div class="marca-top">
-        ❯ data<span class="punto">.</span>lung
-        <span class="sep">·</span>
-        <span class="crumb">framework</span>
-        </div>""",
-        unsafe_allow_html=True,
-    )
-with c_volver:
-    if st.button("← portada", key="btn_portada"):
-        st.switch_page("paso12_landing.py")
+# Barra superior con marca "data.lung > framework". El enlace de vuelta a
+# la portada vive solo en el sidebar (era redundante tenerlo aqui tambien).
+st.markdown(
+    """<div class="marca-top">
+    ❯ data<span class="punto">.</span>lung
+    <span class="sep">·</span>
+    <span class="crumb">framework</span>
+    </div>""",
+    unsafe_allow_html=True,
+)
 
 rf_portada = resumen_firma()
 # La portada del dashboard (titulo, entradilla, cifras) es la vista "inicio"
