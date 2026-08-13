@@ -613,6 +613,7 @@ CAPITULOS = [
     ("introduccion", "Introducción y objetivos"),
     ("metodologia",  "Metodología"),
     ("resultados",   "Resultados"),
+    ("cohortes",     "Cohortes"),
     ("conclusiones", "Conclusiones"),
 ]
 if "capitulo" not in st.session_state:
@@ -1117,6 +1118,180 @@ python agentes/paso18_subtipo_casos_dificiles.py
 python agentes/paso19_firma_validada.py
 python agentes/generar_figuras_auditoria.py
 python agentes/generar_tablas_latex.py""", language="bash")
+
+
+# ---------- Cohortes (vista individual por dataset) -----------------------
+if st.session_state.capitulo == "cohortes":
+    import glob
+    import pandas as _pd
+
+    # Localiza todas las carpetas TFM_GSE*/ con datos suficientes.
+    cohortes_dir = sorted(glob.glob(os.path.join(BASE_DIR, "TFM_GSE*")))
+    disponibles = []
+    for _d in cohortes_dir:
+        _gse = os.path.basename(_d).replace("TFM_", "")
+        # Consideramos "con datos" si al menos existe resultados_completos.
+        if os.path.exists(os.path.join(_d, "resultados_completos.csv")):
+            disponibles.append((_gse, _d))
+
+    if not disponibles:
+        st.info("No hay cohortes procesadas con resultados individuales "
+                "todavía. Ejecuta el pipeline (paso7_orquestador.py) para "
+                "generarlos.")
+    else:
+        seccion("", "Cohortes individuales",
+                "Cada cohorte tiene su propio análisis diferencial, "
+                "modelos de ML y figuras. Selecciona una para ver sus "
+                "resultados por separado.")
+
+        gses_list = [g for g, _ in disponibles]
+        gse_sel = st.selectbox(
+            "Cohorte a explorar",
+            gses_list,
+            index=0,
+            label_visibility="collapsed",
+        )
+        dir_sel = dict(disponibles)[gse_sel]
+
+        # ---------- cifras de cabecera por cohorte -----------------------
+        meta_p = os.path.join(dir_sel, "metadata_procesada.csv")
+        n_mue = n_sano = n_enf = None
+        if os.path.exists(meta_p):
+            meta = _pd.read_csv(meta_p)
+            n_mue = len(meta)
+            if "grupo_analisis" in meta.columns:
+                vc = meta["grupo_analisis"].str.lower().value_counts()
+                n_sano = int(vc.get("sano", 0))
+                n_enf = int(vc.get("enfermo", 0))
+
+        # Analisis diferencial: nº de DEG a distintos umbrales
+        res_p = os.path.join(dir_sel, "resultados_completos.csv")
+        n_deg_05 = n_deg_01 = None
+        if os.path.exists(res_p):
+            res = _pd.read_csv(res_p)
+            n_deg_05 = int((res["adj_pvalue"] < 0.05).sum())
+            n_deg_01 = int((res["adj_pvalue"] < 0.01).sum())
+
+        # Rendimiento ML
+        ml_p = os.path.join(dir_sel, "resultados_ml.csv")
+        auc_max = None
+        if os.path.exists(ml_p):
+            ml = _pd.read_csv(ml_p)
+            auc_max = float(ml["auc"].max())
+
+        st.markdown(f"""
+        <div class="cifras" style="margin-top:1.4rem">
+          <div class="cifra acento-azul">
+            <div class="rotulo">Muestras</div>
+            <div class="valor">{n_mue if n_mue is not None else '—'}</div>
+            <div class="glosa">{n_sano if n_sano is not None else '—'} sanas ·
+            {n_enf if n_enf is not None else '—'} enfermas.</div>
+          </div>
+          <div class="cifra acento-nar">
+            <div class="rotulo">Genes diferencialmente<br>expresados</div>
+            <div class="valor">{n_deg_05 if n_deg_05 is not None else '—'}</div>
+            <div class="glosa">con FDR &lt; 0,05.
+            {n_deg_01 if n_deg_01 is not None else '—'} con FDR &lt; 0,01.</div>
+          </div>
+          <div class="cifra acento-neutro">
+            <div class="rotulo">AUC máximo<br>del ML local</div>
+            <div class="valor">{dec(auc_max) if auc_max is not None else '—'}</div>
+            <div class="glosa">Mejor de LogReg / RF / SVM entrenado
+            solo sobre esta cohorte.</div>
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ---------- ML por modelo ----------------------------------------
+        if os.path.exists(ml_p):
+            seccion("I", "Rendimiento de los modelos",
+                    "Modelos entrenados y evaluados dentro de la propia "
+                    "cohorte (validación interna, no LODO).")
+            st.dataframe(
+                ml,
+                use_container_width=True, hide_index=True,
+                column_config={
+                    "GSE": st.column_config.TextColumn("Cohorte"),
+                    "modelo": st.column_config.TextColumn("Modelo"),
+                    "accuracy": st.column_config.NumberColumn(
+                        "Accuracy", format="%.3f"),
+                    "auc": st.column_config.NumberColumn(
+                        "AUC", format="%.3f"),
+                },
+            )
+
+        # ---------- Genes diferencialmente expresados --------------------
+        if os.path.exists(res_p):
+            seccion("II", "Análisis diferencial",
+                    "Test de Welch + corrección FDR (Benjamini-Hochberg). "
+                    "Los 30 genes con menor p-value ajustado.")
+            top_deg = (res.sort_values("adj_pvalue")
+                          .head(30)
+                          .assign(LogFC=lambda d: d["LogFC"].round(3),
+                                  pvalue=lambda d: d["pvalue"].map(
+                                      lambda x: f"{x:.2e}"),
+                                  adj_pvalue=lambda d: d["adj_pvalue"].map(
+                                      lambda x: f"{x:.2e}")))
+            st.dataframe(
+                top_deg[["GENE_SYMBOL", "LogFC", "pvalue", "adj_pvalue"]],
+                use_container_width=True, hide_index=True,
+                column_config={
+                    "GENE_SYMBOL": st.column_config.TextColumn("Gen"),
+                    "LogFC": st.column_config.TextColumn("logFC"),
+                    "pvalue": st.column_config.TextColumn("p-value"),
+                    "adj_pvalue": st.column_config.TextColumn("FDR"),
+                },
+            )
+
+        # ---------- Top genes ML -----------------------------------------
+        top_ml_p = os.path.join(dir_sel, f"top20_genes_ml_{gse_sel}.csv")
+        if os.path.exists(top_ml_p):
+            seccion("III", "Genes que más pesan en el modelo",
+                    "Ordenados por magnitud absoluta del coeficiente en la "
+                    "regresión logística L1. Se incluye la importancia en "
+                    "Random Forest como referencia.")
+            top_ml = _pd.read_csv(top_ml_p)
+            top_ml = top_ml.assign(
+                coef_logreg=lambda d: d["coef_logreg"].round(4),
+                importancia_rf=lambda d: d["importancia_rf"].round(4),
+            )
+            st.dataframe(
+                top_ml[["gen", "coef_logreg", "importancia_rf"]],
+                use_container_width=True, hide_index=True,
+                column_config={
+                    "gen": st.column_config.TextColumn("Gen"),
+                    "coef_logreg": st.column_config.NumberColumn(
+                        "Coef. LR-L1", format="%.4f"),
+                    "importancia_rf": st.column_config.NumberColumn(
+                        "Importancia RF", format="%.4f"),
+                },
+            )
+
+        # ---------- Figuras -----------------------------------------------
+        figs = [("pca_plot.png", "PCA"),
+                ("volcano_plot.png", "Volcano plot"),
+                ("heatmap_final.png", "Heatmap")]
+        figs_exist = [(f, t) for f, t in figs
+                      if os.path.exists(os.path.join(dir_sel, f))]
+        if figs_exist:
+            seccion("IV", "Figuras")
+            cols = st.columns(len(figs_exist), gap="medium")
+            for (fname, titulo), col in zip(figs_exist, cols):
+                with col:
+                    st.markdown(
+                        f'<div class="lamina-tit">{titulo}</div>',
+                        unsafe_allow_html=True,
+                    )
+                    st.image(os.path.join(dir_sel, fname),
+                             use_container_width=True)
+
+        # ---------- Informe biológico -------------------------------------
+        inf_p = os.path.join(dir_sel, "informe_biologico.txt")
+        if os.path.exists(inf_p):
+            with open(inf_p, encoding="utf-8") as _fh:
+                txt = _fh.read()
+            with st.expander("Informe biológico (interpretación narrativa)"):
+                st.markdown(txt)
 
 
 # ---------- Conclusiones ---------------------------------------------------
