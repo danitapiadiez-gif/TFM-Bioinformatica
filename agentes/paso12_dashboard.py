@@ -1125,18 +1125,75 @@ menos diferenciado y más proliferativo, que es la histología del NSCLC.</p>
     # ---------------------------------------------------------------------
     # V. Figuras
     # ---------------------------------------------------------------------
-    seccion("V", "Figuras")
-    c1, c2 = st.columns(2, gap="large")
-    with c1:
-        lamina("Rendimiento LODO frente al azar informado",
-               "fig_lodo_vs_baseline.png")
-        lamina("Composición tisular dentro de los tumores",
-               "fig_composicion_tumores.png")
-    with c2:
-        lamina("Discriminación (AUC) frente a decisión (bal. acc.)",
-               "fig_auc_vs_balacc.png")
-        lamina("Histologías fuera del entrenamiento",
-               "fig_histologias_excluidas.png")
+    seccion("V", "Figuras",
+            "Cuatro vistas sobre el rendimiento global del framework: cuánto "
+            "supera el clasificador al azar informado, qué relación hay entre "
+            "discriminar y decidir, qué peso tiene la composición tisular "
+            "dentro de los tumores y qué histologías quedaron fuera del "
+            "entrenamiento.")
+
+    FIGS_RES = [
+        ("fig_lodo_vs_baseline.png",
+         "Rendimiento LODO frente al azar informado",
+         "Cada barra es una cohorte que hace de test cuando se retira del "
+         "entrenamiento. Se compara la balanced accuracy del modelo con la "
+         "de un clasificador ingenuo que siempre predice la clase mayoritaria "
+         "(baseline informado).",
+         f"El modelo supera al baseline en la mayoría de las cohortes "
+         f"evaluables. La media LODO es "
+         f"<b>{dec(m.get('bal_acc', 0))}</b> de balanced accuracy frente a "
+         f"<b>{dec(m.get('base', 0))}</b> del baseline: hay ganancia real, no "
+         f"un artefacto por desbalance de clases."),
+        ("fig_auc_vs_balacc.png",
+         "Discriminación (AUC) frente a decisión (balanced accuracy)",
+         "AUC mide si el clasificador <em>ordena</em> bien las muestras "
+         "(cualquier tumor por encima de cualquier sano). Balanced accuracy "
+         "mide si el <em>umbral</em> de decisión es correcto. Cada punto es "
+         "una cohorte.",
+         f"AUC media <b>{dec(m.get('auc', 0))}</b> muy superior a balanced "
+         f"accuracy <b>{dec(m.get('bal_acc', 0))}</b>: la firma ordena "
+         f"correctamente pero el umbral necesita recalibrarse entre cohortes. "
+         f"Es un problema técnico corregible con isotonic regression o Platt "
+         f"scaling, no una limitación de la firma."),
+        ("fig_composicion_tumores.png",
+         "Composición tisular dentro de los tumores",
+         "Correlación entre el score del clasificador y el contenido residual "
+         "de pulmón sano dentro de cada tumor (estimado con marcadores "
+         "canónicos de alvéolo). Solo se incluyen muestras tumorales.",
+         f"Correlación media <b>ρ = {dec(m.get('rho', 0))}</b> en "
+         f"{m.get('n_rho', 0)} cohortes: los tumores con menos pulmón sano "
+         f"residual obtienen scores más altos. La firma no solo separa tumor "
+         f"de sano, también captura la pérdida gradual de arquitectura "
+         f"alvéolo-capilar — un eje biológico real."),
+        ("fig_histologias_excluidas.png",
+         "Histologías fuera del entrenamiento",
+         "El clasificador se entrena con adenocarcinoma y carcinoma escamoso. "
+         "Esta figura muestra qué otras histologías aparecen en las cohortes "
+         "GEO y quedan fuera (carcinoides, neuroendocrinos, etc.).",
+         "El framework declara explícitamente su alcance: no está entrenado "
+         "para tumores neuroendocrinos ni carcinoides, y por tanto no debe "
+         "usarse en triage sobre casos sin diagnosticar hasta ampliar el "
+         "entrenamiento con esas clases."),
+    ]
+    figs_disp = [(f, t, d, i) for f, t, d, i in FIGS_RES
+                 if os.path.exists(os.path.join(FIG, f))]
+    for fname, titulo, descripcion, interpretacion in figs_disp:
+        st.markdown(
+            f'<div class="lamina-tit">{titulo}</div>'
+            f'<p style="font-size:.85rem; color:var(--ink-2); '
+            f'line-height:1.55; margin:.2rem 0 .8rem; max-width:70ch;">'
+            f'{descripcion}</p>',
+            unsafe_allow_html=True,
+        )
+        st.image(os.path.join(FIG, fname), use_container_width=True)
+        st.markdown(
+            f'<p style="font-size:.85rem; color:var(--ink-2); '
+            f'line-height:1.6; margin:.6rem 0 2rem; max-width:70ch; '
+            f'border-left:2px solid var(--azul); padding-left:.9rem;">'
+            f'<b style="color:var(--ink);">Cómo leerlo: </b>'
+            f'{interpretacion}</p>',
+            unsafe_allow_html=True,
+        )
 
 
 # ---------- Metodología ----------------------------------------------------
