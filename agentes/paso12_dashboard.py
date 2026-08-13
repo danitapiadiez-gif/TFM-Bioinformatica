@@ -693,7 +693,6 @@ pendiente = st.session_state.pop("pendiente", None)
 
 
 if st.session_state.capitulo == "asistente":
-    st.markdown('<div class="chat-panel">', unsafe_allow_html=True)
     st.markdown(f"""
     <div class="chat-cab">
       <div class="av">◫</div>
@@ -766,8 +765,6 @@ if st.session_state.capitulo == "asistente":
         if st.button("Limpiar conversación"):
             st.session_state.mensajes = []
             st.rerun()
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # Etiquetar cada burbuja del chat con msg-user / msg-asst segun el emoji del
@@ -1124,17 +1121,7 @@ mecanismo de superación del <em>batch effect</em> sería un error conceptual;
 las diferencias entre cohortes se cuantifican, no se ocultan.</p>
 </div>""", unsafe_allow_html=True)
 
-    seccion("IV", "Sobre la paleta de las figuras")
-    st.markdown("""<div class="prosa">
-<p>Los colores se comprobaron con un validador de accesibilidad en modo claro y
-oscuro. El resultado condicionó el diseño: el par verde–rojo, habitual para
-«cumple / no cumple», da una separación de solo ΔE&nbsp;4,1 en deuteranopía y fue
-descartado. Las oposiciones usan la pareja divergente azul–rojo (ΔE&nbsp;23,8), y
-ninguna figura se apoya en el color en solitario: todas llevan leyenda o etiquetas
-directas.</p>
-</div>""", unsafe_allow_html=True)
-
-    seccion("V", "Reproducir los resultados",
+    seccion("IV", "Reproducir los resultados",
             "Todos los CSV y figuras que se muestran en Resultados se generan "
             "con estos comandos, en este orden, desde la raíz del proyecto.")
     st.code("""python agentes/paso14_auditoria_datos.py
