@@ -1127,16 +1127,28 @@ cohortes. Es un problema técnico corregible, no una limitación intrínseca.</p
             "La firma integra dos ejes biológicos reales, coherentes con la "
             "biología del cáncer y que explican por qué discrimina bien.")
 
+    # Cohorte con la correlacion mas fuerte (mas negativa): se lee del CSV
+    # para no dejar cifras hardcodeadas que envejecen mal.
+    coh_top = ""
+    if (c_comp := tabla("COMPOSICION_VS_BIOLOGIA.csv")) is not None:
+        c_ok = c_comp.dropna(subset=["Rho_SOLO_TUMORES_vs_PulmonNormal"])
+        if not c_ok.empty:
+            fila = c_ok.loc[c_ok["Rho_SOLO_TUMORES_vs_PulmonNormal"].idxmin()]
+            coh_top = (f" en {fila['Cohorte']} (n={int(fila['n_tumores'])}) "
+                       f"alcanza ρ={dec(fila['Rho_SOLO_TUMORES_vs_PulmonNormal'])} "
+                       f"con p={fila['p_SOLO_TUMORES']:.2e}.")
     st.markdown(f"""<div class="prosa">
 <h4>Eje 1 — Pérdida de arquitectura alvéolo-capilar normal</h4>
 <p>Correlación media del score con el contenido de pulmón sano residual (solo
-tumores): <b>ρ = {dec(m.get('rho', 0))}</b> en {m.get('n_rho', 0)} cohortes;
-en GSE31210 (n=226) alcanza ρ=-0,870 con p=7e-71. Genes que sostienen este eje:
-AGER, CLDN18, SFTPC, FABP4, WIF1 — marcadores canónicos de alvéolo sano.</p>
+tumores): <b>ρ = {dec(m.get('rho', 0))}</b> en {m.get('n_rho', 0)} cohortes;{coh_top}
+El eje se define con marcadores canónicos de alvéolo sano (AGER, CLDN18,
+SFTPC, FABP4, WIF1): los tumores con menor expresión de estos marcadores
+obtienen scores más altos del clasificador.</p>
 
 <h4>Eje 2 — Actividad proliferativa aumentada</h4>
 <p>Los tumores más proliferativos concentran valores más altos del score.
-Genes característicos: MKI67, TOP2A, MCM2, PCNA.</p>
+El eje se define con un panel canónico de proliferación
+(MKI67, TOP2A, CCNB1, BIRC5, AURKA).</p>
 
 <p>Ambos ejes son señal biológica reproducible, no artefacto. Aportan
 mecanismo: la firma captura la transición del pulmón sano hacia un tejido
