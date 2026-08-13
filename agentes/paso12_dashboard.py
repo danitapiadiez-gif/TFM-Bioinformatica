@@ -408,38 +408,47 @@ st.markdown("""
     overflow: hidden;
   }
   div[data-testid="stChatMessage"] > [data-testid="stChatMessageContent"] {
-    padding: .75rem 1rem !important;
-    max-width: 68%; border-radius: 16px !important;
+    padding: .6rem .95rem !important;
+    max-width: 68% !important;
+    width: fit-content !important;
+    border-radius: 18px !important;
   }
   @media (max-width: 700px) {
     div[data-testid="stChatMessage"] > [data-testid="stChatMessageContent"] {
-      max-width: 82%;
+      max-width: 82% !important;
     }
   }
   div[data-testid="stChatMessage"] p {
-    margin: 0 !important; font-size: .9rem; line-height: 1.55;
+    margin: 0 !important; font-size: .9rem; line-height: 1.5;
   }
   /* Asistente: izquierda, burbuja clara */
   div[data-testid="stChatMessage"].msg-asst { flex-direction: row; }
   div[data-testid="stChatMessage"].msg-asst
       > [data-testid="stChatMessageContent"] {
-    background: var(--superficie) !important; color: var(--ink) !important;
+    background: var(--plano) !important; color: var(--ink) !important;
     border: 1px solid var(--linea) !important;
-    border-top-left-radius: 4px !important;
+    border-bottom-left-radius: 6px !important;
+    margin-right: auto;
   }
   /* Usuario: derecha, burbuja verde */
   div[data-testid="stChatMessage"].msg-user { flex-direction: row-reverse; }
   div[data-testid="stChatMessage"].msg-user
       > [data-testid="stChatMessageContent"] {
-    background: var(--azul) !important; color: #fff !important;
-    border: 1px solid var(--azul) !important;
-    border-top-right-radius: 4px !important;
+    background: var(--azul) !important;
+    border: none !important;
+    border-bottom-right-radius: 6px !important;
+    margin-left: auto;
   }
+  div[data-testid="stChatMessage"].msg-user
+      > [data-testid="stChatMessageContent"],
   div[data-testid="stChatMessage"].msg-user
       > [data-testid="stChatMessageContent"] * {
     color: #fff !important;
   }
-  div[data-testid="stChatMessage"] p { font-size: .88rem; line-height: 1.65; }
+  div[data-testid="stChatMessage"].msg-user
+      > [data-testid="stChatMessageContent"] a {
+    color: #fff !important; text-decoration: underline;
+  }
   .stButton button, .stFormSubmitButton button {
     border-radius: 0; border: 1px solid var(--linea);
     background: var(--superficie); color: var(--ink-2);
