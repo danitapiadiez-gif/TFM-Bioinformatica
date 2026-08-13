@@ -461,72 +461,53 @@ st.markdown("""
     border-color: var(--azul) !important; box-shadow: none !important;
   }
 
-  /* -------- Chat input fijo abajo, estilo mensajeria --------
-     Streamlit ancla stChatInput al fondo del viewport dentro de un
-     stBottomBlockContainer. Le damos un fondo con fundido, la misma anchura
-     que el resto del contenido (max-width 1140px) y una burbuja de escritura
-     bien redondeada con boton verde. */
-  [data-testid="stBottom"], [data-testid="stBottomBlockContainer"] {
+  /* -------- Chat input fijo abajo --------
+     Solo tematizamos colores (verde de acento). No tocamos la geometria
+     interna del componente, que Streamlit resuelve con flex + posiciones
+     absolutas y se rompe al forzar tamanos. */
+  [data-testid="stBottom"] {
     background: linear-gradient(to bottom,
                 rgba(250,250,247,0) 0%,
-                var(--plano) 35%) !important;
-    padding-bottom: 1rem !important;
+                var(--plano) 45%) !important;
   }
   [data-testid="stBottomBlockContainer"] {
     max-width: 1140px !important;
     padding-left: 2.2rem !important;
     padding-right: 2.2rem !important;
-    padding-top: 1rem !important;
     margin: 0 auto !important;
   }
+  /* Caja del input: fondo blanco, radio grande, borde suave y foco verde */
+  [data-testid="stChatInput"] > div,
   [data-testid="stChatInput"] {
     background: var(--superficie) !important;
-    border: 1px solid var(--linea) !important;
-    border-radius: 26px !important;
-    box-shadow: 0 6px 20px rgba(0,0,0,.06) !important;
-    padding: .25rem .35rem .25rem 1.1rem !important;
+    border-radius: 24px !important;
   }
-  [data-testid="stChatInput"]:focus-within {
+  [data-testid="stChatInput"] > div {
+    border-color: var(--linea) !important;
+  }
+  [data-testid="stChatInput"] > div:focus-within {
     border-color: var(--azul) !important;
-    box-shadow: 0 6px 20px rgba(0,0,0,.09) !important;
+    box-shadow: 0 0 0 1px var(--azul) !important;
   }
-  [data-testid="stChatInputTextArea"],
   [data-testid="stChatInput"] textarea {
-    background: transparent !important;
+    color: var(--ink) !important;
     font-family: var(--sans) !important;
     font-size: .95rem !important;
-    color: var(--ink) !important;
-    padding: .6rem .2rem !important;
-    min-height: 44px !important;
-    box-shadow: none !important;
   }
   [data-testid="stChatInput"] textarea::placeholder {
     color: var(--ink-mute) !important;
   }
-  /* Boton de envio circular verde */
-  [data-testid="stChatInputSubmitButton"],
-  [data-testid="stChatInput"] button {
-    background: var(--azul) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 50% !important;
-    width: 36px !important; height: 36px !important;
-    min-height: 36px !important;
-    display: flex !important; align-items: center; justify-content: center;
-    transition: background .15s ease;
+  /* Boton de envio: solo tinta el color del icono en verde. Sin tocar
+     tamano ni posicion, para no romper la alineacion interna. */
+  [data-testid="stChatInputSubmitButton"] svg {
+    fill: var(--azul) !important; color: var(--azul) !important;
   }
-  [data-testid="stChatInputSubmitButton"]:hover,
-  [data-testid="stChatInput"] button:hover {
-    background: var(--azul-2) !important;
+  [data-testid="stChatInputSubmitButton"]:hover svg {
+    fill: var(--azul-2) !important; color: var(--azul-2) !important;
   }
-  [data-testid="stChatInputSubmitButton"] svg,
-  [data-testid="stChatInput"] button svg {
-    color: #fff !important; fill: #fff !important;
-    width: 16px !important; height: 16px !important;
-  }
-  [data-testid="stChatInputSubmitButton"]:disabled,
-  [data-testid="stChatInput"] button:disabled {
-    background: var(--linea) !important;
+  [data-testid="stChatInputSubmitButton"]:disabled svg {
+    fill: var(--ink-mute) !important; color: var(--ink-mute) !important;
+    opacity: .5;
   }
   /* Espaciador debajo del ultimo mensaje: evita que quede tapado por el
      chat_input fijo al scrollear hasta el fondo. */
