@@ -627,17 +627,19 @@ if st.session_state.get("capitulo", "inicio") == "inicio":
 components.html(
     """
     <script>
-      const doc = window.parent.document;
+      // Correr en el hilo del window.parent (no del iframe): la pagina
+      // real no tiene el iframe visible, y con height=0 el navegador
+      // pausa requestAnimationFrame local, dejando los numeros en 0.
+      const win = window.parent;
+      const doc = win.document;
+      const raf = win.requestAnimationFrame.bind(win);
+      const now = win.performance.now.bind(win.performance);
       const dur = 1200;
       function animar(el) {
         if (el.hasAttribute("data-done")) return;
         el.setAttribute("data-done", "1");
         const objetivo = parseFloat(el.dataset.count);
-        if (!isFinite(objetivo) || objetivo <= 0) {
-          // Objetivo cero o negativo/NaN: no animar, no pintar valores
-          // intermedios raros. Deja el texto tal cual.
-          return;
-        }
+        if (!isFinite(objetivo) || objetivo <= 0) return;
         const dec = parseInt(el.dataset.dec || "0", 10);
         const fmt = (v) => {
           const w = Math.max(0, v);
@@ -645,19 +647,20 @@ components.html(
             ? Math.floor(w).toString()
             : w.toFixed(dec).replace(".", ",");
         };
-        el.textContent = fmt(0);
-        const t0 = performance.now();
+        const t0 = now();
         function paso(ahora) {
           const t = Math.min((ahora - t0) / dur, 1);
           const suave = 1 - Math.pow(1 - t, 3);
           el.textContent = fmt(objetivo * suave);
-          if (t < 1) requestAnimationFrame(paso);
+          if (t < 1) raf(paso);
           else el.textContent = fmt(objetivo);
         }
-        requestAnimationFrame(paso);
+        // Seguro por si el rAF nunca dispara: en 1.5s escribe el final.
+        setTimeout(() => { el.textContent = fmt(objetivo); }, dur + 300);
+        raf(paso);
       }
       doc.querySelectorAll("[data-count]").forEach(animar);
-      const obs = new MutationObserver((muts) => {
+      const obs = new win.MutationObserver((muts) => {
         for (const m of muts) {
           for (const n of m.addedNodes) {
             if (n.nodeType !== 1) continue;

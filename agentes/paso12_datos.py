@@ -82,5 +82,13 @@ def resumen_firma():
 
 
 def dec(v, n=3):
-    """Numero con coma decimal, sin importar la locale del sistema."""
+    """Numero con coma decimal, sin importar la locale del sistema.
+    Devuelve '—' si el valor es None o NaN, para evitar '0,000' fantasma."""
+    if v is None:
+        return "—"
+    try:
+        if v != v:  # NaN
+            return "—"
+    except TypeError:
+        return "—"
     return f"{v:.{n}f}".replace(".", ",")
