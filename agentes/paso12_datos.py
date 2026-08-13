@@ -73,12 +73,28 @@ def metricas():
 
 @st.cache_data
 def resumen_firma():
-    """Resumen JSON del paso 19 (n genes validados, panel minimo, IHC, ...)."""
+    """Resumen JSON del paso 19 (n genes validados, panel minimo, IHC, ...).
+
+    Parche: en versiones antiguas del JSON, 'auc_firma_completa' guardaba
+    por error el maximo de la curva del panel minimo (que se alcanza en un
+    panel intermedio, ~50 genes) en vez de la AUC evaluada con TODA la
+    firma. Si esta disponible PANEL_MINIMO_CURVA.csv, se sobreescribe con
+    el valor correcto (fila N_Genes == n_genes_validados). Asi la UI
+    muestra la cifra correcta sin necesidad de regenerar el JSON.
+    """
     ruta = os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")
     if not os.path.exists(ruta):
         return None
     with open(ruta) as fh:
-        return json.load(fh)
+        rf = json.load(fh)
+    curva = tabla("PANEL_MINIMO_CURVA.csv")
+    if curva is not None and "auc_curva_maxima" not in rf:
+        n_val = rf.get("n_genes_validados")
+        fila = curva[curva["N_Genes"] == n_val]
+        if not fila.empty:
+            rf["auc_curva_maxima"] = rf.get("auc_firma_completa")
+            rf["auc_firma_completa"] = float(fila["AUC_Media"].iloc[0])
+    return rf
 
 
 def dec(v, n=3):

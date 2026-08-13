@@ -180,8 +180,15 @@ def main():
 
     auc_max = curva["AUC_Media"].max()
     suficiente = curva[curva["AUC_Media"] >= auc_max - 0.01]["N_Genes"].min()
+    # AUC con la firma completa: el ultimo tamano de TAMANOS_PANEL, que es
+    # len(ranking) (todos los genes validados). No confundir con el maximo
+    # de la curva, que suele estar en un panel intermedio (~50 genes).
+    auc_completa = float(
+        curva.loc[curva["N_Genes"] == len(ranking), "AUC_Media"].iloc[0])
     print(f"\n  Panel minimo que conserva el AUC (a menos de 0,01 del maximo): "
           f"{suficiente} genes")
+    print(f"  AUC firma completa ({len(ranking)} genes): {auc_completa:.4f}")
+    print(f"  AUC maxima de la curva: {auc_max:.4f}")
 
     # ---------------- Entregable -----------------------------------------
     cols_coh = [c for c in firma.columns if c.startswith("GSE")]
@@ -211,7 +218,8 @@ def main():
         "panel_minimo": int(suficiente),
         "auc_panel_minimo": float(
             curva.loc[curva["N_Genes"] == suficiente, "AUC_Media"].iloc[0]),
-        "auc_firma_completa": float(auc_max),
+        "auc_firma_completa": auc_completa,
+        "auc_curva_maxima": float(auc_max),
         "ihc_recuperados": {k: len(v) for k, v in recuperados.items()},
         "ihc_total": {k: len(v) for k, v in IHC_CLINICA.items()},
         "top10": list(firma.index[:10]),
