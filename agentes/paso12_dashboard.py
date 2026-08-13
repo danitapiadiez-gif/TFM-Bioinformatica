@@ -712,10 +712,13 @@ if st.session_state.capitulo == "asistente":
             st.markdown(pregunta)
         with st.chat_message("assistant", avatar="🧬"):
             try:
+                # Historial acotado (ultimos 8 = 4 turnos usuario/asistente):
+                # mantiene contexto conversacional sin disparar el consumo.
+                # max_tokens=500 acota la longitud de la respuesta.
                 flujo = cliente.chat.completions.create(
                     messages=([{"role": "system", "content": sistema}]
-                              + st.session_state.mensajes[-12:]),
-                    model=MODELO, temperature=0.0, max_tokens=900, stream=True,
+                              + st.session_state.mensajes[-8:]),
+                    model=MODELO, temperature=0.0, max_tokens=500, stream=True,
                 )
                 texto = st.write_stream(
                     t.choices[0].delta.content or "" for t in flujo)
