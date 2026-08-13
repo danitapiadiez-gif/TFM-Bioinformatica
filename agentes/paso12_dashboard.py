@@ -141,15 +141,62 @@ st.markdown("""
     font-family: var(--serif); font-size: 1.06rem; line-height: 1.6;
     color: var(--ink-2); max-width: 62ch; margin: 0;
   }
+  /* Cifras del hero: grid de tarjetas grandes con acento verde */
   .portada .pie {
-    display: flex; gap: 1.7rem; flex-wrap: wrap; margin-top: 1.5rem;
-    padding-top: 1.1rem; border-top: 1px solid var(--linea);
-    font-size: .78rem; color: var(--ink-mute);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--linea);
+    border: 1px solid var(--linea);
+    margin-top: 2.2rem;
   }
+  .portada .pie > div {
+    background: var(--superficie);
+    padding: 1.5rem 1.3rem 1.35rem;
+    display: flex; flex-direction: column;
+    align-items: flex-start; gap: .3rem;
+    position: relative;
+    text-align: left;
+  }
+  .portada .pie > div::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--azul); opacity: .85;
+  }
+  .portada .pie > div:nth-child(2)::before { opacity: .65; }
+  .portada .pie > div:nth-child(3)::before { opacity: .85; }
+  .portada .pie > div:nth-child(4)::before { opacity: .65; }
+  .portada .pie > div:nth-child(5)::before { opacity: .85; }
   .portada .pie b {
-    display: block; font-family: var(--serif); font-size: 1.28rem;
-    font-weight: 400; color: var(--ink); letter-spacing: -.01em;
-    margin-bottom: .1rem;
+    display: block; font-family: var(--serif);
+    font-size: 2.9rem; font-weight: 400;
+    color: var(--ink); letter-spacing: -.025em;
+    line-height: 1; margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .portada .pie > div > *:last-child:not(b) {
+    font-family: var(--mono); font-size: .68rem;
+    color: var(--ink-mute); letter-spacing: .09em;
+    text-transform: uppercase; margin-top: .45rem;
+  }
+  .portada .firma {
+    margin-top: 1.3rem;
+    font-family: var(--mono); font-size: .72rem;
+    color: var(--ink-mute); letter-spacing: .04em;
+    text-align: right;
+  }
+  .portada .firma::before { content: "❯ "; color: var(--azul); }
+
+  @media (max-width: 900px) {
+    .portada .pie b { font-size: 2.3rem; }
+    .portada .pie > div { padding: 1.15rem .9rem 1rem; }
+  }
+  @media (max-width: 680px) {
+    .portada .pie b { font-size: 2rem; }
+    .portada .pie > div > *:last-child:not(b) { font-size: .62rem; }
+  }
+  @media (max-width: 500px) {
+    .portada .pie { grid-template-columns: 1fr; }
+    .portada .pie b { font-size: 2.2rem; }
   }
 
   /* ---------- Cifras ---------- */
@@ -543,13 +590,13 @@ if st.session_state.get("capitulo", "inicio") == "inicio":
       replicados en cohortes independientes, con panel mínimo de 20 genes y
       validación externa contra 18/20 marcadores de inmunohistoquímica clínica.</p>
       <div class="pie">
-        <div><b data-count="{m.get('n_cohortes', 0)}">{m.get('n_cohortes', 0)}</b>cohortes GEO</div>
-        <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b>muestras analizadas</div>
-        <div><b data-count="{rf_portada['n_genes_validados'] if rf_portada else 0}">{rf_portada['n_genes_validados'] if rf_portada else '—'}</b>genes validados</div>
-        <div><b data-count="{rf_portada['panel_minimo'] if rf_portada else 0}">{rf_portada['panel_minimo'] if rf_portada else '—'}</b>panel mínimo</div>
-        <div><b data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</b>AUC media LODO</div>
-        <div style="margin-left:auto;align-self:flex-end">Daniel Tapia Díez</div>
+        <div><b data-count="{m.get('n_cohortes', 0)}">{m.get('n_cohortes', 0)}</b><span>cohortes GEO</span></div>
+        <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b><span>muestras analizadas</span></div>
+        <div><b data-count="{rf_portada['n_genes_validados'] if rf_portada else 0}">{rf_portada['n_genes_validados'] if rf_portada else '—'}</b><span>genes validados</span></div>
+        <div><b data-count="{rf_portada['panel_minimo'] if rf_portada else 0}">{rf_portada['panel_minimo'] if rf_portada else '—'}</b><span>panel mínimo</span></div>
+        <div><b data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</b><span>AUC media LODO</span></div>
       </div>
+      <div class="firma">Daniel Tapia Díez</div>
     </div>
     """, unsafe_allow_html=True)
 
