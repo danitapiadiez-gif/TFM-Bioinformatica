@@ -389,65 +389,42 @@ st.markdown("""
     text-transform: uppercase; color: var(--ink-mute);
     margin: 0 0 .6rem;
   }
-  /* --- Chat estilo conversacion iMessage ---
-     Mensaje del asistente: burbuja gris clara a la IZQUIERDA.
-     Mensaje del usuario: burbuja verde a la DERECHA.
-     Streamlit no expone user/assistant en el DOM con un data-testid, asi
-     que un script (mas abajo) etiqueta cada stChatMessage con .msg-user o
-     .msg-asst segun el emoji del avatar. Aqui estilamos por esas clases. */
+  /* --- Chat: tarjetas simples con acento lateral -----------------
+     Ambos mensajes usan el layout por defecto de Streamlit (avatar a la
+     izquierda). La diferencia entre usuario y asistente esta en el color
+     del acento vertical y del fondo, no en la posicion. Es mas robusto
+     que intentar reproducir iMessage con row-reverse (Streamlit vuelve
+     a poner el avatar donde le da la gana y las burbujas quedan mal). */
   div[data-testid="stChatMessage"] {
-    background: transparent !important; border: none !important;
-    padding: 0 !important; margin-bottom: .9rem;
-    display: flex !important; align-items: flex-start; gap: .6rem;
-  }
-  div[data-testid="stChatMessage"] > div:first-child {
-    flex-shrink: 0; width: 32px; height: 32px;
-    border-radius: 50%; display: flex; align-items: center;
-    justify-content: center; font-size: 16px;
-    background: var(--superficie); border: 1px solid var(--linea);
-    overflow: hidden;
-  }
-  div[data-testid="stChatMessage"] > [data-testid="stChatMessageContent"] {
-    padding: .6rem .95rem !important;
-    max-width: 68% !important;
-    width: fit-content !important;
-    border-radius: 18px !important;
-  }
-  @media (max-width: 700px) {
-    div[data-testid="stChatMessage"] > [data-testid="stChatMessageContent"] {
-      max-width: 82% !important;
-    }
+    background: transparent !important;
+    border: none !important;
+    padding: .55rem .9rem .55rem .8rem !important;
+    margin-bottom: .55rem !important;
+    border-radius: 10px !important;
+    border-left: 3px solid var(--linea) !important;
   }
   div[data-testid="stChatMessage"] p {
-    margin: 0 !important; font-size: .9rem; line-height: 1.5;
+    margin: 0 !important; font-size: .92rem; line-height: 1.6;
   }
-  /* Asistente: izquierda, burbuja clara */
-  div[data-testid="stChatMessage"].msg-asst { flex-direction: row; }
-  div[data-testid="stChatMessage"].msg-asst
-      > [data-testid="stChatMessageContent"] {
-    background: var(--plano) !important; color: var(--ink) !important;
+  div[data-testid="stChatMessage"] p + p { margin-top: .55rem !important; }
+  /* Avatar circular sobrio */
+  div[data-testid="stChatMessage"] > div:first-child {
+    width: 30px !important; height: 30px !important;
+    border-radius: 50% !important;
+    background: var(--superficie) !important;
     border: 1px solid var(--linea) !important;
-    border-bottom-left-radius: 6px !important;
-    margin-right: auto;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
   }
-  /* Usuario: derecha, burbuja verde */
-  div[data-testid="stChatMessage"].msg-user { flex-direction: row-reverse; }
-  div[data-testid="stChatMessage"].msg-user
-      > [data-testid="stChatMessageContent"] {
-    background: var(--azul) !important;
-    border: none !important;
-    border-bottom-right-radius: 6px !important;
-    margin-left: auto;
+  /* Asistente: acento y fondo neutros */
+  div[data-testid="stChatMessage"].msg-asst {
+    background: var(--superficie) !important;
+    border-left-color: var(--ink-mute) !important;
   }
-  div[data-testid="stChatMessage"].msg-user
-      > [data-testid="stChatMessageContent"],
-  div[data-testid="stChatMessage"].msg-user
-      > [data-testid="stChatMessageContent"] * {
-    color: #fff !important;
-  }
-  div[data-testid="stChatMessage"].msg-user
-      > [data-testid="stChatMessageContent"] a {
-    color: #fff !important; text-decoration: underline;
+  /* Usuario: acento verde y fondo verde muy tenue */
+  div[data-testid="stChatMessage"].msg-user {
+    background: rgba(28, 138, 63, .07) !important;
+    border-left-color: var(--azul) !important;
   }
   .stButton button, .stFormSubmitButton button {
     border-radius: 0; border: 1px solid var(--linea);
