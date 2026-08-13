@@ -1268,22 +1268,59 @@ if st.session_state.capitulo == "cohortes":
             )
 
         # ---------- Figuras -----------------------------------------------
-        figs = [("pca_plot.png", "PCA"),
-                ("volcano_plot.png", "Volcano plot"),
-                ("heatmap_final.png", "Heatmap")]
-        figs_exist = [(f, t) for f, t in figs
+        FIGS_INFO = [
+            ("pca_plot.png",
+             "PCA · reducción de dimensionalidad",
+             "Cada punto es una muestra proyectada sobre las dos "
+             "direcciones (componentes principales) que capturan la "
+             "mayor varianza de expresión génica.",
+             "Si las muestras <b>sanas</b> y <b>enfermas</b> se agrupan "
+             "en zonas distintas del plano, hay señal biológica global "
+             "que las diferencia — condición previa para que cualquier "
+             "clasificador pueda funcionar."),
+            ("volcano_plot.png",
+             "Volcano plot · análisis diferencial",
+             "Cada punto es un gen. Eje X: cambio de expresión entre "
+             "grupos (logFC, negativo = infraexpresado en enfermo). "
+             "Eje Y: significancia estadística (-log10 del p-value).",
+             "Los puntos coloreados de las esquinas superiores (grandes "
+             "cambios + p-value pequeño) son los genes diferencialmente "
+             "expresados: los candidatos a biomarcador de esta cohorte."),
+            ("heatmap_final.png",
+             "Heatmap · patrones de expresión",
+             "Filas: los genes más significativos del análisis "
+             "diferencial. Columnas: muestras. Color: nivel de "
+             "expresión (rojo = alto, azul = bajo).",
+             "El dendrograma superior agrupa muestras según su perfil "
+             "de expresión. Si las columnas del mismo grupo clínico "
+             "quedan próximas entre sí, el clasificador tiene una base "
+             "sólida para distinguirlas."),
+        ]
+        figs_exist = [(f, t, d, i) for f, t, d, i in FIGS_INFO
                       if os.path.exists(os.path.join(dir_sel, f))]
         if figs_exist:
-            seccion("IV", "Figuras")
-            cols = st.columns(len(figs_exist), gap="medium")
-            for (fname, titulo), col in zip(figs_exist, cols):
-                with col:
-                    st.markdown(
-                        f'<div class="lamina-tit">{titulo}</div>',
-                        unsafe_allow_html=True,
-                    )
-                    st.image(os.path.join(dir_sel, fname),
-                             use_container_width=True)
+            seccion("IV", "Figuras",
+                    "Tres vistas complementarias sobre los mismos datos: "
+                    "estructura global (PCA), genes individuales (volcano) "
+                    "y patrones por muestra (heatmap).")
+            for fname, titulo, descripcion, interpretacion in figs_exist:
+                st.markdown(
+                    f'<div class="lamina-tit">{titulo}</div>'
+                    f'<p style="font-size:.85rem; color:var(--ink-2); '
+                    f'line-height:1.55; margin:.2rem 0 .8rem; max-width:70ch;">'
+                    f'{descripcion}</p>',
+                    unsafe_allow_html=True,
+                )
+                st.image(os.path.join(dir_sel, fname),
+                         use_container_width=True)
+                st.markdown(
+                    f'<p style="font-size:.85rem; color:var(--ink-2); '
+                    f'line-height:1.6; margin:.6rem 0 1.8rem; max-width:70ch; '
+                    f'border-left:2px solid var(--azul); padding-left:.9rem;">'
+                    f'<b style="color:var(--ink);">Cómo leerlo: </b>'
+                    f'{interpretacion}</p>',
+                    unsafe_allow_html=True,
+                )
 
         # ---------- Informe biológico -------------------------------------
         inf_p = os.path.join(dir_sel, "informe_biologico.txt")
