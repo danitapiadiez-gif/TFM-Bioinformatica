@@ -282,7 +282,7 @@ st.markdown(
   </div>
   <div class="brand">data<span class="punto">.</span>lung</div>
   <div class="filete"></div>
-  <p class="tagline">Del dataset a una firma génica replicable.</p>
+  <p class="tagline">Del dataset<br>a una firma génica replicable.</p>
 </div>
     """,
     unsafe_allow_html=True,
