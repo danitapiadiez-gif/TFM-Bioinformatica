@@ -603,16 +603,18 @@ if st.session_state.get("capitulo", "inicio") == "inicio":
       en cáncer de pulmón</h1>
       <p class="entradilla">Framework de análisis transcriptómico y aprendizaje
       automático aplicado a cáncer de pulmón. Integra cohortes públicas de NCBI
-      GEO, cura los metadatos clínicos con un modelo de lenguaje, entrena
-      clasificadores supervisados y entrega una firma génica de 1174 genes
-      replicados en cohortes independientes, con panel mínimo de 20 genes y
-      validación externa contra 18/20 marcadores de inmunohistoquímica clínica.</p>
+      GEO, cura los metadatos clínicos con un modelo de lenguaje y entrena
+      clasificadores supervisados sobre dos tareas: <b>tumor frente a sano</b>
+      (AUC media LODO {dec(m.get('auc', 0))}) y <b>subtipo histológico</b>
+      (adenocarcinoma vs escamoso), en la que la firma de 1174 genes replicados
+      en tres cohortes independientes recupera 18 de 20 marcadores de
+      inmunohistoquímica diagnóstica con un panel mínimo de 20 genes.</p>
       <div class="pie">
         <div><b data-count="{m.get('n_cohortes', 0)}">{m.get('n_cohortes', 0)}</b><span>cohortes GEO</span></div>
-        <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b><span>muestras analizadas</span></div>
-        <div><b data-count="{rf_portada['n_genes_validados'] if rf_portada else 0}">{rf_portada['n_genes_validados'] if rf_portada else '—'}</b><span>genes validados</span></div>
+        <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b><span>muestras curadas</span></div>
+        <div><b data-count="{rf_portada['n_genes_validados'] if rf_portada else 0}">{rf_portada['n_genes_validados'] if rf_portada else '—'}</b><span>firma subtipo (genes)</span></div>
         <div><b data-count="{rf_portada['panel_minimo'] if rf_portada else 0}">{rf_portada['panel_minimo'] if rf_portada else '—'}</b><span>panel mínimo</span></div>
-        <div><b data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</b><span>AUC media LODO</span></div>
+        <div><b data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</b><span>AUC tumor vs sano</span></div>
       </div>
       <div class="firma">Daniel Tapia Díez</div>
     </div>
@@ -1012,7 +1014,7 @@ if st.session_state.capitulo == "resultados":
     if completa is not None:
         gen = st.text_input(
             "Consultar un gen de la firma",
-            placeholder="p. ej. DSG3, KRT5, NAPSA, SFTPC, TP63, EGFR…",
+            placeholder="p. ej. DSG3, KRT5, NAPSA, NKX2-1, TP63, MUC1…",
         ).strip().upper()
 
         if gen:
