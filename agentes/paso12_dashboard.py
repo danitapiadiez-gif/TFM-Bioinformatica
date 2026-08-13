@@ -1146,27 +1146,46 @@ menos diferenciado y más proliferativo, que es la histología del NSCLC.</p>
          "Cada barra es una cohorte que hace de test cuando se retira del "
          "entrenamiento. Se compara la balanced accuracy del modelo con la "
          "de un clasificador ingenuo que siempre predice la clase mayoritaria "
-         "(baseline informado)."),
+         "(baseline informado).",
+         f"El modelo supera al baseline en la mayoría de las cohortes "
+         f"evaluables. La media LODO es "
+         f"<b>{dec(m.get('bal_acc', 0))}</b> de balanced accuracy frente a "
+         f"<b>{dec(m.get('base', 0))}</b> del baseline: hay ganancia real, no "
+         f"un artefacto por desbalance de clases."),
         ("fig_auc_vs_balacc.png",
          "Discriminación (AUC) frente a decisión (balanced accuracy)",
          "AUC mide si el clasificador <em>ordena</em> bien las muestras "
          "(cualquier tumor por encima de cualquier sano). Balanced accuracy "
          "mide si el <em>umbral</em> de decisión es correcto. Cada punto es "
-         "una cohorte."),
+         "una cohorte.",
+         f"AUC media <b>{dec(m.get('auc', 0))}</b> muy superior a balanced "
+         f"accuracy <b>{dec(m.get('bal_acc', 0))}</b>: la firma ordena "
+         f"correctamente pero el umbral necesita recalibrarse entre cohortes. "
+         f"Es un problema técnico corregible con isotonic regression o Platt "
+         f"scaling, no una limitación de la firma."),
         ("fig_composicion_tumores.png",
          "Composición tisular dentro de los tumores",
          "Correlación entre el score del clasificador y el contenido residual "
          "de pulmón sano dentro de cada tumor (estimado con marcadores "
-         "canónicos de alvéolo). Solo se incluyen muestras tumorales."),
+         "canónicos de alvéolo). Solo se incluyen muestras tumorales.",
+         f"Correlación media <b>ρ = {dec(m.get('rho', 0))}</b> en "
+         f"{m.get('n_rho', 0)} cohortes: los tumores con menos pulmón sano "
+         f"residual obtienen scores más altos. La firma no solo separa tumor "
+         f"de sano, también captura la pérdida gradual de arquitectura "
+         f"alvéolo-capilar — un eje biológico real."),
         ("fig_histologias_excluidas.png",
          "Histologías fuera del entrenamiento",
          "El clasificador se entrena con adenocarcinoma y carcinoma escamoso. "
          "Esta figura muestra qué otras histologías aparecen en las cohortes "
-         "GEO y quedan fuera (carcinoides, neuroendocrinos, etc.)."),
+         "GEO y quedan fuera (carcinoides, neuroendocrinos, etc.).",
+         "El framework declara explícitamente su alcance: no está entrenado "
+         "para tumores neuroendocrinos ni carcinoides, y por tanto no debe "
+         "usarse en triage sobre casos sin diagnosticar hasta ampliar el "
+         "entrenamiento con esas clases."),
     ]
-    figs_disp = [(f, t, d) for f, t, d in FIGS_RES
+    figs_disp = [(f, t, d, i) for f, t, d, i in FIGS_RES
                  if os.path.exists(os.path.join(FIG, f))]
-    for fname, titulo, descripcion in figs_disp:
+    for fname, titulo, descripcion, interpretacion in figs_disp:
         st.markdown(
             f'<div class="lamina-tit">{titulo}</div>'
             f'<p style="font-size:.85rem; color:var(--ink-2); '
@@ -1175,8 +1194,13 @@ menos diferenciado y más proliferativo, que es la histología del NSCLC.</p>
             unsafe_allow_html=True,
         )
         st.image(os.path.join(FIG, fname), use_container_width=True)
-        st.markdown('<div style="margin-bottom:1.8rem"></div>',
-                    unsafe_allow_html=True)
+        st.markdown(
+            f'<p style="font-size:.85rem; color:var(--ink-2); '
+            f'line-height:1.6; margin:.6rem 0 2rem; max-width:70ch; '
+            f'border-left:2px solid var(--azul); padding-left:.9rem;">'
+            f'{interpretacion}</p>',
+            unsafe_allow_html=True,
+        )
 
 
 # ---------- Metodología ----------------------------------------------------
@@ -1380,26 +1404,37 @@ if st.session_state.capitulo == "cohortes":
              "PCA · reducción de dimensionalidad",
              "Cada punto es una muestra proyectada sobre las dos "
              "direcciones (componentes principales) que capturan la "
-             "mayor varianza de expresión génica."),
+             "mayor varianza de expresión génica.",
+             "Si las muestras <b>sanas</b> y <b>enfermas</b> se agrupan "
+             "en zonas distintas del plano, hay señal biológica global "
+             "que las diferencia — condición previa para que cualquier "
+             "clasificador pueda funcionar."),
             ("volcano_plot.png",
              "Volcano plot · análisis diferencial",
              "Cada punto es un gen. Eje X: cambio de expresión entre "
-             "grupos (logFC). Eje Y: significancia estadística "
-             "(-log10 del p-value)."),
+             "grupos (logFC, negativo = infraexpresado en enfermo). "
+             "Eje Y: significancia estadística (-log10 del p-value).",
+             "Los puntos coloreados de las esquinas superiores (grandes "
+             "cambios + p-value pequeño) son los genes diferencialmente "
+             "expresados: los candidatos a biomarcador de esta cohorte."),
             ("heatmap_final.png",
              "Heatmap · patrones de expresión",
              "Filas: los genes más significativos del análisis "
              "diferencial. Columnas: muestras. Color: nivel de "
-             "expresión (rojo = alto, azul = bajo)."),
+             "expresión (rojo = alto, azul = bajo).",
+             "El dendrograma superior agrupa muestras según su perfil "
+             "de expresión. Si las columnas del mismo grupo clínico "
+             "quedan próximas entre sí, el clasificador tiene una base "
+             "sólida para distinguirlas."),
         ]
-        figs_exist = [(f, t, d) for f, t, d in FIGS_INFO
+        figs_exist = [(f, t, d, i) for f, t, d, i in FIGS_INFO
                       if os.path.exists(os.path.join(dir_sel, f))]
         if figs_exist:
             seccion("IV", "Figuras",
                     "Tres vistas complementarias sobre los mismos datos: "
                     "estructura global (PCA), genes individuales (volcano) "
                     "y patrones por muestra (heatmap).")
-            for fname, titulo, descripcion in figs_exist:
+            for fname, titulo, descripcion, interpretacion in figs_exist:
                 st.markdown(
                     f'<div class="lamina-tit">{titulo}</div>'
                     f'<p style="font-size:.85rem; color:var(--ink-2); '
@@ -1409,8 +1444,13 @@ if st.session_state.capitulo == "cohortes":
                 )
                 st.image(os.path.join(dir_sel, fname),
                          use_container_width=True)
-                st.markdown('<div style="margin-bottom:1.8rem"></div>',
-                            unsafe_allow_html=True)
+                st.markdown(
+                    f'<p style="font-size:.85rem; color:var(--ink-2); '
+                    f'line-height:1.6; margin:.6rem 0 1.8rem; max-width:70ch; '
+                    f'border-left:2px solid var(--azul); padding-left:.9rem;">'
+                    f'{interpretacion}</p>',
+                    unsafe_allow_html=True,
+                )
 
         # ---------- Informe biológico -------------------------------------
         inf_p = os.path.join(dir_sel, "informe_biologico.txt")
