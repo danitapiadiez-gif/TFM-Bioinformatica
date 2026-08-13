@@ -449,24 +449,6 @@ st.markdown("""
   .stButton button:hover, .stFormSubmitButton button:hover {
     border-color: var(--ink); color: var(--ink); background: var(--superficie);
   }
-  .stFormSubmitButton button {
-    text-align: center;
-    background: var(--azul) !important; color: #fff !important;
-    border: 1px solid var(--azul) !important;
-    font-family: var(--mono) !important;
-    border-radius: 22px !important;
-    padding: .65rem 1.4rem !important;
-    min-height: 44px !important;
-    white-space: nowrap !important;
-    width: 100% !important;
-  }
-  .stFormSubmitButton button:hover {
-    background: var(--azul-2) !important; color: #fff !important;
-    border-color: var(--azul-2) !important;
-  }
-  .stFormSubmitButton button p {
-    color: #fff !important; margin: 0 !important;
-  }
   .stTextInput input {
     border-radius: 22px !important;
     border: 1px solid var(--linea) !important;
@@ -478,14 +460,77 @@ st.markdown("""
   .stTextInput input:focus {
     border-color: var(--azul) !important; box-shadow: none !important;
   }
-  /* Formulario del chat: aire extra arriba para separar de la ultima burbuja */
-  form[data-testid="stForm"] {
-    border: none !important;
-    border-top: 1px solid var(--linea) !important;
-    background: transparent !important;
-    padding: 1rem 0 .2rem !important;
-    margin-top: .6rem !important;
+
+  /* -------- Chat input fijo abajo, estilo mensajeria --------
+     Streamlit ancla stChatInput al fondo del viewport dentro de un
+     stBottomBlockContainer. Le damos un fondo con fundido, la misma anchura
+     que el resto del contenido (max-width 1140px) y una burbuja de escritura
+     bien redondeada con boton verde. */
+  [data-testid="stBottom"], [data-testid="stBottomBlockContainer"] {
+    background: linear-gradient(to bottom,
+                rgba(250,250,247,0) 0%,
+                var(--plano) 35%) !important;
+    padding-bottom: 1rem !important;
   }
+  [data-testid="stBottomBlockContainer"] {
+    max-width: 1140px !important;
+    padding-left: 2.2rem !important;
+    padding-right: 2.2rem !important;
+    padding-top: 1rem !important;
+    margin: 0 auto !important;
+  }
+  [data-testid="stChatInput"] {
+    background: var(--superficie) !important;
+    border: 1px solid var(--linea) !important;
+    border-radius: 26px !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,.06) !important;
+    padding: .25rem .35rem .25rem 1.1rem !important;
+  }
+  [data-testid="stChatInput"]:focus-within {
+    border-color: var(--azul) !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,.09) !important;
+  }
+  [data-testid="stChatInputTextArea"],
+  [data-testid="stChatInput"] textarea {
+    background: transparent !important;
+    font-family: var(--sans) !important;
+    font-size: .95rem !important;
+    color: var(--ink) !important;
+    padding: .6rem .2rem !important;
+    min-height: 44px !important;
+    box-shadow: none !important;
+  }
+  [data-testid="stChatInput"] textarea::placeholder {
+    color: var(--ink-mute) !important;
+  }
+  /* Boton de envio circular verde */
+  [data-testid="stChatInputSubmitButton"],
+  [data-testid="stChatInput"] button {
+    background: var(--azul) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 36px !important; height: 36px !important;
+    min-height: 36px !important;
+    display: flex !important; align-items: center; justify-content: center;
+    transition: background .15s ease;
+  }
+  [data-testid="stChatInputSubmitButton"]:hover,
+  [data-testid="stChatInput"] button:hover {
+    background: var(--azul-2) !important;
+  }
+  [data-testid="stChatInputSubmitButton"] svg,
+  [data-testid="stChatInput"] button svg {
+    color: #fff !important; fill: #fff !important;
+    width: 16px !important; height: 16px !important;
+  }
+  [data-testid="stChatInputSubmitButton"]:disabled,
+  [data-testid="stChatInput"] button:disabled {
+    background: var(--linea) !important;
+  }
+  /* Espaciador debajo del ultimo mensaje: evita que quede tapado por el
+     chat_input fijo al scrollear hasta el fondo. */
+  .chat-fondo { height: 5rem; }
 
   /* ---------- Texto largo ---------- */
   .prosa { font-size: .89rem; color: var(--ink-2); line-height: 1.68;
@@ -747,22 +792,17 @@ if st.session_state.capitulo == "asistente":
         with st.chat_message(msg["role"], avatar=avatar):
             st.markdown(msg["content"])
 
-    with st.form("form_chat", clear_on_submit=True):
-        col_txt, col_btn = st.columns([6, 1], gap="medium")
-        with col_txt:
-            entrada = st.text_input(
-                "Escribe tu consulta sobre el trabajo…",
-                placeholder=("Escribe tu consulta sobre el trabajo…"
-                             if hay_clave
-                             else "Sin clave API: el asistente está deshabilitado"),
-                label_visibility="collapsed",
-                disabled=not hay_clave,
-            )
-        with col_btn:
-            enviar = st.form_submit_button("Enviar ❯", use_container_width=True,
-                                           disabled=not hay_clave)
+    # Espaciador para que el chat_input fijo en el fondo no tape el ultimo
+    # mensaje al hacer scroll hasta abajo.
+    st.markdown('<div class="chat-fondo"></div>', unsafe_allow_html=True)
 
-    pregunta = pendiente or (entrada if enviar else None)
+    entrada = st.chat_input(
+        ("Escribe tu consulta sobre el trabajo…" if hay_clave
+         else "Sin clave API: el asistente está deshabilitado"),
+        disabled=not hay_clave,
+    )
+
+    pregunta = pendiente or entrada
 
     if pregunta:
         st.session_state.mensajes.append({"role": "user", "content": pregunta})
@@ -800,6 +840,7 @@ components.html(
     """
     <script>
       const doc = window.parent.document;
+      const win = window.parent;
       function marcar() {
         doc.querySelectorAll('[data-testid="stChatMessage"]').forEach(m => {
           if (m.dataset.tagged) return;
@@ -810,8 +851,27 @@ components.html(
           m.dataset.tagged = '1';
         });
       }
+      function bajarAlFondo() {
+        // Solo si estamos en el capitulo del asistente (hay chat_input visible)
+        if (!doc.querySelector('[data-testid="stChatInput"]')) return;
+        win.scrollTo({top: doc.body.scrollHeight, behavior: 'smooth'});
+      }
       marcar();
-      const obs = new MutationObserver(marcar);
+      bajarAlFondo();
+      const obs = new MutationObserver((muts) => {
+        marcar();
+        // Auto-scroll cuando aparecen mensajes nuevos
+        for (const m of muts) {
+          for (const n of m.addedNodes) {
+            if (n.nodeType === 1 &&
+                (n.matches?.('[data-testid="stChatMessage"]') ||
+                 n.querySelector?.('[data-testid="stChatMessage"]'))) {
+              setTimeout(bajarAlFondo, 60);
+              return;
+            }
+          }
+        }
+      });
       obs.observe(doc.body, {childList: true, subtree: true});
     </script>
     """,
