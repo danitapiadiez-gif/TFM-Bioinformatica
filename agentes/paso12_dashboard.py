@@ -834,28 +834,38 @@ y no artefacto técnico.</li>
         a["N_Analizadas"] = a["N_Sano"] + a["N_Enfermo"]
         a_ev = a[a["Evaluable_Como_Test"]]
         st.dataframe(
-            a_ev[["Cohorte", "Plataforma", "N_Analizadas", "N_Sano",
-                  "N_Enfermo", "Tasa_Exito_Curacion"]],
+            a_ev[["Cohorte", "Plataforma", "N_Total", "N_Analizadas",
+                  "N_Sano", "N_Enfermo", "N_Sin_Clasificar",
+                  "Tasa_Exito_Curacion"]],
             use_container_width=True, hide_index=True,
             column_config={
-                "N_Analizadas": st.column_config.NumberColumn("Analizadas"),
+                "N_Total": st.column_config.NumberColumn(
+                    "Descargadas",
+                    help="Muestras descargadas de NCBI GEO."),
+                "N_Analizadas": st.column_config.NumberColumn(
+                    "Analizadas",
+                    help="Muestras que entran al análisis (sanas + enfermas). "
+                         "Suele coincidir con las descargadas salvo cuando "
+                         "la curación LLM no puede etiquetar algunas."),
                 "N_Sano": st.column_config.NumberColumn("Sanas"),
                 "N_Enfermo": st.column_config.NumberColumn("Enfermas"),
+                "N_Sin_Clasificar": st.column_config.NumberColumn(
+                    "Sin clasificar",
+                    help="Muestras que el LLM no pudo etiquetar sin "
+                         "ambigüedad y quedan fuera del análisis."),
                 "Tasa_Exito_Curacion": st.column_config.ProgressColumn(
                     "Curación LLM", min_value=0, max_value=1, format="%.2f"),
             })
         n_ana = int(a_ev["N_Analizadas"].sum())
         n_desc = int(a_ev["N_Total"].sum())
+        n_sin = int(a_ev["N_Sin_Clasificar"].sum())
         st.caption(
             f"{len(a_ev)} de {len(a)} cohortes descargadas cumplen los "
-            f"criterios de inclusión. Se analizan {n_ana:,}"
-            .replace(",", ".") +
-            f" muestras (las que el LLM logró etiquetar como sano o enfermo), "
-            f"de {n_desc:,} descargadas. ".replace(",", ".") +
-            "La barra 'Curación LLM' muestra la fracción de muestras "
-            "etiquetadas con éxito por cohorte; las muestras ambiguas se "
-            "descartan del análisis. Las 3 cohortes excluidas contienen solo "
-            "tumores (sin controles) y no permiten entrenar el clasificador.")
+            f"criterios de inclusión. De {n_desc:,} muestras descargadas, "
+            f"{n_ana:,} se analizan y {n_sin:,} quedan sin clasificar por "
+            f"metadatos ambiguos. Las 3 cohortes excluidas contienen solo "
+            f"tumores (sin controles) y no permiten entrenar el clasificador."
+            .replace(",", "."))
 
 
 # ---------- Resultados -----------------------------------------------------
