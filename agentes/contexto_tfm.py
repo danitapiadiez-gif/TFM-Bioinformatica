@@ -85,7 +85,11 @@ def construir_contexto():
     aud = _leer("AUDITORIA_COHORTES.csv")
     ev_aud = aud[aud["Evaluable_Como_Test"]] if aud is not None else None
     n_ev_coh = len(ev_aud) if ev_aud is not None else 0
-    n_ev_mu = int(ev_aud["N_Total"].sum()) if ev_aud is not None else 0
+    # Muestras evaluables reales: las que el LLM logro etiquetar (sano+enf),
+    # no las descargadas. GSE40791 tiene 194 descargadas pero solo 12 curadas
+    # (182 sin clasificar); mostrar 194 sobre-representa.
+    n_ev_mu = (int((ev_aud["N_Sano"] + ev_aud["N_Enfermo"]).sum())
+               if ev_aud is not None else 0)
 
     lodo = _leer("LODO_HONESTO_RESULTADOS.csv")
     ev = lodo[lodo["Evaluable"]] if lodo is not None else None

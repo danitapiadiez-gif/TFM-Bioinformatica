@@ -40,8 +40,15 @@ def metricas():
             "acc_11": d["Accuracy"].mean(),
         }
     if (a := tabla("AUDITORIA_COHORTES.csv")) is not None:
+        # "Analizadas" = solo las que el LLM logro etiquetar (sano + enfermo).
+        # "Total descargadas" (n_muestras) se mantiene por si algo lo usa.
+        a = a.copy()
+        a["N_Analizadas"] = a["N_Sano"] + a["N_Enfermo"]
+        ev_aud = a[a["Evaluable_Como_Test"]]
         m |= {
-            "n_muestras": int(a["N_Total"].sum()),
+            "n_muestras": int(a["N_Analizadas"].sum()),
+            "n_descargadas": int(a["N_Total"].sum()),
+            "n_muestras_ev": int(ev_aud["N_Analizadas"].sum()),
             "sin_clas": int(a["N_Sin_Clasificar"].sum()),
             "desal": int(a["N_Muestras_Desalineadas"].fillna(0).sum()),
             "n_mono": int((~a["Evaluable_Como_Test"]).sum()),

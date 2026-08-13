@@ -544,7 +544,7 @@ if st.session_state.get("capitulo", "inicio") == "inicio":
       validación externa contra 18/20 marcadores de inmunohistoquímica clínica.</p>
       <div class="pie">
         <div><b data-count="{m.get('n_cohortes', 0)}">{m.get('n_cohortes', 0)}</b>cohortes GEO</div>
-        <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b>muestras</div>
+        <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b>muestras analizadas</div>
         <div><b data-count="{rf_portada['n_genes_validados'] if rf_portada else 0}">{rf_portada['n_genes_validados'] if rf_portada else '—'}</b>genes validados</div>
         <div><b data-count="{rf_portada['panel_minimo'] if rf_portada else 0}">{rf_portada['panel_minimo'] if rf_portada else '—'}</b>panel mínimo</div>
         <div><b data-count="{m.get('auc', 0)}" data-dec="3">{dec(m.get('auc', 0))}</b>AUC media LODO</div>
@@ -830,23 +830,31 @@ y no artefacto técnico.</li>
             "framework. Los criterios de inclusión son: presencia de casos "
             "y controles, curación clínica exitosa y alineamiento verificado.")
     if (a := tabla("AUDITORIA_COHORTES.csv")) is not None:
+        a = a.copy()
+        a["N_Analizadas"] = a["N_Sano"] + a["N_Enfermo"]
         a_ev = a[a["Evaluable_Como_Test"]]
         st.dataframe(
-            a_ev[["Cohorte", "Plataforma", "N_Total", "N_Sano", "N_Enfermo",
-                  "Tasa_Exito_Curacion"]],
+            a_ev[["Cohorte", "Plataforma", "N_Analizadas", "N_Sano",
+                  "N_Enfermo", "Tasa_Exito_Curacion"]],
             use_container_width=True, hide_index=True,
             column_config={
-                "N_Total": st.column_config.NumberColumn("Muestras"),
+                "N_Analizadas": st.column_config.NumberColumn("Analizadas"),
                 "N_Sano": st.column_config.NumberColumn("Sanas"),
                 "N_Enfermo": st.column_config.NumberColumn("Enfermas"),
                 "Tasa_Exito_Curacion": st.column_config.ProgressColumn(
                     "Curación LLM", min_value=0, max_value=1, format="%.2f"),
             })
+        n_ana = int(a_ev["N_Analizadas"].sum())
+        n_desc = int(a_ev["N_Total"].sum())
         st.caption(
             f"{len(a_ev)} de {len(a)} cohortes descargadas cumplen los "
-            f"criterios de inclusión, con {int(a_ev['N_Total'].sum()):,}"
+            f"criterios de inclusión. Se analizan {n_ana:,}"
             .replace(",", ".") +
-            " muestras evaluables. Las 3 cohortes excluidas contienen solo "
+            f" muestras (las que el LLM logró etiquetar como sano o enfermo), "
+            f"de {n_desc:,} descargadas. ".replace(",", ".") +
+            "La barra 'Curación LLM' muestra la fracción de muestras "
+            "etiquetadas con éxito por cohorte; las muestras ambiguas se "
+            "descartan del análisis. Las 3 cohortes excluidas contienen solo "
             "tumores (sin controles) y no permiten entrenar el clasificador.")
 
 
