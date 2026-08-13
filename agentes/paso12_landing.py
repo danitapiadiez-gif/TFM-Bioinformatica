@@ -411,7 +411,7 @@ components.html(
 
 c_izq, c_btn, c_der = st.columns([1, 2, 1])
 with c_btn:
-    if st.button("❯ Entrar al framework", use_container_width=True,
+    if st.button("❯ Comenzar", use_container_width=True,
                  key="btn_entrar"):
         st.switch_page("paso12_dashboard.py")
 
