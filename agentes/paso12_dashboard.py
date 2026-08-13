@@ -947,15 +947,22 @@ y no artefacto técnico.</li>
                 "Tasa_Exito_Curacion": st.column_config.ProgressColumn(
                     "Curación LLM", min_value=0, max_value=1, format="%.2f"),
             })
-        n_ana = int(a_ev["N_Analizadas"].sum())
-        n_desc = int(a_ev["N_Total"].sum())
-        n_sin = int(a_ev["N_Sin_Clasificar"].sum())
+        n_ana_ev = int(a_ev["N_Analizadas"].sum())
+        n_desc_ev = int(a_ev["N_Total"].sum())
+        n_sin_ev = int(a_ev["N_Sin_Clasificar"].sum())
+        n_curadas_total = int(a["N_Sano"].sum() + a["N_Enfermo"].sum())
+        n_no_ev = len(a) - len(a_ev)
         st.caption(
             f"{len(a_ev)} de {len(a)} cohortes descargadas cumplen los "
-            f"criterios de inclusión. De {n_desc:,} muestras descargadas, "
-            f"{n_ana:,} se analizan y {n_sin:,} quedan sin clasificar por "
-            f"metadatos ambiguos. Las 3 cohortes excluidas contienen solo "
-            f"tumores (sin controles) y no permiten entrenar el clasificador."
+            f"criterios de inclusión. En estas {len(a_ev)} cohortes "
+            f"evaluables se analizan {n_ana_ev:,} muestras (sanas + "
+            f"enfermas) sobre {n_desc_ev:,} descargadas; {n_sin_ev:,} "
+            f"quedan sin clasificar por metadatos ambiguos. Las "
+            f"{n_no_ev} cohortes excluidas no tienen controles sanos "
+            f"evaluables y no permiten entrenar el clasificador; sus "
+            f"muestras tumorales sí se aprovechan para engrosar el "
+            f"conjunto de entrenamiento en LODO (hasta {n_curadas_total:,} "
+            f"muestras curadas en total)."
             .replace(",", "."))
 
 
