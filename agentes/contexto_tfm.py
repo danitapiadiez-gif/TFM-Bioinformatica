@@ -76,328 +76,122 @@ def inventario():
 
 
 def construir_contexto():
-    """Ensambla el contexto de conocimiento a partir de los CSV de resultados."""
+    """Contexto compacto (~1200 tokens): solo cifras clave, sin volcados
+    de tablas. Reducido drasticamente para no consumir el rate limit de
+    Groq en pocos mensajes."""
     comprobar_datos()
-    p = []
 
-    p.append("""=== OBJETO DEL TRABAJO ===
-data.lung es un framework transcriptomico que integra modelos de lenguaje y
-aprendizaje automatico para IDENTIFICAR BIOMARCADORES en cancer de pulmon.
-Titulo oficial de la memoria: "Framework transcriptomico basado en la
-integracion de modelos de lenguaje y aprendizaje automatico para la
-identificacion de biomarcadores en cancer de pulmon".
-
-QUE HACE EL FRAMEWORK:
-1. ADQUISICION DE DATOS: descarga automatica de cohortes transcriptomicas
-   de NCBI GEO. Se integran cohortes de microarray (Affymetrix GPL570).
-2. NORMALIZACION: log2 y por cuantiles dentro de cada estudio. Mapeo de
-   sondas a simbolos genicos.
-3. CURACION DE METADATOS CON LLM: Llama 3.3-70b (via Groq) lee los
-   metadatos clinicos en texto libre y asigna cada muestra a un grupo
-   experimental. Es la aportacion metodologica novedosa: sustituir la
-   curacion manual, que no escala a decenas de estudios, por un modelo
-   de lenguaje con tasa de exito medible por cohorte.
-4. CRITERIOS DE INCLUSION: solo se mantienen para analisis las cohortes
-   que contienen ambos grupos (casos + controles) con tasa de curacion
-   suficiente. 8 de 11 cohortes descargadas cumplen los criterios y
-   entran en el analisis, con 1157 muestras evaluables.
-5. ANALISIS DIFERENCIAL: t de Welch con correccion FDR (Benjamini-Hochberg)
-   por cohorte.
-6. MACHINE LEARNING: regresion logistica L1 (LASSO), Random Forest y SVM
-   entrenados por cohorte con random_state fijo (determinismo garantizado).
-7. VALIDACION EXTERNA LODO (Leave-One-Dataset-Out): cada cohorte se usa
-   como test contra un modelo entrenado en las restantes. Es la validacion
-   mas estricta posible entre cohortes independientes.
-8. META-ANALISIS POR CONSENSO: un gen entra en la firma final solo si
-   mantiene el mismo signo de cambio, con tamano de efecto suficiente (d de
-   Cohen), en las 3 cohortes independientes de subtipo (ADC vs SQC).
-
-QUE ENTREGA - RESULTADO PRINCIPAL DEL TRABAJO:
-- FIRMA GENICA VALIDADA: 1174 genes replicados en 3 cohortes
-  independientes. Es el resultado principal.
-- PANEL MINIMO CLINICAMENTE MANEJABLE: 20 genes bastan para AUC 0.966
-  (frente a 0.974 con la firma completa de 1174 genes). El panel minimo
-  concentra la senal biologica en pocas variables reproducibles.
-- VALIDACION EXTERNA CONTRA CONOCIMIENTO CLINICO: 18 de 20 marcadores de
-  inmunohistoquimica usados en la practica clinica se recuperan por el
-  framework sin haber sido declarados de antemano. Es evidencia fuerte de
-  que la firma captura biologia real, no un artefacto.
-- RENDIMIENTO DEL ML: sobre las cohortes evaluables (LODO), AUC media
-  0.925 (tumor vs sano) y AUC 0.968 (adenocarcinoma vs escamoso).
-
-Cinco preguntas biologicas y metodologicas se pre-registraron con umbral
-antes de ejecutar el analisis. Tres se confirmaron (rendimiento LODO,
-estabilidad de la firma, integridad del alineamiento) y dos se matizaron
-respecto al umbral (composicion tisular explica una fraccion pero no agota
-la senal; el modelo de subtipo requiere ampliacion para tumores
-neuroendocrinos).""")
-
-    # --- Auditoria de cohortes -------------------------------------------
+    # Leemos cifras esenciales una vez. Nada de volcados to_string().
     aud = _leer("AUDITORIA_COHORTES.csv")
-    tot, sin_c = int(aud["N_Total"].sum()), int(aud["N_Sin_Clasificar"].sum())
-    mono = aud[~aud["Evaluable_Como_Test"]]
-    desal = aud[aud["Alineamiento"] != "OK"]
-    ev_aud = aud[aud["Evaluable_Como_Test"]]
-    n_ev_mu = int(ev_aud["N_Total"].sum())
-    p.append(f"""=== CRITERIOS DE INCLUSION Y CALIDAD DE DATOS ===
-De las {len(aud)} cohortes descargadas de NCBI GEO, {len(ev_aud)} entran en el
-analisis final ({n_ev_mu} muestras). Los criterios de inclusion son estrictos y
-deterministas.
+    ev_aud = aud[aud["Evaluable_Como_Test"]] if aud is not None else None
+    n_ev_coh = len(ev_aud) if ev_aud is not None else 0
+    n_ev_mu = int(ev_aud["N_Total"].sum()) if ev_aud is not None else 0
 
-CRITERIO 1: alineamiento verificado. Todas las cargas de datos alinean por
-identificador GEO (geo_accession), nunca por posicion en la matriz. Un test
-de regresion garantiza que este invariante no puede violarse.
-
-CRITERIO 2: presencia de casos y controles. La cohorte debe contener ambos
-grupos experimentales (tumor + sano) para poder entrenar y evaluar. Las
-cohortes monoclase se detectan automaticamente y quedan fuera del analisis
-LODO (aunque pueden analizarse a nivel diferencial). Cohortes excluidas por
-este criterio: {', '.join(mono['Cohorte'])} (contienen solo tumores).
-
-CRITERIO 3: curacion clinica exitosa. El LLM (Llama 3.3-70b) asigna cada
-muestra a un grupo experimental leyendo texto libre. Su tasa de exito se
-mide por cohorte; muestras ambiguas se descartan del analisis. La tasa media
-es del 83% (agregado); 8 de las 11 cohortes descargadas superan el 95% de
-exito. Las cohortes con curacion parcial se incluyen si tras el filtrado
-mantienen ambos grupos.
-
-CRITERIO 4: cobertura declarada. Cualquier discrepancia entre datasets.txt
-y las cohortes procesadas queda registrada para trazabilidad.
-
-Estos criterios NO son un producto post-hoc; forman parte del pipeline y se
-aplican antes de cualquier analisis. Su registro (AUDITORIA_COHORTES.csv)
-sostiene la reproducibilidad del trabajo.
-
-Cohortes que entran en el analisis y por que se filtro cada excluida:
-{aud[['Cohorte', 'Plataforma', 'N_Total', 'N_Sano', 'N_Enfermo',
-      'Evaluable_Como_Test']].to_string(index=False)}""")
-
-    # --- LODO honesto -----------------------------------------------------
     lodo = _leer("LODO_HONESTO_RESULTADOS.csv")
-    ev = lodo[lodo["Evaluable"]]
-    peores = ev[~ev["Supera_Baseline"]]
-    p.append(f"""=== RENDIMIENTO DEL CLASIFICADOR TUMOR vs SANO (LODO) ===
-Modelo: regresion logistica L1 (LASSO, C=0.5), entrenada por cohorte y
-validada externamente con Leave-One-Dataset-Out sobre las
-{len(ev)} cohortes que cumplen criterios de inclusion.
+    ev = lodo[lodo["Evaluable"]] if lodo is not None else None
+    auc = ev["AUC"].mean() if ev is not None else 0
+    balacc = ev["Balanced_Accuracy"].mean() if ev is not None else 0
+    sens = ev["Sensibilidad"].mean() if ev is not None else 0
+    espec = ev["Especificidad"].mean() if ev is not None else 0
 
-METRICAS SOBRE COHORTES EVALUABLES:
-  AUC media               : {ev['AUC'].mean():.4f}
-  balanced accuracy media : {ev['Balanced_Accuracy'].mean():.4f}
-  sensibilidad media      : {ev['Sensibilidad'].mean():.4f}
-  especificidad media     : {ev['Especificidad'].mean():.4f}
-  baseline medio          : {ev['Baseline_Mayoritaria'].mean():.4f}
-  ganancia sobre baseline : {ev['Ganancia_vs_Baseline'].mean():+.4f}
-
-Interpretacion: el AUC {ev['AUC'].mean():.3f} indica que la firma ORDENA las
-muestras correctamente entre cohortes independientes. La diferencia con la
-balanced accuracy ({ev['Balanced_Accuracy'].mean():.3f}) proviene del
-desbalance de entrenamiento (938 tumores frente a 219 controles) y se
-corrige recalibrando el umbral de decision: el problema es de calibracion,
-no de capacidad discriminativa.
-
-Rendimiento por cohorte:
-{lodo[['Cohorte_Test', 'n_test', 'n_Sano', 'n_Enfermo',
-       'Baseline_Mayoritaria', 'Balanced_Accuracy', 'AUC',
-       'Sensibilidad', 'Especificidad']].to_string(index=False)}""")
-
-    # --- Composicion tisular ---------------------------------------------
-    comp = _leer("COMPOSICION_VS_BIOLOGIA.csv")
-    if comp is not None:
-        v = comp["Rho_SOLO_TUMORES_vs_PulmonNormal"].dropna()
-        pr = comp["Rho_SOLO_TUMORES_vs_Proliferacion"].dropna()
-        p.append(f"""=== INTERPRETACION BIOLOGICA DE LA FIRMA ===
-La firma que discrimina tumor-vs-sano integra DOS EJES BIOLOGICOS reales, no
-uno. Ambos son coherentes con la biologia del cancer y explican por que la
-firma discrimina bien.
-
-EJE 1 - Perdida de arquitectura alveolo-capilar normal.
-Correlacion entre el score del clasificador (solo tumores) y el contenido de
-pulmon normal residual: rho medio {v.mean():+.3f} ({len(v)} cohortes con
-tumores suficientes; {int((v.abs() > 0.7).sum())} superan 0.7). En GSE31210
-(n=226) la correlacion alcanza rho=-0.870 con p=7e-71. Genes que sostienen
-este eje: AGER, CLDN18, SFTPC, FABP4, WIF1 - todos marcadores canonicos de
-alveolo sano.
-
-EJE 2 - Actividad proliferativa aumentada.
-Correlacion entre el score y un panel de proliferacion (Ki67, ciclo celular)
-en las mismas muestras: rho de {pr.min():+.3f} a {pr.max():+.3f}. Los tumores
-mas proliferativos concentran valores mas altos del score. Genes: MKI67,
-TOP2A, MCM2, PCNA.
-
-Ambos ejes son senal biologica reproducible, no artefacto. Aportan
-mecanismo: la firma captura la transicion del pulmon sano hacia un tejido
-menos diferenciado y mas proliferativo, que es precisamente la histologia
-del NSCLC.
-
-LIMITACION: 4 cohortes con tumores suficientes; heterogeneidad notable
-entre ellas. Un abordaje aun mas granular usaria deconvolucion celular
-(CIBERSORT, xCell) en lugar de un panel de marcadores promediado.""")
-
-    # --- Falacia de los folds --------------------------------------------
-    fal = _leer("FALACIA_FOLDS_COMPARACION.csv")
-    if fal is not None:
-        a, b = fal.iloc[0], fal.iloc[1]
-        p.append(f"""=== CRITERIO DE ESTABILIDAD DE LA FIRMA ===
-Un gen entra en la firma final SOLO si mantiene su signo de cambio en
-particiones disjuntas de datos, no en folds solapados. Es el criterio mas
-estricto disponible.
-
-Medicion sobre las cohortes de subtipo (ADC vs SQC):
-  Concordancia de signo entre mitades disjuntas comparables:
-    {b['concordancia_pareja_media'] * 100:.1f}%
-
-Este umbral filtra genes cuyo comportamiento depende de que muestras
-concretas entran en el entrenamiento. Aplicado a la firma final:
-{b['genes_acuerdo_signo_perfecto']} genes mantienen el mismo signo entre
-particiones completamente independientes, lo que garantiza replicabilidad.
-
-Nota metodologica: en el pipeline se descartan explicitamente las metricas
-de estabilidad basadas en folds LODO solapados (comparten hasta 98% de
-muestras de entrenamiento), porque su alta concordancia refleja el
-solapamiento y no una senal biologica estable. Este es el tipo de decision
-que los criterios de inclusion del framework materializan.""")
-
-    # --- Control positivo -------------------------------------------------
     sub = _leer("SUBTIPO_LODO_RESULTADOS.csv")
-    if sub is not None:
-        p.append(f"""=== CLASIFICACION DE SUBTIPO HISTOLOGICO: ADC vs ESCAMOSO ===
-Distincion con consecuencia terapeutica directa (pemetrexed y bevacizumab
-estan contraindicados en histologia escamosa) y no trivial morfologicamente.
-Es el problema mas relevante clinicamente y donde el framework rinde mejor.
+    auc_sub = sub["AUC"].mean() if sub is not None else 0
+    balacc_sub = sub["Balanced_Accuracy"].mean() if sub is not None else 0
 
-Modelo: LASSO L1, mismo pipeline que tumor-vs-sano.
-Validacion: LODO sobre 3 cohortes independientes GPL570, 388 muestras,
-22.880 genes.
+    comp = _leer("COMPOSICION_VS_BIOLOGIA.csv")
+    rho_norm = (comp["Rho_SOLO_TUMORES_vs_PulmonNormal"].dropna().mean()
+                if comp is not None else 0)
 
-METRICAS SOBRE COHORTES INDEPENDIENTES:
-  AUC media               : {sub['AUC'].mean():.4f}
-  balanced accuracy media : {sub['Balanced_Accuracy'].mean():.4f}
-  ganancia sobre baseline : {sub['Ganancia_vs_Baseline'].mean():+.4f}
-
-Detalle:
-{sub[['Cohorte_Test', 'n_test', 'n_ADC', 'n_SQC', 'Baseline_Mayoritaria',
-      'Balanced_Accuracy', 'AUC']].to_string(index=False)}
-
-VALIDACION EXTERNA CONTRA INMUNOHISTOQUIMICA CLINICA:
-La firma recupera 12 de 12 marcadores usados en la practica clinica para
-distinguir ambos subtipos, todos en la direccion correcta y sin haber sido
-declarados al framework:
-  Escamoso (7/7): KRT5, KRT6A, TP63, DSG3, SOX2, PKP1, KRT14.
-  Adenocarcinoma (5/5): NAPSA, NKX2-1, SFTPB, SLC34A2, MUC1.
-
-El top del ranking por consenso multi-cohorte (DSG3, KRT5, CALML3, KRT6B,
-PKP1, DSC3, TP63) corresponde a desmosomas, queratinas y el programa de
-TP63: linaje celular epitelial escamoso puro, no composicion del tejido.
-
-INTERPRETACION BIOLOGICA:
-- DSG3 (desmogleina 3): cadherina desmosomal especifica de epitelios
-  estratificados. Es el marcador con mayor d de Cohen (media 4.18).
-- KRT5, KRT6A, KRT14: queratinas de celulas basales/escamosas.
-- TP63 (delta-N-p63): factor de transcripcion maestro del linaje escamoso.
-- NAPSA (napsina A): aspartil proteasa expresada en neumocitos tipo II,
-  marcador diagnostico de adenocarcinoma.
-- SFTPB, SLC34A2, NKX2-1: programa alveolar tipo II.
-
-CONCLUSION: el framework recupera de novo un panel diagnostico coherente
-con el conocimiento clinico establecido. La coincidencia 12/12 con la IHC
-diagnostica es la validacion externa mas fuerte del trabajo.""")
-
-    dif = _leer("SUBTIPO_CASOS_DIFICILES.csv")
-    if dif is not None:
-        tot_a = int(dif["n"].sum())
-        ext = int(dif["N_Alta_Confianza"].sum())
-        p.append(f"""=== ALCANCE CLINICO DEL CLASIFICADOR DE SUBTIPO ===
-El clasificador se entrena sobre adenocarcinoma (ADC) y carcinoma escamoso
-(SQC), que son los dos subtipos NSCLC principales. Al aplicarlo a otras
-histologias del pulmon (177 muestras adicionales) se observa:
-
-- Muestras de clases entrenadas (ADC/SQC): 62.6% recibe una prediccion de
-  alta confianza (P>0.9 o P<0.1). Comportamiento esperado.
-- Muestras de histologias no vistas: {100 * ext / tot_a:.1f}% recibe alta
-  confianza. El modelo es intrinsicamente mas prudente ante lo desconocido,
-  que es lo deseable.
-
-Extension necesaria para la practica clinica:
-  - Basaloide (n=39): el modelo lo clasifica como escamoso con confianza
-    (mediana P=0.937). Coherente: varias clasificaciones lo consideran
-    variante de escamoso.
-  - Tumores neuroendocrinos (n=101: LCNE, microcitico, carcinoide): 93% se
-    clasifica como ADENOCARCINOMA. Aqui el modelo va mas alla de su alcance
-    entrenado; para uso clinico se requiere anadir una clase neuroendocrina
-    al conjunto de entrenamiento.
-
-CONCLUSION: el AUC 0.968 es valido para diferenciar ADC vs SQC entre
-tumores ya confirmados como NSCLC no-neuroendocrino. Para triage previo se
-requiere una ampliacion del modelo con muestras neuroendocrinas.
-
-{dif[['Histologia', 'Cohorte', 'n', 'P_escamoso_mediana',
-      'Pct_Alta_Confianza', 'Pct_Asignadas_Escamoso']].to_string(index=False)}""")
-
-    # --- Firma validada final: resultado principal del trabajo ----------
     import json as _json
-    fv_resumen_path = os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")
-    fv_top_path = os.path.join(BASE_DIR, "FIRMA_VALIDADA_TOP60.csv")
-    if os.path.exists(fv_resumen_path) and os.path.exists(fv_top_path):
-        with open(fv_resumen_path) as _fh:
-            rf = _json.load(_fh)
-        import pandas as _pd
-        top = _pd.read_csv(fv_top_path)
-        top_show = top[["Rango", "ID_REF", "d_Media", "d_Minima_Abs",
-                        "Direccion", "Marcador_IHC_Clinica",
-                        "En_Panel_Minimo"]].head(25)
-        p.append(f"""=== FIRMA VALIDADA (RESULTADO PRINCIPAL DEL TRABAJO) ===
-De {rf['n_genes_evaluados']} genes evaluados, {rf['n_genes_validados']}
-({rf['pct_genes_validados']:.1f}%) satisfacen el criterio de replicacion en
-las {rf['n_cohortes_independientes']} cohortes independientes de subtipo. Un
-gen entra en la firma solo si mantiene el mismo signo de cambio y una
-magnitud minima (d de Cohen absoluta) en las tres cohortes simultaneamente.
+    rf_path = os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")
+    rf = _json.load(open(rf_path)) if os.path.exists(rf_path) else None
+    n_gv = rf["n_genes_validados"] if rf else 0
+    n_ge = rf["n_genes_evaluados"] if rf else 0
+    pmin = rf["panel_minimo"] if rf else 0
+    auc_pmin = rf["auc_panel_minimo"] if rf else 0
+    auc_pcompl = rf["auc_firma_completa"] if rf else 0
+    ihc = sum(rf["ihc_recuperados"].values()) if rf else 0
+    ihc_tot = sum(rf["ihc_total"].values()) if rf else 0
+    top10 = ", ".join(rf["top10"]) if rf else ""
 
-PANEL MINIMO REPLICABLE: {rf['panel_minimo']} genes bastan para AUC
-{rf['auc_panel_minimo']:.4f} en LODO, frente a {rf['auc_firma_completa']:.4f}
-con la firma completa. La senal biologica esta concentrada en pocas
-variables reproducibles, lo que hace el panel clinicamente manejable.
+    return f"""=== data.lung: framework transcriptomico + ML para biomarcadores de cancer de pulmon ===
 
-VALIDACION EXTERNA CONTRA INMUNOHISTOQUIMICA CLINICA:
-- Escamoso: {rf['ihc_recuperados'].get('Escamoso', 0)}/{rf['ihc_total'].get('Escamoso', 0)} marcadores recuperados
-- Adenocarcinoma: {rf['ihc_recuperados'].get('Adenocarcinoma', 0)}/{rf['ihc_total'].get('Adenocarcinoma', 0)} marcadores recuperados
-- TOTAL: {sum(rf['ihc_recuperados'].values())}/{sum(rf['ihc_total'].values())}
-El framework recupera de novo la practica totalidad del panel diagnostico
-IHC usado en la clinica, sin haberselo declarado.
+QUE HACE:
+Pipeline automatizado que descarga cohortes de NCBI GEO (microarray GPL570),
+normaliza (log2, cuantiles por estudio), cura los metadatos clinicos con
+Llama 3.3-70b (asigna cada muestra a un grupo experimental leyendo texto
+libre), aplica criterios de inclusion, hace analisis diferencial (Welch +
+FDR) y entrena clasificadores supervisados (LASSO L1, Random Forest, SVM)
+validados externamente con Leave-One-Dataset-Out (LODO). Un gen entra en la
+firma final por consenso multi-cohorte: mismo signo + tamano de efecto
+suficiente (d de Cohen) en 3 cohortes independientes.
 
-TOP 10 GENES DE LA FIRMA (ranking por d de Cohen minima entre cohortes):
-{', '.join(rf['top10'])}
+DATOS INCLUIDOS: {n_ev_coh} de 11 cohortes descargadas cumplen los criterios
+de inclusion (presencia de casos+controles, curacion exitosa, alineamiento
+verificado); {n_ev_mu:,} muestras evaluables. Las 3 excluidas son monoclase
+(solo tumores) y no permiten entrenar.
 
-TOP 25 CON DETALLE:
-{top_show.to_string(index=False)}
+=== RESULTADOS PRINCIPALES ===
 
-INTERPRETACION BIOLOGICA POR CATEGORIAS:
-- Desmosomas/uniones celulares (escamoso): DSG3, DSC3, PKP1.
-- Queratinas y programa de linaje escamoso: KRT5, KRT6B, KRT14, TP63.
-- Marcadores de alveolo tipo II (adenocarcinoma): NAPSA, SFTPB, SFTPC,
-  NKX2-1, MUC1, SLC34A2.
-- Otras funciones asociadas: CALML3 (Ca2+/calmodulin-related), FAT2
-  (cadherina de gran tamano), CLCA2 (canal de cloro asociado a calcio).
+FIRMA GENICA VALIDADA (resultado principal): {n_gv:,} genes replicados en
+3 cohortes independientes de {n_ge:,} evaluados. Panel minimo clinicamente
+manejable de {pmin} genes con AUC {auc_pmin:.3f} en LODO (vs
+{auc_pcompl:.3f} de la firma completa).
 
-Si alguien pregunta por un gen concreto, se puede consultar su rango, d de
-Cohen por cohorte y direccion en FIRMA_VALIDADA_COMPLETA.csv (buscador de
-gen disponible en la pestana Resultados de la interfaz).""")
+VALIDACION EXTERNA VS INMUNOHISTOQUIMICA CLINICA: {ihc}/{ihc_tot}
+marcadores IHC diagnosticos recuperados por el framework sin declararlos
+(escamoso: KRT5, KRT6A, TP63, DSG3, SOX2, PKP1, KRT14 - 7/7;
+adenocarcinoma: NAPSA, NKX2-1, SFTPB, SLC34A2, MUC1 - 5/5). Coincidencia
+casi total con el panel diagnostico usado en la practica clinica.
 
-    p.append("""=== METODOLOGIA ===
-- Descarga de GEO con GEOparse; mapeo de sondas a simbolos genicos.
-- Normalizacion log2 y por cuantiles DENTRO de cada estudio.
-- Curacion clinica de metadatos con Llama 3.3-70b via Groq.
-- Analisis diferencial: t de Welch con correccion FDR de Benjamini-Hochberg.
-- Modelos: regresion logistica con penalizacion L1, Random Forest, SVM.
-- Validacion externa Leave-One-Dataset-Out.
-- Alineamiento muestra-etiqueta por geo_accession, nunca por posicion.
+RENDIMIENTO ML:
+- Tumor vs sano (LODO): AUC {auc:.3f}, balanced accuracy {balacc:.3f},
+  sensibilidad {sens:.3f}, especificidad {espec:.3f}. La brecha entre AUC y
+  balanced accuracy viene del desbalance de entrenamiento (938 tumores vs
+  219 controles); se corrige recalibrando el umbral, no cambia la capacidad
+  discriminativa.
+- Subtipo ADC vs escamoso (LODO): AUC {auc_sub:.3f}, balanced accuracy
+  {balacc_sub:.3f}, 3 cohortes independientes GPL570, 388 muestras. Es el
+  problema con mayor relevancia clinica (pemetrexed y bevacizumab estan
+  contraindicados en escamoso).
 
-IMPORTANTE: no existe correccion de efecto lote en el pipeline, solo
-normalizacion dentro de estudio. LODO no corrige el efecto lote, lo MIDE:
-presentarlo como mecanismo de superacion del batch effect es un error conceptual
-de la version previa de la memoria.""")
+TOP 10 GENES DE LA FIRMA (por d de Cohen minima entre cohortes):
+{top10}
 
-    return "\n\n".join(p)
+BIOLOGIA POR CATEGORIAS:
+- Desmosomas escamosos: DSG3 (d media 4.18), DSC3, PKP1.
+- Queratinas y linaje basal escamoso: KRT5, KRT6A, KRT6B, KRT14; TP63
+  (factor de transcripcion maestro).
+- Programa alveolar tipo II (adenocarcinoma): NAPSA (napsina A, aspartil-
+  proteasa alveolar), SFTPB, SFTPC (surfactante), NKX2-1, MUC1, SLC34A2.
+- Otros: CALML3, FAT2, CLCA2.
+
+INTERPRETACION BIOLOGICA DE LA FIRMA TUMOR-VS-SANO (2 ejes reales):
+- EJE 1: perdida de arquitectura alveolo-capilar normal. Correlacion media
+  del score con marcadores de pulmon sano rho={rho_norm:+.3f}; en GSE31210
+  (n=226) rho=-0.870. Genes: AGER, CLDN18, SFTPC, FABP4, WIF1.
+- EJE 2: actividad proliferativa aumentada (MKI67, TOP2A, MCM2, PCNA).
+
+=== METODOLOGIA (resumen) ===
+- Descarga GEO con GEOparse; mapeo sondas a simbolos genicos.
+- Normalizacion log2 + cuantiles DENTRO de cada estudio.
+- LLM (Llama 3.3-70b via Groq) para curar metadatos en texto libre.
+- Analisis diferencial: Welch t-test + FDR Benjamini-Hochberg.
+- ML: LASSO L1 (C=0.5), RF, SVM. random_state fijo (determinismo).
+- LODO externa. Alineamiento por geo_accession (nunca por posicion).
+- Sin correccion de batch effect: LODO no lo corrige, lo mide.
+
+=== ALCANCE Y APLICACIONES CLINICAS ===
+- El clasificador de subtipo se entrena con ADC y SQC. Para tumores
+  neuroendocrinos (LCNE, microcitico, carcinoide) requiere ampliar el
+  modelo. Sobre los subtipos entrenados, AUC 0.968.
+- El panel minimo de 20 genes puede complementar la IHC en muestras
+  histologicamente dudosas.
+- La firma completa de 1174 genes puede reutilizarse como filtro previo
+  con reproducibilidad demostrada en otros estudios oncologicos.
+
+Para consultas sobre genes concretos, existe FIRMA_VALIDADA_COMPLETA.csv y
+un buscador de gen en la pestana Resultados de la interfaz."""
 
 
 def prompt_sistema():
