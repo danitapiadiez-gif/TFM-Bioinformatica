@@ -606,9 +606,11 @@ if st.session_state.get("capitulo", "inicio") == "inicio":
       GEO, cura los metadatos clínicos con un modelo de lenguaje y entrena
       clasificadores supervisados sobre dos tareas: <b>tumor frente a sano</b>
       (AUC media LODO {dec(m.get('auc', 0))}) y <b>subtipo histológico</b>
-      (adenocarcinoma vs escamoso), en la que la firma de 1174 genes replicados
-      en tres cohortes independientes recupera 18 de 20 marcadores de
-      inmunohistoquímica diagnóstica con un panel mínimo de 20 genes.</p>
+      (adenocarcinoma vs escamoso). Para la tarea de subtipo se obtiene una
+      firma génica de 1174 genes replicados en tres cohortes independientes,
+      con panel mínimo clínicamente manejable de 20 genes; la firma completa
+      recupera 18 de 20 marcadores de inmunohistoquímica diagnóstica sin
+      declararlos.</p>
       <div class="pie">
         <div><b data-count="{m.get('n_cohortes', 0)}">{m.get('n_cohortes', 0)}</b><span>cohortes GEO</span></div>
         <div><b data-count="{m.get('n_muestras', 0)}">{m.get('n_muestras', 0)}</b><span>muestras curadas</span></div>
@@ -1104,6 +1106,9 @@ composición tisular. Es la validación externa más fuerte del trabajo.</p>
             "entrena en todas las cohortes menos una y se prueba en la "
             "restante, iterando sobre las cohortes evaluables.")
 
+    _aud_all = tabla("AUDITORIA_COHORTES.csv")
+    _n_tum = int(_aud_all["N_Enfermo"].sum()) if _aud_all is not None else 0
+    _n_san = int(_aud_all["N_Sano"].sum()) if _aud_all is not None else 0
     st.markdown(f"""<div class="prosa">
 <p>Rendimiento medio en LODO:</p>
 <ul>
@@ -1114,7 +1119,8 @@ entre cohortes independientes).</li>
 {dec(m.get('espec', 0))}.</li>
 </ul>
 <p>La diferencia entre AUC y balanced accuracy proviene del desbalance del
-entrenamiento (938 tumores frente a 219 controles): la firma <i>ordena</i>
+entrenamiento ({_n_tum} tumores frente a {_n_san} controles curados en
+total): la firma <i>ordena</i>
 bien las muestras, aunque el umbral de decisión requiere recalibrarse entre
 cohortes. Es un problema técnico corregible, no una limitación intrínseca.</p>
 </div>""", unsafe_allow_html=True)
