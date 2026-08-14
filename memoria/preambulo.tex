@@ -1,0 +1,89 @@
+% ==========================================================================
+% Preámbulo: paquetes, geometría, tipografía, capítulos, referencias.
+% ==========================================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{lmodern}
+
+% Geometría
+\usepackage[a4paper, top=2.8cm, bottom=2.8cm, left=3cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Cabecera y pie
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape data.lung — TFM Bioinformática}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% Figuras, tablas, código
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\definecolor{codegray}{gray}{0.95}
+\definecolor{codestring}{RGB}{163,21,21}
+\definecolor{codecomment}{RGB}{92,122,72}
+\definecolor{codekw}{RGB}{45,110,175}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codegray},
+  frame=single,
+  rulecolor=\color{lightgray},
+  breaklines=true,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{codekw}\bfseries,
+  stringstyle=\color{codestring},
+  commentstyle=\color{codecomment}\itshape,
+  showstringspaces=false,
+  captionpos=b,
+  extendedchars=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+           {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {Ü}{{\"U}}1
+}
+\lstdefinestyle{bash}{language=bash}
+\lstdefinestyle{python}{language=Python}
+
+% Matemáticas
+\usepackage{amsmath,amssymb,mathtools}
+
+% Referencias cruzadas y bibliografía
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Framework transcriptómico para biomarcadores en cáncer de pulmón},
+  pdfauthor={Daniel Tapia Díez},
+  pdfsubject={TFM Bioinformática, UAX},
+  pdfkeywords={transcriptómica, cáncer de pulmón, machine learning, biomarcadores, LODO, LLM, NCBI GEO}
+}
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{unsrtnat}
+
+% Espacio en tablas
+\renewcommand{\arraystretch}{1.15}
+
+% Título de capítulos más compacto
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{18pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+
+% Comandos útiles
+\newcommand{\framework}{\texttt{data.lung}}
+\newcommand{\gene}[1]{\textit{#1}}
+\newcommand{\cohorte}[1]{\texttt{#1}}
+
+% Índice, glosario
+\usepackage[toc,page]{appendix}

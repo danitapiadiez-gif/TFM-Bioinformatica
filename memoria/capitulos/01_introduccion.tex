@@ -1,0 +1,177 @@
+\chapter{Introducción}
+\label{cap:introduccion}
+
+\section{Contexto y motivación}
+\label{sec:contexto}
+
+El cáncer de pulmón es la principal causa de mortalidad oncológica a nivel
+mundial. Según las estimaciones de la \emph{International Agency for Research
+on Cancer} (IARC), en 2022 se diagnosticaron aproximadamente 2,48 millones
+de nuevos casos, con 1,82 millones de fallecimientos atribuibles a la
+enfermedad~\cite{sung2022global}. En España, el Observatorio del Cáncer de la
+Asociación Española Contra el Cáncer sitúa la incidencia en torno a 30\,000
+casos anuales, con una supervivencia a cinco años que apenas alcanza el
+20\,\%. Estas cifras contrastan con las tasas de supervivencia de otros
+tumores sólidos como el cáncer de mama, próstata o colorrectal, y evidencian
+la necesidad de mejorar tanto el diagnóstico temprano como la
+estratificación molecular de los pacientes.
+
+Desde el punto de vista histológico, el cáncer de pulmón se clasifica
+principalmente en dos grandes grupos: el cáncer de pulmón de células no
+pequeñas (\emph{Non-Small Cell Lung Cancer}, NSCLC), que representa
+aproximadamente el 85\,\% de los casos, y el cáncer de pulmón microcítico
+(\emph{Small Cell Lung Cancer}, SCLC), con el 15\,\% restante. Dentro del
+NSCLC, los dos subtipos histológicos predominantes son el adenocarcinoma
+(ADC) y el carcinoma escamoso (\emph{Squamous Cell Carcinoma}, SQC),
+seguidos a distancia por el carcinoma de células grandes y los tumores
+neuroendocrinos de gran célula.
+
+La distinción entre adenocarcinoma y carcinoma escamoso tiene una
+implicación terapéutica directa que trasciende el mero interés
+clasificatorio. El pemetrexed, un antifolato aprobado para el tratamiento
+del NSCLC no escamoso, presenta una eficacia significativamente menor en
+histología escamosa y su uso está desaconsejado en este subtipo. El
+bevacizumab, un anticuerpo monoclonal dirigido contra el factor de
+crecimiento del endotelio vascular (VEGF), está formalmente
+contraindicado en carcinoma escamoso por el riesgo de hemorragia pulmonar
+grave. Diversos regímenes de inmunoterapia con inhibidores de \emph{immune
+checkpoints} (PD-1/PD-L1) muestran también patrones de respuesta
+diferentes según el subtipo. Por tanto, una clasificación histológica
+inequívoca condiciona la decisión terapéutica y el pronóstico.
+
+En la práctica clínica, la clasificación se realiza sobre biopsia mediante
+inmunohistoquímica (IHC), usando paneles de marcadores canónicos:
+citoqueratinas y factores de transcripción de linaje epitelial escamoso
+(KRT5, TP63, DSG3\ldots) para el diagnóstico de carcinoma escamoso, y
+marcadores del programa alveolar tipo II (napsina A, TTF-1/NKX2-1,
+surfactantes\ldots) para el adenocarcinoma. Sin embargo, cuando la biopsia
+es escasa o el patrón inmunohistoquímico es ambiguo, la decisión puede
+demorarse o quedar sujeta a discrepancia entre patólogos. Un panel
+molecular objetivo basado en la expresión de un número reducido de genes
+podría complementar la IHC en estos casos.
+
+\section{Transcriptómica y bases de datos públicas}
+\label{sec:transcriptomica}
+
+La transcriptómica es la disciplina que estudia el conjunto de tránscritos
+de ARN producidos por un genoma en un momento y contexto biológico
+concretos. A diferencia del genoma, que es esencialmente estable a lo largo
+de la vida del individuo, el transcriptoma refleja el estado funcional de
+la célula: qué genes se están expresando, en qué proporción y bajo qué
+programa regulatorio. Esta característica hace que el transcriptoma sea un
+sustrato especialmente informativo para el estudio del cáncer, donde la
+transformación maligna se acompaña de reprogramaciones profundas de la
+expresión génica~\cite{hanahan2011hallmarks}.
+
+Las dos tecnologías de referencia para cuantificar el transcriptoma son los
+\emph{microarrays} de expresión (predominantes hasta aproximadamente
+2015) y la secuenciación masiva de ARN (RNA-Seq, dominante desde entonces).
+En \emph{microarrays}, un chip fija miles de sondas de oligonucleótidos
+complementarias a cada gen; el ARN de la muestra se marca con
+fluorescencia y se hibrida al chip, obteniendo una medida de la abundancia
+relativa de cada gen. En RNA-Seq, el ARN se convierte a ADN complementario,
+se secuencia y las lecturas se mapean al genoma o transcriptoma de
+referencia. Ambas tecnologías han generado un enorme volumen de datos
+públicos.
+
+El repositorio NCBI Gene Expression Omnibus (GEO,
+\url{https://www.ncbi.nlm.nih.gov/geo/}) es el mayor archivo público de
+datos de expresión génica~\cite{barrett2013geo}. Cuenta con más de un
+millón de muestras de miles de estudios cubriendo prácticamente cualquier
+tejido, condición o especie. Para cáncer de pulmón se dispone de centenares
+de estudios que abarcan tanto adenocarcinoma como escamoso, tanto muestras
+tumorales como controles adyacentes, y tanto plataformas de
+\emph{microarrays} clásicas (Affymetrix HG-U133 Plus 2.0, plataforma GPL570)
+como datos de RNA-Seq de The Cancer Genome Atlas (TCGA).
+
+Sin embargo, la disponibilidad no equivale a usabilidad. Un investigador que
+quiera integrar varias cohortes debe resolver al menos cuatro problemas
+técnicos:
+
+\begin{enumerate}
+  \item \textbf{Heterogeneidad de plataformas.} Las sondas de un chip
+  Affymetrix HG-U133 Plus 2.0 no son directamente comparables con las de un
+  chip Illumina o con las cuentas normalizadas de RNA-Seq. Es preciso
+  mapear cada sonda a un símbolo génico y agregar sondas múltiples cuando
+  varias apuntan al mismo gen.
+  \item \textbf{Curación clínica.} Los metadatos de GEO están redactados en
+  texto libre por el laboratorio que deposita el estudio. Una misma
+  categoría clínica puede aparecer como \emph{lung adenocarcinoma},
+  \emph{ADC}, \emph{non-small cell lung cancer, adenocarcinoma histology},
+  \emph{primary tumor: adenocarcinoma}, etc. El grupo control puede
+  denominarse \emph{normal}, \emph{healthy}, \emph{non-tumor adjacent
+  tissue}, \emph{control lung}, o incluso no estar etiquetado
+  explícitamente en el campo esperado.
+  \item \textbf{Efecto lote.} La variabilidad técnica entre plataformas,
+  laboratorios y protocolos introduce fuentes de varianza que pueden
+  dominar sobre la señal biológica y confundir cualquier análisis
+  posterior.
+  \item \textbf{Validación externa.} Una firma génica identificada en una
+  cohorte concreta rara vez se replica en cohortes independientes. La
+  literatura acumula cientos de firmas propuestas que no han conseguido
+  transferirse a la clínica~\cite{ioannidis2005false}.
+\end{enumerate}
+
+\section{Modelos de lenguaje aplicados a curación de metadatos}
+\label{sec:llm}
+
+Los recientes modelos de lenguaje de gran tamaño (LLMs), como GPT-4, Claude
+o Llama, han demostrado una capacidad notable para tareas de comprensión de
+texto en dominios especializados, incluyendo la biomedicina. La capacidad
+de estos modelos para interpretar texto libre, extraer entidades y
+clasificarlas según categorías predefinidas los convierte en herramientas
+naturales para automatizar tareas de curación que hasta ahora requerían
+intervención manual.
+
+En el ámbito de este trabajo, un LLM puede leer la descripción textual de
+una muestra de GEO (por ejemplo, \emph{lung adenocarcinoma, stage IIB,
+72-year-old male, former smoker}) y devolver una etiqueta canónica del
+grupo experimental (\texttt{enfermo}, \texttt{sano}, \texttt{ambiguo}). Esta
+delegación permite integrar cohortes con nomenclaturas heterogéneas sin
+tener que codificar reglas específicas para cada estudio, y hace escalable
+la incorporación de nuevas cohortes al análisis. El presente trabajo emplea
+Llama~3.3-70b servido vía la infraestructura de inferencia de Groq, que
+ofrece una latencia baja y un coste marginal accesible para el volumen de
+muestras del proyecto.
+
+\section{Alcance y planteamiento del trabajo}
+\label{sec:alcance}
+
+Este Trabajo Fin de Máster desarrolla \framework, un \emph{framework} de
+análisis transcriptómico y aprendizaje automático que integra los
+componentes descritos en las secciones anteriores para responder a una
+pregunta concreta: \emph{¿es posible identificar, mediante integración
+automatizada de cohortes públicas y validación externa, una firma génica de
+biomarcadores replicable entre cohortes independientes para
+adenocarcinoma y carcinoma escamoso de pulmón?}
+
+El planteamiento del trabajo se articula sobre tres pilares:
+
+\begin{itemize}
+  \item \textbf{Automatización de la integración multi-cohorte} mediante un
+  modelo de lenguaje que resuelve la curación clínica sin intervención
+  humana, escalando la incorporación de nuevas cohortes.
+  \item \textbf{Validación externa exigente} basada en Leave-One-Dataset-Out
+  (LODO), donde cada cohorte se retira una vez del entrenamiento y se
+  utiliza como test independiente, y en meta-análisis por consenso: un gen
+  entra en la firma final sólo si mantiene el mismo signo de cambio en las
+  tres cohortes evaluables simultáneamente.
+  \item \textbf{Interpretabilidad biológica} de la firma resultante,
+  contrastada con marcadores clínicos ya establecidos en
+  inmunohistoquímica diagnóstica y con ejes biológicos conocidos del
+  cáncer de pulmón (linaje escamoso frente a alveolar, actividad
+  proliferativa).
+\end{itemize}
+
+El resto de la memoria se organiza como sigue. El capítulo~\ref{cap:estado}
+revisa el estado del arte en integración multi-cohorte, firmas génicas
+publicadas y aplicaciones de LLMs en bioinformática. El
+capítulo~\ref{cap:objetivos} formula los objetivos general y específicos del
+trabajo. El capítulo~\ref{cap:metodos} detalla los materiales y métodos, con
+particular atención al diseño del \emph{pipeline}. El
+capítulo~\ref{cap:resultados} presenta los resultados de las dos tareas de
+clasificación, la firma génica validada y los ejes biológicos identificados.
+El capítulo~\ref{cap:discusion} discute las implicaciones clínicas y
+metodológicas, sitúa los resultados en el contexto de la literatura y
+enumera las limitaciones del trabajo. El capítulo~\ref{cap:conclusiones}
+resume las conclusiones y esboza líneas de trabajo futuro.

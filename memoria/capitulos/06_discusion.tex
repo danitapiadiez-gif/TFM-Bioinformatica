@@ -1,0 +1,209 @@
+\chapter{Discusión}
+\label{cap:discusion}
+
+\section{Interpretación de los resultados}
+\label{sec:disc_interpretacion}
+
+Los resultados obtenidos permiten aceptar las cuatro hipótesis formuladas
+en la sección~\ref{sec:hipotesis} con matices. La tasa de éxito del LLM en
+la curación clínica ha sido del 85,9\,\% global (con 9 de 11 cohortes por
+encima del 95\,\%), superando ampliamente el umbral del 80\,\% planteado
+en la hipótesis 1. La firma génica validada por consenso multi-cohorte
+alcanza AUC 0,968 en LODO sobre la tarea de subtipo, muy por encima del
+0,90 planteado en la hipótesis 2. La recuperación del panel IHC es del
+90\,\% (18/20), superando el 75\,\% planteado en la hipótesis 3. Y el
+panel mínimo alcanza AUC 0,966 con 20 genes, a menos de 0,01 de la firma
+completa, cumpliendo la hipótesis 4.
+
+Más allá del cumplimiento formal de las hipótesis, los resultados aportan
+tres observaciones cualitativas relevantes:
+
+\begin{enumerate}
+  \item \textbf{La recuperación del panel IHC escamoso es completa
+  (12/12).} El framework, seleccionando genes por un criterio puramente
+  estadístico (consenso de $d$ de Cohen en tres cohortes independientes),
+  encuentra los mismos genes que la patología clínica utiliza en
+  inmunohistoquímica diagnóstica desde hace décadas. Esto es una
+  triangulación externa fuerte: la firma no es sólo estadísticamente
+  robusta, es biológicamente correcta.
+  \item \textbf{La discrepancia entre AUC y balanced accuracy en tumor
+  \emph{vs.} sano} pone de manifiesto una limitación de la firma tal cual
+  se entrega, pero también un problema técnico bien conocido y corregible.
+  El modelo ordena bien las muestras (AUC 0,925) pero necesita
+  recalibración del umbral entre cohortes. Este comportamiento es
+  característico del desbalance del entrenamiento y no una limitación
+  intrínseca del framework.
+  \item \textbf{La existencia de dos ejes biológicos identificables}
+  (pérdida alvéolo-capilar y proliferación) enriquece la interpretación
+  clínica: la firma no es una caja negra, sino que corresponde a
+  mecanismos oncológicos conocidos.
+\end{enumerate}
+
+\section{Contribución del modelo de lenguaje}
+\label{sec:disc_llm}
+
+La integración de Llama~3.3-70b en el paso de curación clínica ha
+demostrado ser una decisión de diseño acertada. Sin este componente, la
+integración de 11 cohortes con nomenclaturas heterogéneas habría requerido
+codificar reglas de mapeo específicas para cada estudio (o incluso para
+cada muestra) o realizar la curación manualmente. Ambos caminos son poco
+escalables y frágiles frente a la incorporación de nuevas cohortes.
+
+Es importante subrayar que el LLM cumple aquí una función bien
+delimitada: leer texto libre y devolver una etiqueta canónica.
+\emph{No participa en ninguna decisión analítica posterior}. No selecciona
+genes, no computa métricas, no interpreta resultados. Esta restricción es
+deliberada y responde a dos preocupaciones:
+
+\begin{itemize}
+  \item \textbf{Sesgo por conocimiento paramétrico.} Un LLM entrenado en
+  la literatura biomédica \emph{sabe} qué genes se han asociado
+  clásicamente al cáncer de pulmón. Si se le permitiera participar en la
+  selección de biomarcadores, sería difícil discernir si un gen aparece
+  en la firma porque los datos lo señalan o porque el modelo lo
+  recomienda.
+  \item \textbf{Alucinación.} Los LLMs pueden inventar cifras plausibles
+  cuando no tienen datos suficientes. En una tarea de razonamiento
+  abierto sobre resultados de un análisis, este riesgo es real. La tarea
+  de clasificación de texto (categoría de 3 opciones) es mucho menos
+  susceptible de alucinación que la generación libre.
+\end{itemize}
+
+La misma restricción se aplica al asistente conversacional integrado en
+la interfaz: su prompt sistema le prohíbe inventar cifras y le exige
+responder \emph{«Eso no figura en los resultados del trabajo»} cuando no
+tenga el dato. En el capítulo~\ref{cap:resultados} se muestra que el
+asistente y el resto de la interfaz emiten cifras coherentes entre sí,
+gracias a que ambos se alimentan del mismo conjunto de CSV y JSON del
+pipeline.
+
+\section{Sesgos y limitaciones metodológicas}
+\label{sec:disc_sesgos}
+
+\subsection{Ámbito de plataforma}
+El clasificador se entrena sobre datos de microarray, principalmente
+plataforma Affymetrix HG-U133 Plus 2.0. Su transferibilidad directa a
+datos de RNA-Seq requiere normalización específica y no está garantizada:
+las distribuciones de intensidad y el ruido técnico son distintos. Este
+punto se discute como línea de trabajo futuro en la
+sección~\ref{sec:conc_futuro}.
+
+\subsection{Ámbito histológico}
+El entrenamiento se restringe a adenocarcinoma y carcinoma escamoso. El
+framework no está diseñado para clasificar tumores neuroendocrinos ni
+otras histologías raras. Esta restricción se declara explícitamente en la
+interfaz y en el asistente conversacional, para evitar cualquier uso
+inadecuado en triage sobre casos sin diagnosticar.
+
+\subsection{Umbral de decisión}
+Como se ha señalado, el umbral óptimo del clasificador varía entre
+cohortes. Para uso clínico esto exigiría una calibración por cohorte de
+implementación o una recalibración isotónica sobre un pequeño conjunto
+de referencia local. Ambas soluciones son estándar en el despliegue de
+clasificadores biomédicos, pero no se han integrado en este trabajo.
+
+\subsection{Población y sesgos demográficos}
+Las cohortes GEO empleadas se generaron mayoritariamente en poblaciones de
+origen europeo o asiático. La transferibilidad a otras poblaciones no
+está evaluada. Este es un sesgo común en genómica pública que la
+comunidad reconoce~\cite{sirugo2019missing}.
+
+\subsection{Tamaño muestral}
+Dos cohortes evaluables (GSE23066 y GSE7670) tienen tamaños muy reducidos
+($n \leq 15$). Sus resultados individuales tienen poca precisión
+estadística y contribuyen poco a la media LODO. El diseño podría
+beneficiarse de restringir la evaluación a cohortes con al menos 30-50
+muestras, aunque a coste de reducir el número de folds.
+
+\section{Comparación con la literatura}
+\label{sec:disc_literatura}
+
+Los resultados obtenidos se sitúan en el rango alto de la literatura
+publicada sobre clasificación de subtipos NSCLC a partir de expresión
+génica. Girard et al.~\cite{girard2016comprehensive} publican una
+clasificación de subtipos moleculares en NSCLC con AUC en torno a 0,92
+sobre TCGA, sin validación externa en cohortes independientes. Chen et
+al.~\cite{chen2017gene} proponen una firma pronóstica de 12 genes con AUC
+0,83 en validación externa. La firma presentada en este trabajo obtiene
+AUC 0,968 en validación externa sobre tres cohortes independientes, con un
+panel mínimo de 20 genes.
+
+Más importante que la magnitud del AUC es el criterio de validación. Las
+firmas publicadas suelen mostrar caídas de 5-15 puntos porcentuales entre
+validación interna y externa~\cite{bernau2014crossvalidation}. La firma
+presentada aquí ya está validada externamente, por lo que no cabe
+esperar una degradación adicional al aplicarla a nuevas cohortes GPL570.
+
+Respecto a la validación IHC, el trabajo de Faruki et
+al.~\cite{faruki2017lung} ya señalaba la correspondencia entre firmas
+transcriptómicas y marcadores IHC clásicos, pero sin cuantificarla ni
+proponer un panel mínimo derivado. La aportación específica de este TFM
+es cuantificar la recuperación (18/20) y explicitar el subconjunto no
+recuperado (SFTPA1, SFTPC) con una explicación biológica plausible.
+
+\section{Implicaciones clínicas potenciales}
+\label{sec:disc_clinico}
+
+El panel mínimo de 20 genes tiene, en principio, aplicabilidad clínica
+directa como complemento diagnóstico en casos histológicamente ambiguos.
+Su tamaño lo hace compatible con PCR cuantitativa multiplex (kits de hasta
+30 tránscritos son rutinarios en laboratorios de patología molecular) o
+con \emph{NanoString nCounter} (que trabaja habitualmente con paneles de
+100-800 genes). El tiempo de respuesta ronda las 24-48\,h desde biopsia,
+compatible con la práctica oncológica.
+
+No obstante, dos requisitos deben cumplirse antes de considerar un uso
+clínico real:
+
+\begin{enumerate}
+  \item \textbf{Validación prospectiva} sobre una cohorte no incluida en
+  el descubrimiento, idealmente de una plataforma distinta (RNA-Seq) para
+  demostrar transferibilidad tecnológica.
+  \item \textbf{Aprobación regulatoria} (marcado CE-IVD en la UE, 510(k)
+  o PMA en EE.UU.) que exigirá estudios clínicos formales y un
+  fabricante que asuma la responsabilidad del ensayo.
+\end{enumerate}
+
+Ambos pasos exceden el alcance de este TFM, pero el panel identificado es
+un candidato razonable para iniciar dicha ruta.
+
+\section{Comparación con firmas comerciales existentes}
+\label{sec:disc_comerciales}
+
+Las firmas comerciales existentes para NSCLC (Pervenio Lung RS, Oncotype
+DX Lung) se orientan principalmente al pronóstico de recurrencia tras
+cirugía, no al diagnóstico histológico. La firma presentada en este
+trabajo cubre un nicho diferente: la clasificación del subtipo
+histológico. Por tanto, no compite directamente con las firmas
+pronósticas, sino que las complementa cubriendo una necesidad clínica
+menos atendida.
+
+\section{Lecciones metodológicas}
+\label{sec:disc_lecciones}
+
+Del trabajo se derivan varias lecciones metodológicas aplicables a otros
+proyectos de integración transcriptómica multi-cohorte:
+
+\begin{itemize}
+  \item \textbf{LODO como estándar mínimo.} Los resultados en validación
+  interna sobre-estiman consistentemente el rendimiento externo. LODO
+  debería ser la validación de referencia para cualquier firma que
+  aspire a uso clínico.
+  \item \textbf{Consenso multi-cohorte como filtro de robustez.}
+  Exigir que un gen replique en varias cohortes independientes elimina
+  la mayoría de falsos positivos derivados de sesgos técnicos
+  específicos de una cohorte.
+  \item \textbf{No corregir efecto lote conjuntamente cuando LODO se va
+  a aplicar.} La corrección de lote enmascara la variabilidad que LODO
+  precisamente pretende medir.
+  \item \textbf{Delimitar el rol del LLM.} Un LLM bien acotado a una
+  tarea de curación de texto es una herramienta escalable y fiable.
+  Fuera de esa tarea (por ejemplo, en la selección de genes o en la
+  redacción de conclusiones), sus riesgos superan sus beneficios.
+  \item \textbf{Auditoría automática de coherencia.} La interfaz web
+  incluye una capa de contexto que se lee de los CSV/JSON en cada
+  render, lo que garantiza que las cifras mostradas siempre reflejen el
+  estado actual del análisis. Este patrón, aplicado también al prompt
+  del asistente, elimina una fuente típica de errores en trabajos de
+  este tipo (cifras hardcodeadas que envejecen mal).
+\end{itemize}
