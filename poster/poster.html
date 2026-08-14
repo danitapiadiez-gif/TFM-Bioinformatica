@@ -1,0 +1,659 @@
+<meta charset="utf-8">
+<title>data.lung · Póster TFM</title>
+<style>
+  :root {
+    --ink:      #0B0B0B;
+    --ink-2:    #4A4948;
+    --mute:     #8F8D87;
+    --line:     #DAD6C8;
+    --plane:    #F7F4EB;
+    --surface:  #FFFFFF;
+    --verde:    #1C8A3F;
+    --verde-2:  #0F5F2A;
+    --amber:    #C78A1E;
+
+    --mono: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {}
+  }
+  /* Diseño monotema deliberado: papel cálido con acento verde. */
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--plane); color: var(--ink);
+               font-family: var(--serif); }
+
+  /* ==========================================================
+     Contenedor tipo A0 vertical
+     Ratio A0: 841 × 1189 mm ≈ 1 : 1.414
+     Renderizamos a 1400px de ancho por defecto (comodo en pantalla)
+     y usamos @page A0 en impresion.
+     ========================================================== */
+  .poster {
+    width: min(1400px, 100vw);
+    min-height: calc(min(1400px, 100vw) * 1189 / 841);
+    margin: 0 auto;
+    padding: 56px 60px 36px;
+    background: var(--plane);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  @media print {
+    @page { size: A0 portrait; margin: 0; }
+    html, body { background: var(--plane); }
+    .poster {
+      width: 841mm;
+      height: 1189mm;
+      padding: 40mm 40mm 26mm;
+      margin: 0 auto;
+      page-break-after: avoid;
+      gap: 20mm;
+    }
+  }
+
+  /* ------------ HEADER ------------ */
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: .18em;
+    color: var(--ink-2);
+    text-transform: uppercase;
+  }
+  .header-eyebrow .prompt { color: var(--verde); font-weight: 700; margin-right: .5em; }
+  .header-eyebrow .sep { color: var(--mute); margin: 0 .9em; }
+
+  /* Header en dos columnas: mark + tagline a la izquierda,
+     título + autores a la derecha. Aprovecha ancho, ahorra altura. */
+  header {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 40px;
+    align-items: end;
+  }
+  .header-left { display: flex; flex-direction: column; gap: 8px; }
+  .header-right { display: flex; flex-direction: column; gap: 20px; }
+
+  .mark {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 150px;
+    line-height: .9;
+    letter-spacing: -.04em;
+    color: var(--ink);
+    margin-top: 12px;
+  }
+  .mark .dot { color: var(--verde); }
+
+  .tagline {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 26px;
+    color: var(--ink-2);
+    margin-top: 4px;
+    max-width: 26ch;
+  }
+
+  .title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 38px;
+    line-height: 1.18;
+    letter-spacing: -.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .authors {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-family: var(--serif);
+    font-size: 18px;
+    color: var(--ink-2);
+  }
+  .authors .name { color: var(--ink); font-weight: 700; }
+  .authors .sep { color: var(--mute); font-family: var(--mono); }
+
+  .rule { border: 0; height: 1px; background: var(--line); margin: 0; }
+  .rule.verde { background: var(--verde); height: 3px; }
+  .rule.verde.thin { height: 2px; width: 44px; margin: 8px 0 14px; }
+
+  /* ------------ HERO DE CIFRAS ------------ */
+  .stats-label {
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: .18em;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .stats-label .prompt { color: var(--verde); font-weight: 700; margin-right: .5em; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+  }
+  .stat {
+    display: flex; flex-direction: column;
+    border-top: 3px solid var(--verde);
+    padding-top: 14px;
+  }
+  .stat.amber { border-top-color: var(--amber); }
+  .stat .num {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 82px;
+    line-height: 1;
+    letter-spacing: -.03em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .num small {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 34px;
+    color: var(--mute);
+  }
+  .stat .lbl {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .18em;
+    color: var(--mute);
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+  .stat .sub {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink-2);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* ------------ COLUMNAS Y BLOQUES ------------ */
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 46px;
+    flex: 1;
+  }
+  .block { display: flex; flex-direction: column; margin-bottom: 22px; }
+  .block:last-child { margin-bottom: 0; }
+
+  .kicker {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--verde);
+    letter-spacing: .04em;
+  }
+  .kicker::before { content: "❯ "; }
+
+  .block h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 26px;
+    color: var(--ink);
+    letter-spacing: -.01em;
+    margin: 4px 0 0;
+    text-wrap: balance;
+    line-height: 1.2;
+  }
+  .block p {
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin: 0 0 10px;
+    max-width: 62ch;
+  }
+  .block p b { color: var(--ink); }
+  .block .quote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.35;
+    color: var(--ink);
+    margin: 8px 0 4px;
+    max-width: 32ch;
+  }
+  .block ul {
+    margin: 0 0 8px 0;
+    padding-left: 22px;
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+  .block ul li { margin-bottom: 8px; }
+  .block ul li b { color: var(--ink); }
+
+  /* Tabla estilo editorial */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    margin: 4px 0 8px;
+  }
+  th, td {
+    padding: 9px 10px;
+    text-align: right;
+    border-bottom: 1px solid var(--line);
+  }
+  th:first-child, td:first-child { text-align: left; }
+  thead th {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--mute);
+    font-weight: 600;
+    border-bottom: 2px solid var(--ink);
+  }
+  tbody tr.total td {
+    border-top: 1px solid var(--ink);
+    font-weight: 700;
+    color: var(--ink);
+  }
+  td.acc { color: var(--verde); font-weight: 700; }
+  td.gene { font-family: var(--sans); font-size: 14px; color: var(--ink-2); }
+
+  /* Diagrama del pipeline (SVG-friendly) */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 8px 0 4px;
+  }
+  .pipeline .p {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 10px 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.3;
+    text-align: center;
+  }
+  .pipeline .p .n { color: var(--verde); font-weight: 700; margin-right: 4px; }
+  .pipeline .p.in  { background: var(--plane); border-color: var(--verde); }
+  .pipeline .p.out { background: var(--plane); border-color: var(--amber); }
+
+  /* Panel mínimo: chips */
+  .chips {
+    display: flex; flex-wrap: wrap; gap: 6px 8px;
+    margin: 8px 0 8px;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 4px 10px;
+    border-radius: 2px;
+    letter-spacing: .01em;
+  }
+  .chip.ihc {
+    border-color: var(--verde);
+    background: color-mix(in oklab, var(--verde) 8%, var(--surface));
+    color: var(--verde-2);
+    font-weight: 700;
+  }
+  .chip.no {
+    color: var(--mute);
+    border-style: dashed;
+    text-decoration: line-through;
+    text-decoration-color: var(--mute);
+  }
+  .chips-legend {
+    display: flex; gap: 16px;
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: .1em;
+    color: var(--mute);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .chips-legend .k { display: inline-flex; align-items: center; gap: 6px; }
+  .chips-legend .swatch { width: 10px; height: 10px; border: 1px solid var(--line); }
+  .chips-legend .swatch.v { background: color-mix(in oklab, var(--verde) 15%, white); border-color: var(--verde); }
+
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--verde);
+    padding: 14px 18px;
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    margin: 10px 0 4px;
+  }
+  .callout b { color: var(--ink); }
+
+  /* ------------ FOOTER ------------ */
+  footer {
+    margin-top: 8px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-2);
+    letter-spacing: .04em;
+  }
+  footer .prompt { color: var(--verde); font-weight: 700; margin-right: .5em; }
+  footer .sep { color: var(--mute); margin: 0 1em; }
+</style>
+
+<div class="poster">
+
+  <!-- ================== HEADER ================== -->
+  <div class="header-eyebrow" style="grid-column: 1 / -1;">
+    <span class="prompt">❯</span>Trabajo de Fin de Máster
+    <span class="sep">·</span>Máster en Bioinformática
+    <span class="sep">·</span>Facultad Business &amp; Tech
+    <span class="sep">·</span>Universidad Alfonso X el Sabio
+    <span class="sep">·</span>Madrid 2026
+  </div>
+
+  <header>
+    <div class="header-left">
+      <div class="mark">data<span class="dot">.</span>lung</div>
+      <div class="tagline">Del dataset a una firma génica replicable.</div>
+    </div>
+
+    <div class="header-right">
+      <h1 class="title">
+        Framework transcriptómico basado en la integración de modelos de
+        lenguaje y aprendizaje automático para la identificación de
+        biomarcadores en cáncer de pulmón
+      </h1>
+
+      <div class="authors">
+        <span class="name">Daniel Tapia Díez</span>
+        <span class="sep">·</span>
+        <span>Tutor: Leonardo Dulcetti</span>
+        <span class="sep">·</span>
+        <span>14 de agosto de 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <hr class="rule verde">
+
+  <!-- ================== HERO DE CIFRAS ================== -->
+  <section>
+    <div class="stats-label"><span class="prompt">❯</span>Cifras clave del framework</div>
+    <div class="stats">
+      <div class="stat">
+        <div class="num">1174</div>
+        <div class="lbl">Genes</div>
+        <div class="sub">replicados en 3 cohortes independientes</div>
+      </div>
+      <div class="stat">
+        <div class="num">20</div>
+        <div class="lbl">Panel mínimo</div>
+        <div class="sub">alcanza AUC 0,966 en LODO</div>
+      </div>
+      <div class="stat amber">
+        <div class="num">18<small> / 20</small></div>
+        <div class="lbl">Marcadores IHC</div>
+        <div class="sub">recuperados sin declararlos</div>
+      </div>
+      <div class="stat">
+        <div class="num">0,968</div>
+        <div class="lbl">AUC LODO subtipo</div>
+        <div class="sub">ADC vs carcinoma escamoso (n=388, 3 cohortes)</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ================== COLUMNAS ================== -->
+  <div class="cols">
+
+    <!-- ============ COLUMNA IZQUIERDA ============ -->
+    <div class="col">
+
+      <section class="block">
+        <div class="kicker">I · Contexto</div>
+        <h2>Cáncer de pulmón y el problema de las firmas génicas</h2>
+        <hr class="rule verde thin">
+        <p>El cáncer de pulmón es la <b>primera causa de mortalidad
+        oncológica</b> en el mundo (2,48 M nuevos casos en 2022;
+        supervivencia a 5 años &lt;20&nbsp;%). Distinguir
+        <b>adenocarcinoma</b> (ADC) de <b>carcinoma escamoso</b> (SQC)
+        condiciona el tratamiento: pemetrexed y bevacizumab están
+        contraindicados en escamoso.</p>
+        <p>NCBI GEO reúne cientos de estudios transcriptómicos, pero su
+        integración se ve frenada por la heterogeneidad de plataformas y
+        por metadatos clínicos en texto libre. La mayoría de firmas
+        publicadas <b>no replican</b> en cohortes independientes.</p>
+        <p class="quote">Un framework reproducible que automatiza la
+        integración multi-cohorte con un modelo de lenguaje, y valida
+        externamente las firmas identificadas.</p>
+      </section>
+
+      <section class="block">
+        <div class="kicker">II · Método</div>
+        <h2>Pipeline extremo a extremo</h2>
+        <hr class="rule verde thin">
+        <div class="pipeline">
+          <div class="p in"><span class="n">·</span>NCBI GEO</div>
+          <div class="p"><span class="n">1</span>Descarga</div>
+          <div class="p"><span class="n">2</span>Normalización</div>
+          <div class="p"><span class="n">3</span>LLM curación<br>Llama 3.3-70b</div>
+
+          <div class="p"><span class="n">4</span>Criterios<br>de inclusión</div>
+          <div class="p"><span class="n">5</span>Welch + FDR</div>
+          <div class="p"><span class="n">6</span>LASSO L1<br>RF · SVM</div>
+          <div class="p"><span class="n">7</span>LODO externa</div>
+
+          <div class="p"><span class="n">8</span>Consenso<br>multi-cohorte</div>
+          <div class="p out"><span class="n">9</span>Firma<br>1174 genes</div>
+          <div class="p out"><span class="n">9</span>Panel<br>mínimo 20</div>
+          <div class="p out"><span class="n">9</span>Validación<br>IHC 18/20</div>
+        </div>
+        <p style="margin-top:10px;">
+          <b>Consenso multi-cohorte</b>: un gen entra en la firma sólo si
+          mantiene el mismo signo y <i>d</i> de Cohen |<i>d</i>|&nbsp;&gt;&nbsp;0,5
+          en las tres cohortes evaluables simultáneamente.
+          <b>Validación externa Leave-One-Dataset-Out</b> (LODO): cada
+          cohorte se retira una vez del entrenamiento y se usa como test.
+        </p>
+      </section>
+
+      <section class="block">
+        <div class="kicker">III · Rendimiento en validación externa</div>
+        <h2>Dos tareas, dos regímenes</h2>
+        <hr class="rule verde thin">
+        <table>
+          <thead>
+            <tr>
+              <th>Tarea</th>
+              <th>AUC</th>
+              <th>Bal. acc.</th>
+              <th>Sens.</th>
+              <th>Espec.</th>
+              <th><i>k</i> cohortes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tumor <i>vs.</i> sano</td>
+              <td class="acc">0,925</td>
+              <td>0,772</td>
+              <td>0,983</td>
+              <td>0,561</td>
+              <td>8</td>
+            </tr>
+            <tr>
+              <td>Subtipo ADC <i>vs.</i> SQC</td>
+              <td class="acc">0,968</td>
+              <td>0,940</td>
+              <td>0,924</td>
+              <td>0,957</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td><i>Baseline mayoritario</i></td>
+              <td>—</td>
+              <td>0,609</td>
+              <td>—</td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>La brecha entre AUC y balanced accuracy en tumor <i>vs.</i>
+        sano proviene del desbalance de entrenamiento (938 tumores frente
+        a 219 controles curados). Corregible por recalibración isotónica
+        o Platt scaling; no es una limitación de la firma.</p>
+      </section>
+
+    </div>
+
+    <!-- ============ COLUMNA DERECHA ============ -->
+    <div class="col">
+
+      <section class="block">
+        <div class="kicker">IV · Validación externa contra IHC clínica</div>
+        <h2>18 de 20 marcadores diagnósticos recuperados sin declararlos</h2>
+        <hr class="rule verde thin">
+        <p style="margin-bottom:6px;"><b>Escamoso — 12 / 12 recuperados</b></p>
+        <div class="chips">
+          <span class="chip ihc">KRT5</span>
+          <span class="chip ihc">KRT6A</span>
+          <span class="chip ihc">KRT6B</span>
+          <span class="chip ihc">KRT13</span>
+          <span class="chip ihc">KRT14</span>
+          <span class="chip ihc">TP63</span>
+          <span class="chip ihc">DSG3</span>
+          <span class="chip ihc">DSC3</span>
+          <span class="chip ihc">SOX2</span>
+          <span class="chip ihc">PKP1</span>
+          <span class="chip ihc">CALML3</span>
+          <span class="chip ihc">S100A2</span>
+        </div>
+        <p style="margin:14px 0 6px;"><b>Adenocarcinoma — 6 / 8 recuperados</b></p>
+        <div class="chips">
+          <span class="chip ihc">NAPSA</span>
+          <span class="chip ihc">NKX2-1</span>
+          <span class="chip ihc">SFTPB</span>
+          <span class="chip ihc">MUC1</span>
+          <span class="chip ihc">SLC34A2</span>
+          <span class="chip ihc">CEACAM6</span>
+          <span class="chip no">SFTPC</span>
+          <span class="chip no">SFTPA1</span>
+        </div>
+        <div class="chips-legend">
+          <span class="k"><span class="swatch v"></span>En la firma</span>
+          <span class="k"><span class="swatch"></span>Panel IHC OMS, no recuperado</span>
+        </div>
+        <div class="callout">
+          La firma, seleccionada por criterio estadístico puro
+          (consenso multi-cohorte), <b>coincide con el panel diagnóstico
+          que ya usa la clínica</b>. Es la validación externa más fuerte
+          del trabajo.
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="kicker">V · Panel mínimo</div>
+        <h2>20 genes ≈ 1174 genes</h2>
+        <hr class="rule verde thin">
+        <p>Con <b>20 genes</b> la AUC media LODO es <b>0,966</b>; con la
+        firma completa de 1174 genes es 0,970. La pérdida es inferior a
+        0,01, haciendo el panel <b>clínicamente manejable</b> mediante
+        PCR cuantitativa multiplex o NanoString nCounter.</p>
+        <div class="chips">
+          <span class="chip ihc">DSG3</span>
+          <span class="chip ihc">KRT5</span>
+          <span class="chip ihc">CALML3</span>
+          <span class="chip ihc">KRT6B</span>
+          <span class="chip ihc">PKP1</span>
+          <span class="chip">FAT2</span>
+          <span class="chip">DAPL1</span>
+          <span class="chip">TRIM29</span>
+          <span class="chip">CLCA2</span>
+          <span class="chip ihc">DSC3</span>
+          <span class="chip">S1PR5</span>
+          <span class="chip ihc">KRT6A</span>
+          <span class="chip ihc">KRT13</span>
+          <span class="chip">SERPINB5</span>
+          <span class="chip ihc">TP63</span>
+          <span class="chip">GJB5</span>
+          <span class="chip">KRT16</span>
+          <span class="chip">BNC1</span>
+          <span class="chip">CERS3</span>
+          <span class="chip">TMEM40</span>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="kicker">VI · Interpretación biológica</div>
+        <h2>La firma captura dos ejes reales</h2>
+        <hr class="rule verde thin">
+        <p><b>Eje 1 — Pérdida de arquitectura alvéolo-capilar normal.</b>
+        Correlación media <i>ρ</i> = −0,626 entre el score del clasificador
+        y el contenido residual de pulmón sano dentro de los tumores. En
+        GSE31210 (<i>n</i>=226) alcanza <i>ρ</i> = <b>−0,858</b> con
+        <i>p</i> = 1,1·10<sup>−66</sup>.</p>
+        <p><b>Eje 2 — Actividad proliferativa aumentada.</b>
+        Panel canónico: MKI67, TOP2A, CCNB1, BIRC5, AURKA.</p>
+        <p>Ambos ejes son señal biológica reproducible, no artefacto de
+        composición. La firma captura la transición del pulmón sano
+        hacia un tejido menos diferenciado y más proliferativo — la
+        histología del NSCLC.</p>
+      </section>
+
+      <section class="block">
+        <div class="kicker">VII · Conclusiones</div>
+        <h2>Lo que aporta este trabajo</h2>
+        <hr class="rule verde thin">
+        <ul>
+          <li>Un LLM contemporáneo cura los metadatos de GEO con tasa
+          media del <b>85,9 %</b>, escalando la integración multi-cohorte
+          sin intervención manual.</li>
+          <li>El consenso multi-cohorte + LODO produce una firma
+          <b>robusta</b> en validación externa (AUC 0,968).</li>
+          <li>Un panel de <b>20 genes</b> aproxima el rendimiento de la
+          firma completa (pérdida &lt; 0,01 de AUC).</li>
+          <li>La firma <b>recupera 18/20 marcadores IHC clínicos</b> sin
+          declararlos, coincidiendo con el panel diagnóstico OMS 2015.</li>
+          <li>El framework es <b>reproducible extremo a extremo</b>, con
+          interfaz web y asistente conversacional acotado a los
+          resultados.</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ================== FOOTER ================== -->
+  <footer>
+    <div>
+      <span class="prompt">❯</span>github.com/danitapiadiez-gif/TFM-Bioinformatica
+    </div>
+    <div>
+      <span>streamlit run agentes/paso12_web_chatbot.py</span>
+      <span class="sep">·</span>
+      <span>Licencia MIT</span>
+    </div>
+  </footer>
+
+</div>
