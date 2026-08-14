@@ -1,0 +1,303 @@
+% ==========================================================================
+% Poster TFM — Framework transcriptomico para cancer de pulmon
+% Formato A0 vertical.
+% ==========================================================================
+\documentclass[25pt, a0paper, portrait, margin=15mm, innermargin=15mm,
+               blockverticalspace=12mm, colspace=12mm, subcolspace=8mm]{tikzposter}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit}
+
+% Elimina el logo de tikzposter en pie de pagina.
+\tikzposterlatexaffectionproofoff
+
+% -------- Paleta (verde terminal, coherente con la memoria) --------
+\definecolor{verdeTerm}{HTML}{1C8A3F}
+\definecolor{verdeOsc}{HTML}{146A2F}
+\definecolor{ambar}{HTML}{C78A1E}
+\definecolor{rojo}{HTML}{D03B3B}
+\definecolor{tinta}{HTML}{0B0B0B}
+\definecolor{tinta2}{HTML}{52514E}
+\definecolor{linea}{HTML}{E2E0D8}
+\definecolor{plano}{HTML}{FAFAF7}
+
+\definecolorpalette{dataLungPalette}{
+  \definecolor{colorOne}{named}{verdeTerm}
+  \definecolor{colorTwo}{named}{verdeOsc}
+  \definecolor{colorThree}{named}{plano}
+}
+
+\definecolorstyle{dataLungStyle}{}{
+  \colorlet{backgroundcolor}{white}
+  \colorlet{framecolor}{verdeTerm}
+  \colorlet{titlefgcolor}{white}
+  \colorlet{titlebgcolor}{verdeTerm}
+  \colorlet{blocktitlebgcolor}{verdeTerm}
+  \colorlet{blocktitlefgcolor}{white}
+  \colorlet{blockbodybgcolor}{white}
+  \colorlet{blockbodyfgcolor}{tinta}
+  \colorlet{innerblocktitlebgcolor}{plano}
+  \colorlet{innerblocktitlefgcolor}{tinta}
+  \colorlet{innerblockbodybgcolor}{plano}
+  \colorlet{innerblockbodyfgcolor}{tinta}
+  \colorlet{notefgcolor}{tinta}
+  \colorlet{notebgcolor}{plano}
+  \colorlet{notefrcolor}{verdeTerm}
+}
+
+\usetheme{Simple}
+\usecolorstyle{dataLungStyle}
+\usebackgroundstyle{Plain}
+\usetitlestyle{Empty}
+\useblockstyle{Basic}
+
+% Ajustes tipograficos
+\renewcommand{\baselinestretch}{1.05}
+
+% -------- Info del poster --------
+\title{\parbox{0.95\linewidth}{\centering\bfseries
+       Framework transcriptómico basado en la integración de modelos de\\
+       lenguaje y aprendizaje automático para la identificación de\\
+       biomarcadores en cáncer de pulmón}}
+\author{\bfseries Daniel Tapia Díez\quad$\cdot$\quad Tutor: Leonardo Dulcetti}
+\institute{Máster Universitario en Bioinformática\; --- \;
+           Facultad Business \& Tech, Universidad Alfonso X el Sabio\; --- \;Madrid, 2026}
+
+\begin{document}
+
+% ==========================================================================
+% Cabecera: bloque verde con nombre del proyecto en mono + titulo largo
+% ==========================================================================
+\node[fill=verdeTerm, text=white, minimum width=\paperwidth-40pt,
+      inner sep=18pt, anchor=north] at (0, 43.5) {
+  \begin{minipage}{0.98\linewidth}
+    \centering
+    {\fontfamily{lmtt}\selectfont\fontsize{110}{110}\selectfont
+     \textbf{data\textcolor{plano}{.}lung}}\\[6pt]
+    {\Large Del dataset a una firma génica replicable}\\[18pt]
+    {\bfseries\LARGE
+     Framework transcriptómico basado en la integración de modelos de
+     lenguaje y aprendizaje automático para la\\
+     identificación de biomarcadores en cáncer de pulmón}\\[10pt]
+    {\Large Daniel Tapia Díez\quad$\cdot$\quad Tutor: Leonardo Dulcetti\quad$\cdot$\quad TFM Bioinformática\quad$\cdot$\quad UAX 2026}
+  \end{minipage}
+};
+
+% ==========================================================================
+% Columna izquierda: contexto / objetivo / metodos
+% ==========================================================================
+\begin{columns}
+
+\column{0.33}
+
+\block{Contexto y motivación}{
+  El cáncer de pulmón es la \textbf{primera causa de mortalidad
+  oncológica} en el mundo (2,48 millones de nuevos casos en 2022;
+  supervivencia a 5 años \mbox{$<20$\,\%}). La distinción entre
+  \textbf{adenocarcinoma} (ADC) y \textbf{carcinoma escamoso} (SQC)
+  tiene consecuencia terapéutica directa: pemetrexed y bevacizumab están
+  contraindicados en escamoso.
+
+  Las bases de datos públicas (NCBI GEO) reúnen \emph{cientos} de
+  estudios, pero su integración se ve frenada por:
+  \begin{itemize}\setlength{\itemsep}{2pt}
+    \item Heterogeneidad de plataformas.
+    \item Metadatos clínicos en \textbf{texto libre}.
+    \item Firmas génicas propuestas que \textbf{no replican} en cohortes
+      independientes.
+  \end{itemize}
+}
+
+\block{Objetivo}{
+  \centering\Large\bfseries
+  Un framework reproducible que \emph{automatice} la integración
+  multi-cohorte usando un \textbf{modelo de lenguaje} para curar
+  metadatos, y que \emph{valide externamente} las firmas génicas
+  identificadas.
+}
+
+\block{Método}{
+  Pipeline extremo a extremo en 9 fases:
+  \begin{center}
+  \begin{tikzpicture}[node distance=6mm and 6mm, font=\small]
+    \tikzset{
+      p/.style={rectangle, rounded corners, draw=verdeTerm, thick,
+                fill=plano, minimum width=32mm, minimum height=11mm,
+                align=center},
+      f/.style={-{Latex[length=3mm]}, thick, verdeTerm}
+    }
+    \node[p, fill=verdeTerm!20] (geo) {GEO};
+    \node[p, right=of geo] (des) {\textbf{1} Descarga};
+    \node[p, right=of des] (nor) {\textbf{2} Normaliza};
+    \node[p, below=of des] (llm) {\textbf{3} LLM curación\\Llama 3.3-70b};
+    \node[p, right=of llm] (cri) {\textbf{4} Criterios\\de inclusión};
+    \node[p, below=of llm] (dif) {\textbf{5} Welch + FDR};
+    \node[p, right=of dif] (ml)  {\textbf{6} LASSO L1\\RF · SVM};
+    \node[p, below=of dif] (lod) {\textbf{7} LODO};
+    \node[p, right=of lod] (con) {\textbf{8} Consenso\\multi-cohorte};
+    \node[p, below=of lod, fill=ambar!25] (fir) {\textbf{9} Firma\\1174 genes};
+    \node[p, right=of fir, fill=ambar!25] (pan) {\textbf{9} Panel\\mínimo 20};
+    \draw[f] (geo) -- (des);
+    \draw[f] (des) -- (nor);
+    \draw[f] (nor.south) |- (llm.east);
+    \draw[f] (llm) -- (cri);
+    \draw[f] (cri.south) |- (dif.east);
+    \draw[f] (dif) -- (ml);
+    \draw[f] (ml.south) |- (lod.east);
+    \draw[f] (lod) -- (con);
+    \draw[f] (con.south) |- (fir.east);
+    \draw[f] (fir) -- (pan);
+  \end{tikzpicture}
+  \end{center}
+
+  \medskip
+  \textbf{Consenso multi-cohorte}: un gen entra en la firma sólo si
+  mantiene el mismo signo y $|d|>0{,}5$ (Cohen) en las
+  \textbf{3 cohortes evaluables simultáneamente}. Validación externa
+  \textbf{Leave-One-Dataset-Out (LODO)}.
+}
+
+% ==========================================================================
+% Columna central: cifras y resultados principales
+% ==========================================================================
+\column{0.34}
+
+\block{Cifras principales}{
+  \centering
+  \renewcommand{\arraystretch}{1.35}
+  \begin{tabular}{c@{\quad}l}
+    \Huge\bfseries\color{verdeTerm} 11 & \small cohortes GEO descargadas \\
+    \Huge\bfseries\color{verdeTerm} 8/11 & \small cumplen criterios de inclusión \\
+    \Huge\bfseries\color{verdeTerm} 1157 & \small muestras curadas con LLM \\
+    \Huge\bfseries\color{verdeTerm} 1174 & \small genes replicados en 3 cohortes \\
+    \Huge\bfseries\color{verdeTerm} 20 & \small genes del panel mínimo \\
+    \Huge\bfseries\color{verdeTerm} 18/20 & \small marcadores IHC recuperados \\
+    \Huge\bfseries\color{verdeTerm} 0,968 & \small AUC media LODO (subtipo) \\
+    \Huge\bfseries\color{verdeTerm} 0,925 & \small AUC media LODO (tumor vs sano) \\
+  \end{tabular}
+}
+
+\block{Rendimiento LODO}{
+  \begin{center}
+  \small
+  \begin{tabular}{@{}lccccc@{}}
+    \toprule
+    \textbf{Tarea} & AUC & Bal.\,acc. & Sens. & Espec. & $k$ cohortes \\
+    \midrule
+    Tumor vs sano   & \textbf{0,925} & 0,772 & 0,983 & 0,561 & 8 \\
+    Subtipo ADC vs SQC & \textbf{0,968} & 0,940 & 0,924 & 0,957 & 3 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \medskip
+  Sobre 8 cohortes evaluables tumor-vs-sano el modelo \textbf{ordena}
+  correctamente las muestras (AUC 0,925), aunque el umbral de decisión
+  necesita recalibración por cohorte. Es un problema técnico
+  corregible, no una limitación de la firma.
+}
+
+\block{Panel mínimo (20 genes) $\approx$ firma completa}{
+  \begin{center}
+    \includegraphics[width=0.95\linewidth]{fig_panel_minimo.pdf}
+  \end{center}
+  Con \textbf{20 genes}, la AUC en LODO es \textbf{0,966}; con la firma
+  completa de 1174 genes es 0,970. La pérdida es inferior a 0,01,
+  haciendo el panel \emph{clínicamente manejable} mediante PCR
+  cuantitativa multiplex o \emph{NanoString}.
+}
+
+% ==========================================================================
+% Columna derecha: validación IHC, biología, conclusiones
+% ==========================================================================
+\column{0.33}
+
+\block{Validación externa contra IHC clínica}{
+  De los 20 marcadores diagnósticos del panel IHC de la OMS (2015), el
+  framework recupera \textbf{18 sin declararlos}:
+  \begin{center}\small
+  \begin{tabular}{@{}p{0.32\linewidth}p{0.45\linewidth}c@{}}
+    \toprule
+    \textbf{Linaje} & \textbf{Marcadores recuperados} & \textbf{Cobertura} \\
+    \midrule
+    Escamoso &
+    KRT5, KRT6A, KRT6B, KRT13, KRT14, TP63, DSG3, DSC3, SOX2, PKP1,
+    CALML3, S100A2 & \textbf{12/12} \\
+    \midrule
+    Adenocarcinoma &
+    NAPSA, NKX2-1, SFTPB, MUC1, SLC34A2, CEACAM6
+    \small(no: SFTPA1, SFTPC) & \textbf{6/8} \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \medskip
+  Es especialmente significativo que la firma, seleccionada por
+  \emph{criterio estadístico puro} (consenso multi-cohorte), coincida
+  con el panel diagnóstico que ya usa la clínica.
+}
+
+\block{Interpretación biológica: 2 ejes reales}{
+  \textbf{Eje 1 — Pérdida de arquitectura alvéolo-capilar.}
+  Correlación media $\rho = -0{,}626$ entre score del clasificador y
+  contenido residual de pulmón sano dentro de los tumores; en GSE31210
+  ($n=226$) alcanza $\rho = -0{,}858$ con $p=1{,}1\cdot 10^{-66}$.
+
+  \medskip
+  \textbf{Eje 2 — Actividad proliferativa aumentada.}
+  Marcadores canónicos: MKI67, TOP2A, CCNB1, BIRC5, AURKA.
+
+  \medskip
+  Ambos ejes son \emph{señal biológica reproducible}, no artefacto de
+  composición tisular. La firma captura la transición del pulmón sano a
+  un tejido menos diferenciado y más proliferativo — la histología del
+  NSCLC.
+}
+
+\block{Conclusiones}{
+  \begin{itemize}\setlength{\itemsep}{4pt}
+    \item Un LLM contemporáneo puede \textbf{curar los metadatos} de
+    cohortes GEO con tasa de éxito media del \textbf{85,9\,\%}.
+    \item El consenso multi-cohorte produce una firma \textbf{robusta}
+    (AUC 0,968 LODO en 3 cohortes independientes).
+    \item Un \textbf{panel de 20 genes} basta para aproximar el
+    rendimiento de la firma completa.
+    \item La firma \textbf{recupera 18/20 marcadores IHC clínicos} sin
+    haberlos declarado.
+    \item El framework es \textbf{reproducible} extremo a extremo, con
+    interfaz web y asistente conversacional integrados.
+  \end{itemize}
+}
+
+\block{Trabajo futuro}{
+  \small
+  Validación prospectiva sobre RNA-Seq (TCGA), ampliación a subtipos
+  neuroendocrinos, recalibración isotónica del umbral tumor-vs-sano y
+  extensión metodológica a otras patologías con datos GEO abundantes.
+}
+
+\end{columns}
+
+% ==========================================================================
+% Pie: repo + agradecimiento
+% ==========================================================================
+\node[fill=plano, draw=verdeTerm, thick, minimum width=\paperwidth-40pt,
+      inner sep=12pt, anchor=south, align=center] at (0, -63.5) {
+  \Large
+  \textbf{Código y memoria completa:}\;
+  \texttt{github.com/danitapiadiez-gif/TFM-Bioinformatica}
+  \quad$\cdot$\quad
+  \textbf{Interfaz:}\; \texttt{streamlit run agentes/paso12\_web\_chatbot.py}
+  \quad$\cdot$\quad
+  \textbf{Licencia:} MIT
+};
+
+\end{document}
