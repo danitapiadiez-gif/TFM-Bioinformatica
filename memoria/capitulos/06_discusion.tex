@@ -135,7 +135,37 @@ sobre TCGA, sin validación externa en cohortes independientes. Chen et
 al.~\cite{chen2017gene} proponen una firma pronóstica de 12 genes con AUC
 0,83 en validación externa. La firma presentada en este trabajo obtiene
 AUC 0,968 en validación externa sobre tres cohortes independientes, con un
-panel mínimo de 20 genes.
+panel mínimo de 20 genes. La tabla~\ref{tab:comparativa} sitúa la firma
+frente a algunas de las más relevantes publicadas en las últimas dos
+décadas.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Comparación con firmas génicas publicadas para cáncer de
+  pulmón.}
+  \label{tab:comparativa}
+  \begin{tabular}{lllrrl}
+    \toprule
+    \textbf{Firma} & \textbf{Año} & \textbf{Tarea} & \textbf{$n$ genes} & \textbf{AUC} & \textbf{Validación} \\
+    \midrule
+    Beer et al.~\cite{beer2002gene}           & 2002 & Pronóstico ADC           & 50   & --    & Interna (1 cohorte) \\
+    Chen et al.~\cite{chen2017gene}           & 2007 & Pronóstico NSCLC estadio I & 5    & 0,83  & Externa (1 cohorte) \\
+    Kratz et al.~\cite{kratz2012practical}    & 2012 & Pronóstico NSCLC no escamoso & 14  & --    & Externa (2 cohortes) \\
+    Girard et al.~\cite{girard2016comprehensive} & 2016 & Subtipo NSCLC           & \emph{n.\,d.} & 0,92 & Interna (TCGA) \\
+    Faruki et al.~\cite{faruki2017lung}       & 2017 & Subtipo NSCLC            & \emph{n.\,d.} & --    & Múltiples cohortes \\
+    \midrule
+    \textbf{Este trabajo}                     & 2026 & \textbf{Subtipo ADC vs SQC} & \textbf{1174} & \textbf{0,968} & \textbf{LODO estricto (3 cohortes)} \\
+    \textbf{Este trabajo (panel mínimo)}      & 2026 & \textbf{Subtipo ADC vs SQC} & \textbf{20}   & \textbf{0,966} & \textbf{LODO estricto (3 cohortes)} \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.35em}
+  {\footnotesize \emph{n.\,d.}: no disponible en el artículo original.
+  ``Validación externa'' se refiere a cohortes no usadas en la fase de
+  descubrimiento; ``LODO estricto'' añade la garantía de que ninguna
+  muestra de la cohorte test aparece en el entrenamiento.}
+\end{table}
 
 Más importante que la magnitud del AUC es el criterio de validación. Las
 firmas publicadas suelen mostrar caídas de 5-15 puntos porcentuales entre

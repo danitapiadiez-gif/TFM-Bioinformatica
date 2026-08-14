@@ -372,7 +372,53 @@ simultáneamente en las tres cohortes evaluables:
 El listado resultante se ordena por $d$ media entre cohortes y se
 almacena en \texttt{FIRMA\_VALIDADA\_COMPLETA.csv}. Los 60 primeros genes
 por ranking se exportan también a \texttt{FIRMA\_VALIDADA\_TOP60.csv} para
-facilitar la exploración manual.
+facilitar la exploración manual. La figura~\ref{fig:consenso} ilustra
+visualmente el criterio de consenso sobre tres genes de ejemplo:
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=0.45cm and 1cm]
+    % Cabeceras
+    \node[font=\small\bfseries] (h1) {Gen};
+    \node[right=1.3cm of h1, font=\small\bfseries] (h2) {Cohorte A};
+    \node[right=of h2, font=\small\bfseries]      (h3) {Cohorte B};
+    \node[right=of h3, font=\small\bfseries]      (h4) {Cohorte C};
+    \node[right=of h4, font=\small\bfseries]      (h5) {Decisión};
+
+    % Gen 1: DSG3 - consenso
+    \node[below=of h1, font=\small\ttfamily] (g1) {DSG3};
+    \node[paso, right=1.3cm of g1, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (a1) {$d = +4{,}12$};
+    \node[paso, right=of a1, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (b1) {$d = +4{,}05$};
+    \node[paso, right=of b1, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (c1) {$d = +4{,}36$};
+    \node[salida, right=of c1, minimum width=2.4cm, minimum height=0.7cm, font=\footnotesize, fill=green!25, draw=green!70!black] (d1) {\checkmark\ Entra};
+
+    % Gen 2: BRCA1 - signo opuesto
+    \node[below=of g1, font=\small\ttfamily] (g2) {\emph{Gen X}};
+    \node[paso, right=1.3cm of g2, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (a2) {$d = +1{,}20$};
+    \node[paso, right=of a2, fill=red!12, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (b2) {$d = -0{,}90$};
+    \node[paso, right=of b2, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (c2) {$d = +1{,}05$};
+    \node[paso, right=of c2, minimum width=2.4cm, minimum height=0.7cm, font=\footnotesize, fill=red!12, draw=red!70!black] (d2) {$\times$ Signo no coincide};
+
+    % Gen 3: magnitud insuficiente
+    \node[below=of g2, font=\small\ttfamily] (g3) {\emph{Gen Y}};
+    \node[paso, right=1.3cm of g3, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (a3) {$d = +0{,}90$};
+    \node[paso, right=of a3, fill=yellow!20, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (b3) {$d = +0{,}35$};
+    \node[paso, right=of b3, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (c3) {$d = +1{,}10$};
+    \node[paso, right=of c3, minimum width=2.4cm, minimum height=0.7cm, font=\footnotesize, fill=yellow!30, draw=orange!80!black] (d3) {$\times$ $|d| < 0{,}5$ en B};
+
+    % Regla al pie
+    \node[grupo, fit=(g1) (d3), inner sep=6pt] (box) {};
+    \node[below=0.4cm of box, font=\footnotesize\itshape, text width=13cm, align=center]
+      {Regla de consenso: un gen entra en la firma sólo si mantiene el
+      mismo signo y $|d| > 0{,}5$ en las 3 cohortes evaluables.};
+  \end{tikzpicture}
+  \caption{Regla del meta-análisis por consenso. Sobre tres genes de
+  ejemplo, sólo \gene{DSG3} pasa el filtro: mantiene signo positivo y
+  $|d|$ grande en las tres cohortes. \emph{Gen X} tiene signo opuesto
+  en la cohorte B; \emph{Gen Y} tiene signo consistente pero magnitud
+  insuficiente en B.}
+  \label{fig:consenso}
+\end{figure}
 
 \section{Panel mínimo}
 \label{sec:panel_minimo}

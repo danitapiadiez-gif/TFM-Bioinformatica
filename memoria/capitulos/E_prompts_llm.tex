@@ -57,7 +57,54 @@ El asistente conversacional integrado en la interfaz emplea un prompt
 sistema construido dinámicamente por \texttt{contexto\_tfm.py}. La
 estructura consta de tres bloques: (i) declaración de rol y ámbito, (ii)
 reglas de comportamiento en orden de prioridad, y (iii) el contexto de
-resultados leído en tiempo real de los CSV/JSON del pipeline.
+resultados leído en tiempo real de los CSV/JSON del pipeline. La
+figura~\ref{fig:prompt} representa gráficamente cómo se compone el
+prompt en cada ejecución del asistente.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=0.55cm and 0.9cm]
+    % Fuentes de datos (izquierda)
+    \node[entrada, minimum width=3.4cm, minimum height=0.75cm] (aud)   {\footnotesize AUDITORIA\_COHORTES.csv};
+    \node[entrada, below=of aud, minimum width=3.4cm, minimum height=0.75cm] (lodo)  {\footnotesize LODO\_HONESTO\_RESULTADOS.csv};
+    \node[entrada, below=of lodo, minimum width=3.4cm, minimum height=0.75cm] (sub)   {\footnotesize SUBTIPO\_LODO\_RESULTADOS.csv};
+    \node[entrada, below=of sub, minimum width=3.4cm, minimum height=0.75cm] (comp)  {\footnotesize COMPOSICION\_VS\_BIOLOGIA.csv};
+    \node[entrada, below=of comp, minimum width=3.4cm, minimum height=0.75cm] (rf)    {\footnotesize FIRMA\_VALIDADA\_RESUMEN.json};
+    \node[entrada, below=of rf, minimum width=3.4cm, minimum height=0.75cm] (comp2) {\footnotesize FIRMA\_VALIDADA\_COMPLETA.csv};
+    % Modulo
+    \node[paso, right=of lodo, yshift=-1.1cm, minimum width=3.6cm, minimum height=1.6cm] (mod) {\texttt{contexto\_tfm.py}\\\footnotesize construir\_contexto()\\\footnotesize \_cifras\_clave()};
+    % Prompt bloques
+    \node[salida, right=of mod, yshift=1.6cm, minimum width=4cm] (rol)    {\textbf{Rol y ámbito}\\\footnotesize (estático)};
+    \node[salida, right=of mod, minimum width=4cm]              (reglas) {\textbf{8 reglas}\\\footnotesize (estático + cifras clave)};
+    \node[salida, right=of mod, yshift=-1.6cm, minimum width=4cm] (ctx)  {\textbf{Contexto de resultados}\\\footnotesize (dinámico desde CSVs)};
+    % LLM
+    \node[paso, right=of reglas, minimum width=2.6cm, fill=purple!8, draw=purple!60!black] (llm) {\textbf{Llama 3.3-70b}\\\footnotesize vía Groq};
+    % Historial
+    \node[paso, above=of llm, minimum width=2.6cm] (hist) {Últimos 8\\mensajes};
+    % Flechas
+    \draw[flecha] (aud.east)  -- (mod.west);
+    \draw[flecha] (lodo.east) -- (mod.west);
+    \draw[flecha] (sub.east)  -- (mod.west);
+    \draw[flecha] (comp.east) -- (mod.west);
+    \draw[flecha] (rf.east)   -- (mod.west);
+    \draw[flecha] (comp2.east) -- (mod.west);
+    \draw[flecha] (mod.east) -- (rol.west);
+    \draw[flecha] (mod.east) -- (reglas.west);
+    \draw[flecha] (mod.east) -- (ctx.west);
+    \draw[flecha] (rol.east) -- (llm.west);
+    \draw[flecha] (reglas.east) -- (llm.west);
+    \draw[flecha] (ctx.east) -- (llm.west);
+    \draw[flecha] (hist) -- (llm);
+  \end{tikzpicture}
+  \caption{Composición del prompt sistema del asistente conversacional.
+  Los CSV/JSON del pipeline (bloques verdes) alimentan
+  \texttt{contexto\_tfm.py}, que compone tres secciones (rol, reglas y
+  contexto dinámico) que se concatenan con los últimos ocho mensajes
+  del historial y se envían al modelo Llama~3.3-70b vía Groq. Como los
+  CSV/JSON se leen en tiempo real, cualquier reejecución del pipeline
+  se propaga al chat sin editar código.}
+  \label{fig:prompt}
+\end{figure}
 
 \subsection*{Reglas del sistema}
 \addcontentsline{toc}{subsection}{Reglas del sistema}
