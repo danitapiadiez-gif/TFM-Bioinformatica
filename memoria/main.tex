@@ -13,28 +13,29 @@
 
 \begin{document}
 
-% ---- Portada institucional -----------------------------------------------
+% ---- Portada institucional (sin numero de pagina) -----------------------
 \input{portada}
 
-% ---- Resumen y abstract --------------------------------------------------
-\input{resumen}
-
-% ---- Índices -------------------------------------------------------------
+% ---- Front matter con numero romano en el pie, sin cabecera ------------
 \pagenumbering{roman}
 \setcounter{page}{1}
+\pagestyle{frontmatter}
+\input{resumen}
+\input{capitulos/03_objetivos}
 \tableofcontents
-\clearpage
+\cleardoublepage
 \listoffigures
-\clearpage
+\cleardoublepage
 \listoftables
-\clearpage
+\cleardoublepage
+
+% ---- Cuerpo con numero arabigo, cabecera del capitulo actual -----------
 \pagenumbering{arabic}
 \setcounter{page}{1}
+\pagestyle{fancy}
 
-% ---- Capítulos -----------------------------------------------------------
 \input{capitulos/01_introduccion}
 \input{capitulos/02_estado_arte}
-\input{capitulos/03_objetivos}
 \input{capitulos/04_metodos}
 \input{capitulos/05_resultados}
 \input{capitulos/06_discusion}
@@ -47,79 +48,12 @@
 
 % ---- Anexos --------------------------------------------------------------
 \begin{appendices}
-\chapter{Estructura del repositorio}
-\label{anexo:repo}
-El código fuente y los artefactos generados por el pipeline se organizan
-en el repositorio \url{https://github.com/danitapiadiez-gif/TFM-Bioinformatica}
-con la siguiente estructura:
-
-\begin{lstlisting}[style=bash, caption={Estructura resumida del repositorio.}]
-TFM/
-|-- agentes/                # Codigo del pipeline (paso1 - paso19)
-|   |-- paso1_descarga.py         # Descarga GEO
-|   |-- paso2_metadata.py         # Curacion LLM
-|   |-- paso3_diferencial.py      # Analisis diferencial
-|   |-- paso7_orquestador.py      # Orquestador general
-|   |-- paso12_web_chatbot.py     # Router de la app Streamlit
-|   |-- paso12_landing.py         # Pagina de portada
-|   |-- paso12_dashboard.py       # Dashboard del framework
-|   |-- paso12_datos.py           # Agregacion de metricas
-|   |-- paso13_subtipo_lodo.py    # LODO subtipo histologico
-|   |-- paso14_auditoria_datos.py # Auditoria de cohortes
-|   |-- paso15_lodo_honesto.py    # LODO tumor vs sano
-|   |-- paso16_composicion_vs_biologia.py
-|   |-- paso17_falacia_folds.py
-|   |-- paso18_subtipo_casos_dificiles.py
-|   |-- paso19_firma_validada.py  # Firma consenso multi-cohorte
-|   |-- generar_figuras_auditoria.py
-|   |-- contexto_tfm.py           # Prompt sistema del asistente
-|   \-- utils_cohortes.py
-|-- tests/                  # Tests con pytest
-|-- TFM_GSE*/               # Datos por cohorte (una carpeta por GSE)
-|-- figuras_auditoria/      # Figuras globales generadas
-|-- memoria/                # Esta memoria en LaTeX
-|-- *.csv, *.json           # Artefactos del pipeline (resultados)
-\-- README.md
-\end{lstlisting}
-
-\chapter{Ficheros de resultados}
-\label{anexo:resultados}
-Los principales artefactos generados por el pipeline y consumidos por la
-interfaz y esta memoria son:
-
-\begin{itemize}
-  \item \texttt{AUDITORIA\_COHORTES.csv}: cohortes descargadas y su estado
-  de curación.
-  \item \texttt{LODO\_HONESTO\_RESULTADOS.csv}: rendimiento LODO por
-  cohorte para la tarea tumor vs sano.
-  \item \texttt{SUBTIPO\_LODO\_RESULTADOS.csv}: rendimiento LODO por
-  cohorte para la tarea de subtipo ADC vs SQC.
-  \item \texttt{FIRMA\_VALIDADA\_COMPLETA.csv}: firma génica de 1174 genes.
-  \item \texttt{FIRMA\_VALIDADA\_TOP60.csv}: top 60 de la firma.
-  \item \texttt{FIRMA\_VALIDADA\_RESUMEN.json}: cifras resumen (panel
-  mínimo, AUC, IHC recuperados).
-  \item \texttt{PANEL\_MINIMO\_CURVA.csv}: AUC en función del tamaño del
-  panel.
-  \item \texttt{COMPOSICION\_VS\_BIOLOGIA.csv}: correlación entre score y
-  contenido de pulmón sano dentro de tumores.
-  \item \texttt{FALACIA\_FOLDS\_COMPARACION.csv}: concordancia de signos
-  entre folds LODO.
-\end{itemize}
-
-\chapter{Interfaz web}
-\label{anexo:interfaz}
-La interfaz Streamlit está disponible en el repositorio y puede lanzarse
-con:
-
-\begin{lstlisting}[style=bash]
-streamlit run agentes/paso12_web_chatbot.py
-\end{lstlisting}
-
-Se abre en \url{http://localhost:8501} y consta de dos vistas:
-\emph{Inicio} (portada minimalista con tarjeta resumen) y
-\emph{Framework} (dashboard con siete capítulos que reproducen la
-estructura de esta memoria). El asistente conversacional requiere una
-clave API de Groq configurada en el fichero \texttt{.env} de la raíz.
+\input{capitulos/A_repositorio}
+\input{capitulos/B_ficheros_resultados}
+\input{capitulos/C_interfaz}
+\input{capitulos/D_paneles}
+\input{capitulos/E_prompts_llm}
+\input{capitulos/F_despliegue}
 \end{appendices}
 
 \end{document}

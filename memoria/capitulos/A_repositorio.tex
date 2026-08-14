@@ -1,0 +1,119 @@
+\chapter{Estructura del repositorio}
+\label{anexo:repo}
+
+El código fuente y los artefactos generados por el pipeline se organizan
+en el repositorio público
+\url{https://github.com/danitapiadiez-gif/TFM-Bioinformatica}, bajo
+licencia MIT. La estructura del repositorio, organizada por función, es
+la siguiente:
+
+\begin{lstlisting}[style=bash, caption={Estructura completa del repositorio.}]
+TFM/
+|-- agentes/                         # Codigo del pipeline (paso1 - paso19)
+|   |-- paso0_clasificador.py             # Utilidades comunes de clasificacion
+|   |-- paso1_descarga.py                 # Descarga GEO via GEOparse
+|   |-- paso2_metadata.py                 # Curacion clinica con LLM
+|   |-- paso2a_microarray.py              # Normalizacion microarray
+|   |-- paso2b_bulk.py                    # Normalizacion RNA-Seq (bulk)
+|   |-- paso3_diferencial.py              # Analisis diferencial Welch + FDR
+|   |-- paso4_informe.py                  # Informes biologicos por cohorte
+|   |-- paso5_graficos.py                 # PCA, volcano y heatmap por cohorte
+|   |-- paso6_dashboard.py                # Version antigua del dashboard
+|   |-- paso7_orquestador.py              # Orquestador que encadena pasos 1-6
+|   |-- paso12_web_chatbot.py             # Router de la app Streamlit
+|   |-- paso12_landing.py                 # Pagina de portada (landing)
+|   |-- paso12_dashboard.py               # Dashboard del framework
+|   |-- paso12_datos.py                   # Agregacion de metricas para la UI
+|   |-- paso13_subtipo_lodo.py            # LODO subtipo histologico ADC vs SQC
+|   |-- paso14_auditoria_datos.py         # Auditoria de cohortes
+|   |-- paso15_lodo_honesto.py            # LODO tumor vs sano
+|   |-- paso16_composicion_vs_biologia.py # Composicion tisular vs score
+|   |-- paso17_falacia_folds.py           # Concordancia entre folds LODO
+|   |-- paso18_subtipo_casos_dificiles.py # Casos ambiguos de subtipo
+|   |-- paso19_firma_validada.py          # Firma consenso multi-cohorte
+|   |-- generar_figuras_auditoria.py      # Genera figuras/PDF globales
+|   |-- contexto_tfm.py                   # Prompt sistema del asistente
+|   |-- estilo_viz.py                     # Paleta y estilo de figuras
+|   \-- utils_cohortes.py                 # Paneles biologicos y utilidades
+|-- tests/                           # Tests con pytest
+|-- TFM_GSE118370/  ...  TFM_GSE81089/    # Datos por cohorte (una por GSE)
+|-- figuras_auditoria/               # PDF y PNG de las figuras globales
+|-- memoria/                         # Fuentes LaTeX de esta memoria
+|-- .github/workflows/               # Configuracion CI (GitHub Actions)
+|-- configuracion/                   # Ficheros de configuracion del pipeline
+|-- *.csv, *.json                    # Artefactos del pipeline
+|-- README.md, README_FRAMEWORK.md   # Documentacion
+|-- pyproject.toml, requirements.txt # Dependencias
+\-- datasets.txt                     # Lista de cohortes a descargar
+\end{lstlisting}
+
+\section*{Responsabilidad de cada módulo del pipeline}
+\addcontentsline{toc}{section}{Responsabilidad de cada módulo del pipeline}
+
+La numeración de los módulos \texttt{pasoN\_} refleja el orden lógico de
+ejecución. Los módulos con el mismo número base (por ejemplo,
+\texttt{paso2}, \texttt{paso2a}, \texttt{paso2b}) tratan tareas
+relacionadas dentro de una misma fase.
+
+\begin{description}
+  \item[Fase 1 -- Adquisición.] \texttt{paso1\_descarga.py} lee la lista
+  de cohortes de \texttt{datasets.txt}, consulta GEO mediante GEOparse y
+  almacena los ficheros SOFT y suplementarios en la carpeta
+  \texttt{TFM\_GSE*/} correspondiente.
+
+  \item[Fase 2 -- Curación y normalización.] \texttt{paso2\_metadata.py}
+  gestiona la comunicación con el LLM y persiste las etiquetas asignadas
+  en \texttt{metadata\_procesada.csv}. Los módulos \texttt{paso2a} y
+  \texttt{paso2b} implementan la normalización específica de microarray y
+  RNA-Seq. \texttt{utils\_cohortes.py} centraliza los paneles biológicos
+  usados como referencia (véase anexo~\ref{anexo:paneles}).
+
+  \item[Fase 3 -- Análisis diferencial.] \texttt{paso3\_diferencial.py}
+  aplica el test $t$ de Welch por gen y la corrección FDR
+  Benjamini-Hochberg. Escribe \texttt{resultados\_completos.csv} por
+  cohorte.
+
+  \item[Fase 4 -- Informe biológico.] \texttt{paso4\_informe.py} genera
+  un informe narrativo por cohorte que interpreta los DEGs (\emph{genes
+  diferencialmente expresados}) en función de los paneles conocidos.
+
+  \item[Fase 5 -- Gráficos por cohorte.] \texttt{paso5\_graficos.py}
+  produce PCA, volcano plot y heatmap de cada cohorte a partir de sus
+  resultados.
+
+  \item[Fase 6 -- Orquestador.] \texttt{paso7\_orquestador.py} concatena
+  las fases 1-5 y proporciona un punto de entrada único para regenerar
+  todo el árbol de resultados por cohorte.
+
+  \item[Fase 7 -- Modelo transversal (pasos 13-19).] Los módulos
+  \texttt{paso13} a \texttt{paso19} operan sobre el conjunto de cohortes
+  y ejecutan la validación LODO y el meta-análisis por consenso.
+  \texttt{paso19\_firma\_validada.py} es el paso terminal que produce la
+  firma de 1174 genes y el panel mínimo de 20.
+
+  \item[Fase 8 -- Interfaz y difusión (pasos 12).] Los módulos
+  \texttt{paso12\_*.py} implementan la interfaz web Streamlit descrita
+  en el anexo~\ref{anexo:interfaz}. \texttt{contexto\_tfm.py} contiene
+  el prompt sistema del asistente conversacional.
+
+  \item[Fase 9 -- Figuras globales.] \texttt{generar\_figuras\_auditoria.py}
+  compone las siete figuras globales del anexo B del pipeline
+  (\texttt{fig\_lodo\_vs\_baseline.pdf}, etc.).
+\end{description}
+
+\section*{Convenciones de código}
+\addcontentsline{toc}{section}{Convenciones de código}
+
+\begin{itemize}
+  \item Cada módulo puede ejecutarse de forma aislada
+  (\texttt{python agentes/pasoN\_xxx.py}) y publica sus resultados en la
+  raíz del proyecto.
+  \item Los ficheros \texttt{.csv} y \texttt{.json} de la raíz son
+  artefactos del pipeline y no se editan manualmente.
+  \item Las semillas aleatorias se fijan siempre a \texttt{random\_state=42}.
+  \item La versión de Python soportada es 3.12; las dependencias se
+  declaran en \texttt{pyproject.toml} y \texttt{requirements.txt}.
+  \item La cobertura de tests se limita al alineamiento
+  muestra-etiqueta, la operación más crítica del pipeline (ver
+  \texttt{tests/test\_alineamiento.py}).
+\end{itemize}

@@ -14,51 +14,54 @@ extraen del trabajo son las siguientes:
   \item \textbf{Se ha demostrado la viabilidad de la curación clínica
   automatizada mediante LLM.} Llama~3.3-70b, servido vía Groq, alcanza
   una tasa de éxito de curación del 85,9\,\% de media sobre 11 cohortes
-  GEO heterogéneas, con nueve cohortes por encima del 95\,\%. Esto habilita
-  la integración multi-cohorte a un coste marginal accesible y sin
-  intervención manual.
+  GEO heterogéneas (figura~\ref{fig:curacion}), con nueve cohortes por
+  encima del 95\,\%. Esto habilita la integración multi-cohorte a un
+  coste marginal accesible y sin intervención manual.
 
   \item \textbf{La firma génica validada por consenso multi-cohorte es
   robusta.} Sobre la tarea de subtipo histológico ADC \emph{vs.} SQC, la
   firma alcanza AUC media LODO de 0,968 sobre tres cohortes
-  independientes, con balanced accuracy 0,940. Este rendimiento se
-  mantiene en validación externa, sin depender de particiones internas
-  del conjunto de entrenamiento.
+  independientes con balanced accuracy 0,940 (tabla~\ref{tab:lodo_sub}).
+  Este rendimiento se mantiene en validación externa, sin depender de
+  particiones internas del conjunto de entrenamiento.
 
   \item \textbf{Un panel mínimo clínicamente manejable de 20 genes
   aproxima el rendimiento de la firma completa.} Con AUC 0,966 frente al
-  0,970 de la firma completa (1174 genes), la pérdida es inferior a 0,01.
-  El panel es susceptible de ser medido mediante PCR cuantitativa o
-  \emph{NanoString} y podría complementar la IHC diagnóstica en casos
-  histológicamente ambiguos.
+  0,970 de la firma completa (1174 genes), la pérdida es inferior a
+  0,01 (figura~\ref{fig:panel_minimo}). El panel es susceptible de ser
+  medido mediante PCR cuantitativa o \emph{NanoString} y podría
+  complementar la IHC diagnóstica en casos histológicamente ambiguos.
 
   \item \textbf{La firma recupera el panel diagnóstico IHC de la OMS
-  con altísima cobertura.} De los 20 marcadores clínicos, el framework
-  recupera 18 (12/12 escamosos, 6/8 adenocarcinoma) sin haberlos
-  declarado durante el entrenamiento. Los dos marcadores no recuperados
-  (SFTPA1, SFTPC) son proteínas del surfactante cuya expresión cae de
-  forma homogénea entre ambos subtipos NSCLC.
+  con altísima cobertura.} De los 20 marcadores clínicos declarados en
+  el anexo~\ref{anexo:paneles}, el framework recupera 18 (12/12
+  escamosos, 6/8 adenocarcinoma) sin haberlos declarado durante el
+  entrenamiento. Los dos marcadores no recuperados (SFTPA1, SFTPC) son
+  proteínas del surfactante cuya expresión cae de forma homogénea entre
+  ambos subtipos NSCLC.
 
   \item \textbf{La firma admite una interpretación biológica coherente.}
   Se identifican dos ejes reales: pérdida de arquitectura alvéolo-capilar
   normal (correlación media $\rho=-0{,}626$ con marcadores de alvéolo
-  sano, hasta $\rho=-0{,}858$ en GSE31210) y actividad proliferativa
-  aumentada. La firma no es una caja negra: refleja mecanismos
-  oncológicos conocidos.
+  sano, hasta $\rho=-0{,}858$ en GSE31210, figura~\ref{fig:composicion})
+  y actividad proliferativa aumentada. La firma no es una caja negra:
+  refleja mecanismos oncológicos conocidos.
 
   \item \textbf{El clasificador tumor \emph{vs.} sano ordena bien pero
   requiere recalibración del umbral.} Sobre 8 cohortes evaluables, AUC
-  media LODO de 0,925 con balanced accuracy 0,772. La brecha entre ambas
-  métricas se atribuye al desbalance del entrenamiento (938 tumores frente
-  a 219 controles curados en total) y es corregible mediante técnicas
-  estándar de recalibración por cohorte.
+  media LODO de 0,925 con balanced accuracy 0,772
+  (tabla~\ref{tab:lodo_tvs}, figura~\ref{fig:auc_vs_balacc}). La brecha
+  entre ambas métricas se atribuye al desbalance del entrenamiento (938
+  tumores frente a 219 controles curados en total) y es corregible
+  mediante técnicas estándar de recalibración por cohorte.
 
   \item \textbf{El framework es reproducible.} Todo el análisis se
   puede regenerar desde la raíz del repositorio con una única secuencia
-  de comandos. Las semillas aleatorias están fijadas y los resultados
-  intermedios se persisten en disco. La interfaz web y el asistente
-  conversacional leen los mismos ficheros, lo que garantiza la
-  coherencia de las cifras mostradas.
+  de comandos (anexo~\ref{anexo:despliegue}). Las semillas aleatorias
+  están fijadas y los resultados intermedios se persisten en disco. La
+  interfaz web (anexo~\ref{anexo:interfaz}) y el asistente
+  conversacional (anexo~\ref{anexo:prompts}) leen los mismos ficheros,
+  lo que garantiza la coherencia de las cifras mostradas.
 \end{enumerate}
 
 \section{Aportaciones originales}

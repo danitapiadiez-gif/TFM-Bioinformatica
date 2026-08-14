@@ -5,15 +5,17 @@
 \label{sec:disc_interpretacion}
 
 Los resultados obtenidos permiten aceptar las cuatro hipótesis formuladas
-en la sección~\ref{sec:hipotesis} con matices. La tasa de éxito del LLM en
-la curación clínica ha sido del 85,9\,\% global (con 9 de 11 cohortes por
-encima del 95\,\%), superando ampliamente el umbral del 80\,\% planteado
-en la hipótesis 1. La firma génica validada por consenso multi-cohorte
-alcanza AUC 0,968 en LODO sobre la tarea de subtipo, muy por encima del
-0,90 planteado en la hipótesis 2. La recuperación del panel IHC es del
-90\,\% (18/20), superando el 75\,\% planteado en la hipótesis 3. Y el
+en el apartado \emph{Objetivos} (\hyperref[sec:hipotesis]{Hipótesis de
+partida}) con matices. La tasa de éxito del LLM en
+la curación clínica ha sido del 85,9\,\% global
+(figura~\ref{fig:curacion}), con 9 de 11 cohortes por encima del 95\,\%,
+superando ampliamente el umbral del 80\,\% planteado en la hipótesis~1.
+La firma génica validada por consenso multi-cohorte alcanza AUC 0,968 en
+LODO sobre la tarea de subtipo (tabla~\ref{tab:lodo_sub}), muy por encima
+del 0,90 planteado en la hipótesis~2. La recuperación del panel IHC es del
+90\,\% (18/20), superando el 75\,\% planteado en la hipótesis~3. Y el
 panel mínimo alcanza AUC 0,966 con 20 genes, a menos de 0,01 de la firma
-completa, cumpliendo la hipótesis 4.
+completa (figura~\ref{fig:panel_minimo}), cumpliendo la hipótesis~4.
 
 Más allá del cumplimiento formal de las hipótesis, los resultados aportan
 tres observaciones cualitativas relevantes:
@@ -27,16 +29,20 @@ tres observaciones cualitativas relevantes:
   triangulación externa fuerte: la firma no es sólo estadísticamente
   robusta, es biológicamente correcta.
   \item \textbf{La discrepancia entre AUC y balanced accuracy en tumor
-  \emph{vs.} sano} pone de manifiesto una limitación de la firma tal cual
-  se entrega, pero también un problema técnico bien conocido y corregible.
-  El modelo ordena bien las muestras (AUC 0,925) pero necesita
+  \emph{vs.} sano} (visible en la figura~\ref{fig:auc_vs_balacc} y en la
+  tabla~\ref{tab:lodo_tvs}) pone de manifiesto una limitación de la firma
+  tal cual se entrega, pero también un problema técnico bien conocido y
+  corregible. El modelo ordena bien las muestras (AUC 0,925) pero necesita
   recalibración del umbral entre cohortes. Este comportamiento es
   característico del desbalance del entrenamiento y no una limitación
   intrínseca del framework.
   \item \textbf{La existencia de dos ejes biológicos identificables}
-  (pérdida alvéolo-capilar y proliferación) enriquece la interpretación
-  clínica: la firma no es una caja negra, sino que corresponde a
-  mecanismos oncológicos conocidos.
+  (pérdida alvéolo-capilar y proliferación, sección~\ref{sec:res_biologia})
+  enriquece la interpretación clínica: la firma no es una caja negra,
+  sino que corresponde a mecanismos oncológicos conocidos. La correlación
+  inversa entre score y contenido de pulmón sano residual dentro de los
+  tumores (figura~\ref{fig:composicion}) es una prueba adicional de que
+  la firma captura señal biológica y no un confundente de composición.
 \end{enumerate}
 
 \section{Contribución del modelo de lenguaje}
@@ -89,10 +95,11 @@ punto se discute como línea de trabajo futuro en la
 sección~\ref{sec:conc_futuro}.
 
 \subsection{Ámbito histológico}
-El entrenamiento se restringe a adenocarcinoma y carcinoma escamoso. El
-framework no está diseñado para clasificar tumores neuroendocrinos ni
-otras histologías raras. Esta restricción se declara explícitamente en la
-interfaz y en el asistente conversacional, para evitar cualquier uso
+El entrenamiento se restringe a adenocarcinoma y carcinoma escamoso
+(tabla~\ref{tab:lodo_sub}). El framework no está diseñado para clasificar
+tumores neuroendocrinos ni otras histologías raras
+(figura~\ref{fig:histologias}). Esta restricción se declara explícitamente
+en la interfaz y en el asistente conversacional, para evitar cualquier uso
 inadecuado en triage sobre casos sin diagnosticar.
 
 \subsection{Umbral de decisión}
@@ -110,10 +117,12 @@ comunidad reconoce~\cite{sirugo2019missing}.
 
 \subsection{Tamaño muestral}
 Dos cohortes evaluables (GSE23066 y GSE7670) tienen tamaños muy reducidos
-($n \leq 15$). Sus resultados individuales tienen poca precisión
-estadística y contribuyen poco a la media LODO. El diseño podría
-beneficiarse de restringir la evaluación a cohortes con al menos 30-50
-muestras, aunque a coste de reducir el número de folds.
+($n \leq 15$, tabla~\ref{tab:cohortes}). Como se observa en la
+tabla~\ref{tab:lodo_tvs}, precisamente estas cohortes son las que
+concentran las AUC individuales más bajas (0,440 y 1,000 respectivamente),
+reflejando la baja precisión estadística que impone su tamaño. El diseño
+podría beneficiarse de restringir la evaluación a cohortes con al menos
+30-50 muestras, aunque a coste de reducir el número de folds LODO.
 
 \section{Comparación con la literatura}
 \label{sec:disc_literatura}

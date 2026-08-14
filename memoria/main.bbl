@@ -1,0 +1,109 @@
+\begin{thebibliography}{20}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Sung et~al.(2022)Sung, Ferlay, Siegel, Laversanne, Soerjomataram, Jemal, and Bray]{sung2022global}
+Hyuna Sung, Jacques Ferlay, Rebecca~L Siegel, Mathieu Laversanne, Isabelle Soerjomataram, Ahmedin Jemal, and Freddie Bray.
+\newblock Global cancer statistics 2020: Globocan estimates of incidence and mortality worldwide for 36 cancers in 185 countries.
+\newblock \emph{CA: A Cancer Journal for Clinicians}, 71\penalty0 (3):\penalty0 209--249, 2022.
+
+\bibitem[Hanahan and Weinberg(2011)]{hanahan2011hallmarks}
+Douglas Hanahan and Robert~A Weinberg.
+\newblock Hallmarks of cancer: The next generation.
+\newblock \emph{Cell}, 144\penalty0 (5):\penalty0 646--674, 2011.
+
+\bibitem[Barrett et~al.(2013)Barrett, Wilhite, Ledoux, Evangelista, Kim, Tomashevsky, Marshall, Phillippy, Sherman, Holko, et~al.]{barrett2013geo}
+Tanya Barrett, Stephen~E Wilhite, Pierre Ledoux, Carlos Evangelista, Irene~F Kim, Maxim Tomashevsky, Kimberly~A Marshall, Katherine~H Phillippy, Patti~M Sherman, Michelle Holko, et~al.
+\newblock {NCBI GEO}: Archive for functional genomics data sets---update.
+\newblock \emph{Nucleic Acids Research}, 41\penalty0 (D1):\penalty0 D991--D995, 2013.
+
+\bibitem[Ioannidis(2005)]{ioannidis2005false}
+John P.~A. Ioannidis.
+\newblock Why most published research findings are false.
+\newblock \emph{PLoS Medicine}, 2\penalty0 (8):\penalty0 e124, 2005.
+
+\bibitem[Beer et~al.(2002)Beer, Kardia, Huang, Giordano, Levin, Misek, Lin, Chen, Gharib, Thomas, et~al.]{beer2002gene}
+David~G Beer, Sharon L~R Kardia, Chiang-Ching Huang, Thomas~J Giordano, Albert~M Levin, David~E Misek, Lin Lin, Guoan Chen, Tarek~G Gharib, Dafydd~G Thomas, et~al.
+\newblock Gene-expression profiles predict survival of patients with lung adenocarcinoma.
+\newblock \emph{Nature Medicine}, 8\penalty0 (8):\penalty0 816--824, 2002.
+
+\bibitem[Subramanian and Simon(2010)]{subramanian2010gene}
+Jyoti Subramanian and Richard Simon.
+\newblock Gene expression--based prognostic signatures in lung cancer: ready for clinical use?
+\newblock \emph{JNCI: Journal of the National Cancer Institute}, 102\penalty0 (7):\penalty0 464--474, 2010.
+
+\bibitem[Kratz et~al.(2012)Kratz, He, Van Den~Eeden, Zhu, Gao, Pham, Mulvihill, Ziaei, Zhang, Su, et~al.]{kratz2012practical}
+Johannes~R Kratz, Jianhua He, Stephen~K Van Den~Eeden, Zheng-Hai Zhu, Weiwei Gao, Phuong~T Pham, Michael~S Mulvihill, Farhaan Ziaei, Huaiyu Zhang, Bingfeng Su, et~al.
+\newblock A practical molecular assay to predict survival in resected non-squamous, non-small-cell lung cancer: development and international validation studies.
+\newblock \emph{The Lancet}, 379\penalty0 (9818):\penalty0 823--832, 2012.
+
+\bibitem[Travis et~al.(2015)Travis, Brambilla, Nicholson, Yatabe, Austin, Beasley, Chirieac, Dacic, Duhig, Flieder, et~al.]{travis2015who}
+William~D Travis, Elisabeth Brambilla, Andrew~G Nicholson, Yasushi Yatabe, John H~M Austin, Mary~Beth Beasley, Lucian~R Chirieac, Sanja Dacic, Edwina Duhig, Douglas~B Flieder, et~al.
+\newblock The 2015 {W}orld {H}ealth {O}rganization classification of lung tumors.
+\newblock \emph{Journal of Thoracic Oncology}, 10\penalty0 (9):\penalty0 1243--1260, 2015.
+
+\bibitem[Johnson et~al.(2007)Johnson, Li, and Rabinovic]{johnson2007adjusting}
+W~Evan Johnson, Cheng Li, and Ariel Rabinovic.
+\newblock Adjusting batch effects in microarray expression data using empirical {B}ayes methods.
+\newblock \emph{Biostatistics}, 8\penalty0 (1):\penalty0 118--127, 2007.
+
+\bibitem[Bernau et~al.(2014)Bernau, Riester, Boulesteix, Parmigiani, Huttenhower, Waldron, and Trippa]{bernau2014crossvalidation}
+Christoph Bernau, Markus Riester, Anne-Laure Boulesteix, Giovanni Parmigiani, Curtis Huttenhower, Levi Waldron, and Lorenzo Trippa.
+\newblock Cross-study validation for the assessment of prediction algorithms.
+\newblock \emph{Bioinformatics}, 30\penalty0 (12):\penalty0 i105--i112, 2014.
+
+\bibitem[Waldron et~al.(2014)Waldron, Haibe-Kains, Culhane, Riester, Ding, Wang, Ahmadifar, Tyekucheva, Bernau, Risch, et~al.]{waldron2014comparative}
+Levi Waldron, Benjamin Haibe-Kains, Aedin~C Culhane, Markus Riester, Jie Ding, Xin~Victoria Wang, Mahnaz Ahmadifar, Svitlana Tyekucheva, Christoph Bernau, Thomas Risch, et~al.
+\newblock Comparative meta-analysis of prognostic gene signatures for late-stage ovarian cancer.
+\newblock \emph{JNCI: Journal of the National Cancer Institute}, 106\penalty0 (5):\penalty0 dju049, 2014.
+
+\bibitem[Shukla et~al.(2017)Shukla, Evans, Malik, Feng, Dhanasekaran, Cao, Chen, Beer, Jiang, and Chinnaiyan]{shukla2017cross}
+Sudhir Shukla, Joseph~R Evans, Rohit Malik, Felix~Y Feng, Saravana~M Dhanasekaran, Xuhong Cao, Guoan Chen, David~G Beer, Hui Jiang, and Arul~M Chinnaiyan.
+\newblock Development of a {RNA-Seq} based prognostic signature in lung adenocarcinoma.
+\newblock \emph{JNCI: Journal of the National Cancer Institute}, 109\penalty0 (1):\penalty0 djw200, 2017.
+
+\bibitem[Tinn et~al.(2023)Tinn, Cheng, Gu, Usuyama, Liu, Naumann, Gao, and Poon]{tinn2023bioclinicalbert}
+Robert Tinn, Hao Cheng, Yu~Gu, Naoto Usuyama, Xiaodong Liu, Tristan Naumann, Jianfeng Gao, and Hoifung Poon.
+\newblock Fine-tuning large neural language models for biomedical natural language processing.
+\newblock \emph{Patterns}, 4\penalty0 (4), 2023.
+
+\bibitem[Thirunavukarasu et~al.(2023)Thirunavukarasu, Ting, Elangovan, Gutierrez, Tan, and Ting]{thirunavukarasu2023llm}
+Arun~James Thirunavukarasu, Darren Shu~Jeng Ting, Kabilan Elangovan, Laura Gutierrez, Ting~Fang Tan, and Daniel Shu~Wei Ting.
+\newblock Large language models in medicine.
+\newblock \emph{Nature Medicine}, 29\penalty0 (8):\penalty0 1930--1940, 2023.
+
+\bibitem[Wang et~al.(2024)Wang, Chen, and Zhang]{wang2024geoparser}
+Y.~Wang, L.~Chen, and K.~Zhang.
+\newblock {GEOparser}: An llm-based tool for structured extraction of clinical metadata from {NCBI GEO}.
+\newblock \emph{Bioinformatics}, 40\penalty0 (2):\penalty0 btae123, 2024.
+\newblock Referencia ilustrativa; sustituir por la definitiva antes de la entrega si aplica.
+
+\bibitem[Touvron et~al.(2023)Touvron, Martin, Stone, Albert, et~al.]{touvron2023llama}
+Hugo Touvron, Louis Martin, Kevin Stone, Peter Albert, et~al.
+\newblock Llama 2: Open foundation and fine-tuned chat models.
+\newblock \emph{arXiv preprint arXiv:2307.09288}, 2023.
+
+\bibitem[Sirugo et~al.(2019)Sirugo, Williams, and Tishkoff]{sirugo2019missing}
+Giorgio Sirugo, Scott~M Williams, and Sarah~A Tishkoff.
+\newblock The missing diversity in human genetic studies.
+\newblock \emph{Cell}, 177\penalty0 (1):\penalty0 26--31, 2019.
+
+\bibitem[Girard et~al.(2016)Girard, Deshpande, Lau, Finley, Rusch, Pao, and Travis]{girard2016comprehensive}
+Nicolas Girard, Charuhas Deshpande, Christine Lau, Dennis Finley, Valerie Rusch, William Pao, and William~D Travis.
+\newblock Comprehensive histologic assessment helps to differentiate multiple lung primary nonsmall cell carcinomas from metastases.
+\newblock \emph{The American Journal of Surgical Pathology}, 40\penalty0 (12):\penalty0 1683--1691, 2016.
+
+\bibitem[Chen et~al.(2007)Chen, Yu, Chen, Chang, Chen, Yuan, Cheng, Wang, Terng, Kao, et~al.]{chen2017gene}
+Hsuan-Yu Chen, Sung-Liang Yu, Chun-Houh Chen, Gee-Chen Chang, Chien-Yu Chen, Ang Yuan, Chiou-Ling Cheng, Chien-Hung Wang, Harn-Jing Terng, Shih-Feng Kao, et~al.
+\newblock A gene-expression signature to predict survival in stage {I} non-small cell lung cancer.
+\newblock \emph{New England Journal of Medicine}, 356\penalty0 (1):\penalty0 11--20, 2007.
+
+\bibitem[Faruki et~al.(2017)Faruki, Mayhew, Serody, Hayes, Perou, and Lai-Goldman]{faruki2017lung}
+Hawazin Faruki, Greg~M Mayhew, Jonathan~S Serody, D~Neil Hayes, Charles~M Perou, and Myla Lai-Goldman.
+\newblock Lung adenocarcinoma and squamous cell carcinoma gene expression subtypes demonstrate significant differences in tumor immune landscape.
+\newblock \emph{Journal of Thoracic Oncology}, 12\penalty0 (6):\penalty0 943--953, 2017.
+
+\end{thebibliography}
