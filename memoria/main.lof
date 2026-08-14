@@ -2,28 +2,31 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Arquitectura del \emph {pipeline} de \texttt {data.lung}. Los pasos con fondo verde son entradas (repositorios públicos), los pasos naranjas son entregables (firma, panel mínimo y validación externa contra IHC clínica), y los pasos azules son transformaciones intermedias.}}{10}{figure.caption.8}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Esquema de la validación Leave-One-Dataset-Out con $k=4$ cohortes. En cada iteración, una cohorte (naranja) actúa como test y las demás como entrenamiento. Las métricas se agregan como media al final del proceso.}}{15}{figure.caption.11}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Tasa de éxito de la curación LLM por cohorte. Barras verdes indican cohortes con curación superior al 40\,\% (umbral de inclusión).}}{17}{figure.caption.9}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Balanced accuracy del modelo en LODO frente al baseline mayoritario informado por cohorte.}}{19}{figure.caption.11}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces AUC frente a balanced accuracy por cohorte en LODO. La brecha vertical entre ambas cifras es proporcional a la necesidad de recalibración del umbral.}}{20}{figure.caption.12}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces AUC media LODO en función del tamaño del panel (genes ordenados por $d$ media de la firma validada). El panel mínimo (20 genes) captura el 99,6\,\% del AUC de la firma completa.}}{21}{figure.caption.14}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Correlación entre el score del clasificador y el contenido residual de pulmón sano dentro de los tumores, por cohorte.}}{23}{figure.caption.15}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Histologías presentes en las cohortes GEO originales que quedaron fuera del entrenamiento del clasificador de subtipo.}}{24}{figure.caption.16}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Análisis exploratorio de la cohorte GSE31210. (a) Componentes principales; los grupos sano y enfermo se separan en el plano. (b) Volcano de la comparación diferencial; miles de genes cruzan el umbral $|d|>1$ con FDR $<0{,}05$. (c) Heatmap de los 30 genes más significativos, con dendrograma de muestras que reproduce el grupo clínico.}}{25}{figure.caption.17}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Concordancia de signo de los coeficientes de LASSO entre distintos folds LODO. El acuerdo perfecto en signo se sitúa por encima del 90\,\% para los genes de la firma.}}{25}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Tasa de éxito de la curación LLM por cohorte. Barras verdes indican cohortes con curación superior al 40\,\% (umbral de inclusión).}}{19}{figure.caption.12}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Balanced accuracy del modelo en LODO frente al baseline mayoritario informado por cohorte.}}{21}{figure.caption.14}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces AUC frente a balanced accuracy por cohorte en LODO. La brecha vertical entre ambas cifras es proporcional a la necesidad de recalibración del umbral.}}{22}{figure.caption.15}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces AUC media LODO en función del tamaño del panel (genes ordenados por $d$ media de la firma validada). El panel mínimo (20 genes) captura el 99,6\,\% del AUC de la firma completa.}}{23}{figure.caption.17}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Correlación entre el score del clasificador y el contenido residual de pulmón sano dentro de los tumores, por cohorte.}}{26}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Histologías presentes en las cohortes GEO originales que quedaron fuera del entrenamiento del clasificador de subtipo.}}{27}{figure.caption.22}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Análisis exploratorio de la cohorte GSE31210. (a) Componentes principales; los grupos sano y enfermo se separan en el plano. (b) Volcano de la comparación diferencial; miles de genes cruzan el umbral $|d|>1$ con FDR $<0{,}05$. (c) Heatmap de los 30 genes más significativos, con dendrograma de muestras que reproduce el grupo clínico.}}{28}{figure.caption.23}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Concordancia de signo de los coeficientes de LASSO entre distintos folds LODO. El acuerdo perfecto en signo se sitúa por encima del 90\,\% para los genes de la firma.}}{28}{figure.caption.24}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {C.1}{\ignorespaces Portada de la interfaz \texttt {data.lung}. Fondo con terminal animada reproduciendo trazas reales del pipeline, tipografía mono con acento verde y CTA \emph {Comenzar}.}}{50}{figure.caption.23}%
-\contentsline {figure}{\numberline {C.2}{\ignorespaces Capítulo \emph {Inicio} del framework. Título, entradilla y hero de cinco cifras con acento verde.}}{51}{figure.caption.24}%
-\contentsline {figure}{\numberline {C.3}{\ignorespaces Capítulo \emph {Asistente}. Cabecera con avatar y estado en línea, sugerencias iniciales de conversación y input anclado abajo.}}{52}{figure.caption.25}%
-\contentsline {figure}{\numberline {C.4}{\ignorespaces Capítulo \emph {Introducción y objetivos}. Se aprecia la tabla de cohortes con la barra de progreso de curación LLM y el caption dinámico.}}{53}{figure.caption.26}%
-\contentsline {figure}{\numberline {C.5}{\ignorespaces Capítulo \emph {Metodología}. Bloques numerados con las fases del pipeline y comandos de reproducibilidad.}}{54}{figure.caption.27}%
-\contentsline {figure}{\numberline {C.6}{\ignorespaces Capítulo \emph {Resultados}. Se aprecia la cabecera de cuatro tarjetas, el buscador de gen y el inicio de la sección de subtipo.}}{55}{figure.caption.28}%
-\contentsline {figure}{\numberline {C.7}{\ignorespaces Capítulo \emph {Cohortes}. Selector de cohorte y bloque de cifras por dataset.}}{56}{figure.caption.29}%
-\contentsline {figure}{\numberline {C.8}{\ignorespaces Capítulo \emph {Conclusiones}. Lista de biomarcadores por linaje con cifras de recuperación IHC.}}{57}{figure.caption.30}%
+\contentsline {figure}{\numberline {C.1}{\ignorespaces Arquitectura de la interfaz web. Los CSV/JSON del pipeline se leen desde \texttt {paso12\_datos.py} (datos) y \texttt {contexto\_tfm.py} (prompt del asistente). El router de \texttt {paso12\_web\_chatbot.py} expone dos vistas: la portada (\texttt {/}) y el dashboard del framework (\texttt {/framework}). La línea discontinua indica la dependencia externa opcional (API de Groq) del asistente conversacional.}}{54}{figure.caption.30}%
+\contentsline {figure}{\numberline {C.2}{\ignorespaces Portada de la interfaz \texttt {data.lung}. Fondo con terminal animada reproduciendo trazas reales del pipeline, tipografía mono con acento verde y CTA \emph {Comenzar}.}}{55}{figure.caption.31}%
+\contentsline {figure}{\numberline {C.3}{\ignorespaces Capítulo \emph {Inicio} del framework. Título, entradilla y hero de cinco cifras con acento verde.}}{56}{figure.caption.32}%
+\contentsline {figure}{\numberline {C.4}{\ignorespaces Capítulo \emph {Asistente}. Cabecera con avatar y estado en línea, sugerencias iniciales de conversación y input anclado abajo.}}{57}{figure.caption.33}%
+\contentsline {figure}{\numberline {C.5}{\ignorespaces Capítulo \emph {Introducción y objetivos}. Se aprecia la tabla de cohortes con la barra de progreso de curación LLM y el caption dinámico.}}{58}{figure.caption.34}%
+\contentsline {figure}{\numberline {C.6}{\ignorespaces Capítulo \emph {Metodología}. Bloques numerados con las fases del pipeline y comandos de reproducibilidad.}}{59}{figure.caption.35}%
+\contentsline {figure}{\numberline {C.7}{\ignorespaces Capítulo \emph {Resultados}. Se aprecia la cabecera de cuatro tarjetas, el buscador de gen y el inicio de la sección de subtipo.}}{60}{figure.caption.36}%
+\contentsline {figure}{\numberline {C.8}{\ignorespaces Capítulo \emph {Cohortes}. Selector de cohorte y bloque de cifras por dataset.}}{61}{figure.caption.37}%
+\contentsline {figure}{\numberline {C.9}{\ignorespaces Capítulo \emph {Conclusiones}. Lista de biomarcadores por linaje con cifras de recuperación IHC.}}{62}{figure.caption.38}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

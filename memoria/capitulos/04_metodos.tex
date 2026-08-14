@@ -31,6 +31,51 @@ y mediante el registro de cada resultado intermedio en disco. El código
 fuente se aloja en un repositorio Git público
 (\url{https://github.com/danitapiadiez-gif/TFM-Bioinformatica}).
 
+La figura~\ref{fig:pipeline} representa gráficamente la arquitectura del
+pipeline, agrupando los pasos por fase y señalando los artefactos
+principales que fluyen entre ellos.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=0.55cm and 0.9cm]
+    % Fila 1: entrada
+    \node[entrada] (geo)      {NCBI GEO};
+    \node[paso, right=of geo] (descarga) {\textbf{1} Descarga};
+    \node[paso, right=of descarga] (norma) {\textbf{2} Normalización};
+    % Fila 2: curación
+    \node[paso, below=of descarga] (llm)  {\textbf{3} Curación LLM\\(Llama 3.3-70b)};
+    \node[paso, right=of llm]     (crit) {\textbf{4} Criterios de\\inclusión};
+    % Fila 3: analisis
+    \node[paso, below=of llm]     (dif)  {\textbf{5} Diferencial\\Welch + FDR};
+    \node[paso, right=of dif]     (ml)   {\textbf{6} Clasificación\\LASSO L1 · RF · SVM};
+    % Fila 4: LODO
+    \node[paso, below=of dif]     (lodo) {\textbf{7} LODO\\externa};
+    \node[paso, right=of lodo]    (cons) {\textbf{8} Consenso\\multi-cohorte};
+    % Fila 5: entregables
+    \node[salida, below=of lodo]  (firma) {\textbf{9} Firma\\1174 genes};
+    \node[salida, right=of firma] (panel) {\textbf{9} Panel\\mínimo 20};
+    \node[salida, right=of panel] (ihc)   {\textbf{9} Validación\\IHC 18/20};
+
+    % Flechas principales
+    \draw[flecha] (geo) -- (descarga);
+    \draw[flecha] (descarga) -- (norma);
+    \draw[flecha] (norma.south) |- (llm.east);
+    \draw[flecha] (llm) -- (crit);
+    \draw[flecha] (crit.south) |- (dif.east);
+    \draw[flecha] (dif) -- (ml);
+    \draw[flecha] (ml.south) |- (lodo.east);
+    \draw[flecha] (lodo) -- (cons);
+    \draw[flecha] (cons.south) |- (firma.east);
+    \draw[flecha] (firma) -- (panel);
+    \draw[flecha] (panel) -- (ihc);
+  \end{tikzpicture}
+  \caption{Arquitectura del \emph{pipeline} de \framework. Los pasos con
+  fondo verde son entradas (repositorios públicos), los pasos naranjas
+  son entregables (firma, panel mínimo y validación externa contra IHC
+  clínica), y los pasos azules son transformaciones intermedias.}
+  \label{fig:pipeline}
+\end{figure}
+
 \section{Adquisición y normalización de cohortes}
 \label{sec:adquisicion}
 
@@ -222,6 +267,27 @@ Los tres clasificadores empleados se implementan sobre \texttt{scikit-learn}
   \texttt{SVC(kernel='linear', C=1.0, probability=True, random\_state=42)}.
 \end{itemize}
 
+La tabla~\ref{tab:hiperparametros} resume los hiperparámetros y las
+propiedades relevantes de cada clasificador.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Hiperparámetros y propiedades de los tres clasificadores.}
+  \label{tab:hiperparametros}
+  \begin{tabular}{lllll}
+    \toprule
+    \textbf{Modelo} & \textbf{Hiperparámetros} & \textbf{Regularización} & \textbf{Interpretabilidad} & \textbf{Determinismo} \\
+    \midrule
+    Regresión log. L1 & $C{=}0{,}5$, saga, $10^{4{,}7}$ iter. & $\ell_1$ (esparsa) & Alta (coefs.) & sí (seed 42) \\
+    Random Forest & 300 árboles, $\sqrt{p}$ feat. & Implícita (bagging) & Media (importancias) & sí (seed 42) \\
+    SVM lineal & $C{=}1{,}0$, kernel lineal & $\ell_2$ (densa) & Baja (pesos) & sí (seed 42) \\
+    \midrule
+    Baseline & Predice clase mayoritaria & — & — & determinista \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 Como \emph{baseline} de comparación se emplea el clasificador
 \emph{mayoritario informado}: siempre predice la clase más frecuente en el
 conjunto de entrenamiento y su balanced accuracy es siempre 0,5. Esto
@@ -244,7 +310,51 @@ La validación se realiza mediante LODO. Para cada iteración $k$:
 Los resultados de las $k$ iteraciones se agregan como media (para las
 cohortes evaluables) y se registran también individualmente en
 \texttt{LODO\_HONESTO\_RESULTADOS.csv} y
-\texttt{SUBTIPO\_LODO\_RESULTADOS.csv}.
+\texttt{SUBTIPO\_LODO\_RESULTADOS.csv}. La figura~\ref{fig:lodo} ilustra
+gráficamente el esquema de la validación LODO para un caso con cuatro
+cohortes.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=0.35cm and 0.55cm]
+    % Iteracion 1
+    \node[paso, fill=orange!20, draw=orange!70!black] (t1) {Test\\C1};
+    \node[paso, right=of t1] (a1) {Train C2};
+    \node[paso, right=of a1] (a2) {Train C3};
+    \node[paso, right=of a2] (a3) {Train C4};
+    \node[right=of a3, font=\footnotesize] (r1) {\;$\Rightarrow$ AUC$_1$, BalAcc$_1$};
+    % Iteracion 2
+    \node[paso, below=of t1] (b1) {Train C1};
+    \node[paso, fill=orange!20, draw=orange!70!black, right=of b1] (t2) {Test\\C2};
+    \node[paso, right=of t2] (b2) {Train C3};
+    \node[paso, right=of b2] (b3) {Train C4};
+    \node[right=of b3, font=\footnotesize] (r2) {\;$\Rightarrow$ AUC$_2$, BalAcc$_2$};
+    % Iteracion 3
+    \node[paso, below=of b1] (c1) {Train C1};
+    \node[paso, right=of c1] (c2) {Train C2};
+    \node[paso, fill=orange!20, draw=orange!70!black, right=of c2] (t3) {Test\\C3};
+    \node[paso, right=of t3] (c3) {Train C4};
+    \node[right=of c3, font=\footnotesize] (r3) {\;$\Rightarrow$ AUC$_3$, BalAcc$_3$};
+    % Iteracion 4
+    \node[paso, below=of c1] (d1) {Train C1};
+    \node[paso, right=of d1] (d2) {Train C2};
+    \node[paso, right=of d2] (d3) {Train C3};
+    \node[paso, fill=orange!20, draw=orange!70!black, right=of d3] (t4) {Test\\C4};
+    \node[right=of t4, font=\footnotesize] (r4) {\;$\Rightarrow$ AUC$_4$, BalAcc$_4$};
+    % Media
+    \node[salida, below=0.7cm of d2, minimum width=8cm] (media)
+      {Media LODO $=\frac{1}{k}\sum_{i=1}^{k}$ AUC$_i$, BalAcc$_i$};
+    \draw[flecha] (r1.south east) to[out=-15, in=45] (media.north east);
+    \draw[flecha] (r2.south east) to[out=-15, in=45] (media.east);
+    \draw[flecha] (r3.south east) to[out=-15, in=25] (media.east);
+    \draw[flecha] (r4.west) -- (media.east);
+  \end{tikzpicture}
+  \caption{Esquema de la validación Leave-One-Dataset-Out con $k=4$
+  cohortes. En cada iteración, una cohorte (naranja) actúa como test y
+  las demás como entrenamiento. Las métricas se agregan como media al
+  final del proceso.}
+  \label{fig:lodo}
+\end{figure}
 
 \section{Firma génica por consenso}
 \label{sec:consenso}

@@ -173,7 +173,44 @@ a menos de 0,01 del AUC máximo alcanza \textbf{20 genes} con AUC
 Este panel de 20 genes es susceptible de ser medido mediante PCR
 cuantitativa multiplex o por \emph{NanoString nCounter}, tecnologías con
 tiempos de respuesta y coste unitario compatibles con la aplicación
-clínica.
+clínica. La tabla~\ref{tab:panel_min} detalla los 20 genes ordenados por
+rango en la firma, junto con su tamaño de efecto y su condición de
+marcador IHC clínico.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Panel mínimo de 20 genes ordenados por rango en la firma.}
+  \label{tab:panel_min}
+  \begin{tabular}{clrlc}
+    \toprule
+    \textbf{\#} & \textbf{Gen} & \textbf{$d$ media} & \textbf{Dirección} & \textbf{Marcador IHC} \\
+    \midrule
+     1 & \gene{DSG3}     & 4,18 & Escamoso & \checkmark \\
+     2 & \gene{KRT5}     & 3,97 & Escamoso & \checkmark \\
+     3 & \gene{CALML3}   & 2,98 & Escamoso & \checkmark \\
+     4 & \gene{KRT6B}    & 3,09 & Escamoso & \checkmark \\
+     5 & \gene{PKP1}     & 3,38 & Escamoso & \checkmark \\
+     6 & \gene{FAT2}     & 3,03 & Escamoso & --- \\
+     7 & \gene{DAPL1}    & 3,23 & Escamoso & --- \\
+     8 & \gene{TRIM29}   & 2,79 & Escamoso & --- \\
+     9 & \gene{CLCA2}    & 3,32 & Escamoso & --- \\
+    10 & \gene{DSC3}     & 3,80 & Escamoso & \checkmark \\
+    11 & \gene{S1PR5}    & 2,58 & Escamoso & --- \\
+    12 & \gene{KRT6A}    & 2,72 & Escamoso & \checkmark \\
+    13 & \gene{KRT13}    & 2,56 & Escamoso & \checkmark \\
+    14 & \gene{SERPINB5} & 2,48 & Escamoso & --- \\
+    15 & \gene{TP63}     & 3,20 & Escamoso & \checkmark \\
+    16 & \gene{GJB5}     & 2,82 & Escamoso & --- \\
+    17 & \gene{KRT16}    & 2,45 & Escamoso & --- \\
+    18 & \gene{BNC1}     & 2,63 & Escamoso & --- \\
+    19 & \gene{CERS3}    & 2,38 & Escamoso & --- \\
+    20 & \gene{TMEM40}   & 2,47 & Escamoso & --- \\
+    \midrule
+    \multicolumn{2}{l}{Cobertura IHC del panel} & \multicolumn{3}{r}{\textbf{9 de 20 son marcadores IHC clínicos (45\,\%)}} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \section{Validación externa contra IHC clínica}
 \label{sec:res_ihc}
@@ -200,7 +237,42 @@ adenocarcinoma constituye una validación externa fuerte frente a un
 estándar clínico independiente. Es especialmente significativo que el
 framework no haya recibido información previa sobre estos marcadores: la
 selección se realiza únicamente por criterio estadístico de consenso
-multi-cohorte.
+multi-cohorte. La tabla~\ref{tab:ihc_lado_a_lado} resume la comparación
+lado a lado entre el panel IHC clínico completo y la firma génica.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Panel IHC clínico (OMS 2015) frente a la firma génica
+  validada.}
+  \label{tab:ihc_lado_a_lado}
+  \begin{tabular}{lp{6.5cm}l}
+    \toprule
+    \textbf{Linaje} & \textbf{Marcadores IHC clínicos (OMS)} & \textbf{Recuperación} \\
+    \midrule
+    Escamoso &
+    \gene{KRT5}\checkmark, \gene{KRT6A}\checkmark, \gene{KRT6B}\checkmark,
+    \gene{KRT13}\checkmark, \gene{KRT14}\checkmark, \gene{TP63}\checkmark,
+    \gene{DSG3}\checkmark, \gene{DSC3}\checkmark, \gene{SOX2}\checkmark,
+    \gene{PKP1}\checkmark, \gene{CALML3}\checkmark, \gene{S100A2}\checkmark
+    & \textbf{12 / 12} \\
+    \midrule
+    Adenocarcinoma &
+    \gene{NAPSA}\checkmark, \gene{NKX2-1}\checkmark, \gene{SFTPB}\checkmark,
+    \gene{MUC1}\checkmark, \gene{SLC34A2}\checkmark, \gene{CEACAM6}\checkmark,
+    \emph{\gene{SFTPA1}}, \emph{\gene{SFTPC}}
+    & \textbf{6 / 8} \\
+    \midrule
+    \multicolumn{2}{l}{\textbf{Total panel IHC OMS}} & \textbf{18 / 20 (90,0\,\%)} \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.35em}
+  {\footnotesize Los marcadores marcados con \checkmark\ están presentes
+  en la firma génica validada. Los marcados en cursiva (\gene{SFTPA1},
+  \gene{SFTPC}) son proteínas del surfactante que no superan el
+  criterio de replicación en las tres cohortes.}
+\end{table}
 
 \section{Composición tisular dentro de los tumores}
 \label{sec:res_composicion}
@@ -231,7 +303,36 @@ cohorte.
 La correlación negativa indica que los tumores con \emph{menos} pulmón
 sano residual obtienen scores más altos, lo que constituye un eje
 biológico legítimo (pérdida gradual de arquitectura alvéolo-capilar
-normal) y no un artefacto de composición.
+normal) y no un artefacto de composición. La
+tabla~\ref{tab:composicion} desglosa los valores exactos por cohorte.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Correlación entre el score del clasificador y el contenido
+  residual de pulmón sano dentro de los tumores.}
+  \label{tab:composicion}
+  \begin{tabular}{lrrrr}
+    \toprule
+    \textbf{Cohorte} & $n$ tumores & $\rho$ (solo tumores) & $p$-valor & $\rho$ (todas las muestras) \\
+    \midrule
+    GSE118370 & 6   & --      & --                    & --0,755 \\
+    GSE18842  & 46  & --0,537 & $1{,}2\cdot 10^{-4}$  & --0,872 \\
+    GSE19188  & 91  & --0,332 & $1{,}3\cdot 10^{-3}$  & --0,822 \\
+    GSE19804  & 60  & --0,777 & $3{,}1\cdot 10^{-13}$ & --0,799 \\
+    GSE23066  & 5   & --      & --                    & --0,055 \\
+    GSE31210  & 226 & \textbf{--0,858} & $\mathbf{1{,}1\cdot 10^{-66}}$ & --0,889 \\
+    GSE40791  & 2   & --      & --                    & --0,490 \\
+    GSE7670   & 7   & --      & --                    & --0,725 \\
+    \midrule
+    \textbf{Media evaluables} & & \textbf{--0,626} & & \textbf{--0,676} \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.35em}
+  {\footnotesize Las cohortes con $n \leq 6$ tumores no permiten un
+  cálculo estable de correlación intra-tumor y aparecen como ``--''.}
+\end{table}
 
 \section{Interpretación biológica: dos ejes reales}
 \label{sec:res_biologia}
@@ -325,3 +426,30 @@ estable y no depende de qué cohorte concreta se retira como test.
   del 90\,\% para los genes de la firma.}
   \label{fig:concordancia}
 \end{figure}
+
+La tabla~\ref{tab:folds} contrasta cuantitativamente dos esquemas: (a)
+folds LODO usados en el trabajo, y (b) una partición ingenua en cohortes
+totalmente disjuntas (con muestras que no comparten cohorte entre train
+y test), a modo de referencia superior.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Concordancia de la firma entre folds bajo dos esquemas de
+  partición.}
+  \label{tab:folds}
+  \begin{tabular}{lrrrr}
+    \toprule
+    \textbf{Esquema} & \textbf{Seleccionados} & \textbf{En todos} & \textbf{Signo perfecto} & \textbf{Conc. media} \\
+    \midrule
+    (a) LODO solapados ($k{=}8$)  & 739 & 12 & 12 & 1,000 \\
+    (b) Cohortes disjuntas ($k{=}8$) & 304 & 0 & 0 & 0,773 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.35em}
+  {\footnotesize (a) es el esquema utilizado en este trabajo: refleja la
+  estabilidad de la firma bajo LODO estricto. (b) es una referencia con
+  particiones más rigurosas que muestra la caída natural de concordancia
+  cuando no hay ninguna muestra compartida entre folds.}
+\end{table}

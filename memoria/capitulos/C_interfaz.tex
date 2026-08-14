@@ -33,7 +33,44 @@ Los datos que consumen ambas vistas se leen desde
 funciones puras (\texttt{metricas()}, \texttt{resumen\_firma()},
 \texttt{tabla()}, \texttt{dec()}) usadas por toda la interfaz. Esta
 separación estricta entre presentación y datos garantiza que cualquier
-cifra mostrada sea trazable a una fila concreta de los CSV/JSON.
+cifra mostrada sea trazable a una fila concreta de los CSV/JSON. La
+figura~\ref{fig:arquitectura} resume la arquitectura completa de la
+interfaz.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[node distance=0.5cm and 0.9cm]
+    % Datos
+    \node[entrada, minimum width=2.6cm] (csv) {CSV / JSON\\del pipeline};
+    % Capa de datos
+    \node[paso, right=1.2cm of csv] (datos) {\texttt{paso12\_datos.py}\\metricas() · tabla()};
+    \node[paso, below=0.35cm of datos] (ctx)   {\texttt{contexto\_tfm.py}\\prompt sistema};
+    % Router
+    \node[paso, right=1.2cm of datos] (router) {\texttt{paso12\_web\_chatbot.py}\\router \texttt{st.navigation}};
+    % Vistas
+    \node[salida, right=1.2cm of router, yshift=0.7cm] (landing) {Portada\\\texttt{/}};
+    \node[salida, right=1.2cm of router, yshift=-0.7cm] (dash)    {Framework\\\texttt{/framework}};
+    % Groq
+    \node[entrada, below=0.7cm of ctx] (groq) {API Groq\\Llama 3.3-70b};
+
+    % Flechas
+    \draw[flecha] (csv) -- (datos);
+    \draw[flecha] (csv.south) |- (ctx.west);
+    \draw[flecha] (datos) -- (router);
+    \draw[flecha] (ctx.east) -| ($(router.south)+(0,-0.3)$) -- (router.south);
+    \draw[flecha] (router.east) -- (landing.west);
+    \draw[flecha] (router.east) -- (dash.west);
+    \draw[flecha, dashed] (groq) -- (ctx);
+  \end{tikzpicture}
+  \caption{Arquitectura de la interfaz web. Los CSV/JSON del pipeline
+  se leen desde \texttt{paso12\_datos.py} (datos) y
+  \texttt{contexto\_tfm.py} (prompt del asistente). El router de
+  \texttt{paso12\_web\_chatbot.py} expone dos vistas: la portada
+  (\texttt{/}) y el dashboard del framework (\texttt{/framework}). La
+  línea discontinua indica la dependencia externa opcional (API de
+  Groq) del asistente conversacional.}
+  \label{fig:arquitectura}
+\end{figure}
 
 Para ejecutar la aplicación localmente:
 
@@ -78,7 +115,7 @@ Al entrar en \texttt{/framework} se aterriza en el capítulo
 
 \begin{itemize}
   \item Una marca superior en tipografía monoespaciada
-  ``\texttt{\textcolor{teal}{>}~data.lung~$\cdot$~framework}''.
+  ``\texttt{> data.lung \textperiodcentered\ framework}''.
   \item El kicker \emph{Trabajo de Fin de Máster · Bioinformática · UAX}.
   \item El título completo del trabajo.
   \item Una entradilla en tipografía serif que resume el framework y

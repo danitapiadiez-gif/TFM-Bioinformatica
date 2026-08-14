@@ -69,6 +69,20 @@
 % Matemáticas
 \usepackage{amsmath,amssymb,mathtools}
 
+% Diagramas TikZ
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc, shadows}
+\tikzset{
+  paso/.style={rectangle, rounded corners, draw=black!60, thick,
+               fill=blue!5, minimum width=3.2cm, minimum height=0.9cm,
+               align=center, font=\small},
+  entrada/.style={paso, fill=green!8, draw=green!60!black},
+  salida/.style={paso, fill=orange!8, draw=orange!60!black},
+  flecha/.style={-{Latex[length=2.5mm]}, thick, black!60},
+  grupo/.style={rectangle, dashed, draw=black!40, inner sep=8pt,
+                rounded corners, fill=black!2},
+}
+
 % Referencias cruzadas y bibliografía
 \usepackage{hyperref}
 \hypersetup{
