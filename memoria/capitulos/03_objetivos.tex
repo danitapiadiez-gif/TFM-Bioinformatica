@@ -42,68 +42,36 @@ El framework debe cumplir tres propiedades irrenunciables:
 Los objetivos específicos que se derivan del objetivo general son:
 
 \begin{description}
-  \item[OE1. Adquisición y normalización automatizada de cohortes GEO.]
-  Descargar mediante API las cohortes seleccionadas del repositorio NCBI
-  GEO, extraer las matrices de expresión y aplicar normalización log$_2$ y
-  corrección por cuantiles dentro de cada estudio. El proceso debe ser
-  robusto frente a la heterogeneidad de plataformas de microarray,
-  particularmente Affymetrix HG-U133 Plus 2.0 (GPL570).
+  \item[OE1. Integración automatizada de cohortes GEO.] Descargar y
+  normalizar (log$_2$ + cuantiles dentro de cada estudio) las cohortes
+  seleccionadas del repositorio NCBI GEO, y \textbf{curar los metadatos
+  clínicos} mediante un modelo de lenguaje (Llama~3.3-70b vía Groq) que
+  asigna cada muestra a una categoría binaria a partir del texto libre.
 
-  \item[OE2. Curación clínica de metadatos con modelo de lenguaje.]
-  Implementar un módulo que consulte al modelo Llama~3.3-70b a través de la
-  API de Groq para asignar cada muestra a una categoría binaria
-  (\texttt{sano} / \texttt{enfermo}), o descartarla como \texttt{ambigua},
-  interpretando el texto libre de la descripción de la muestra. Registrar
-  la tasa de éxito por cohorte como métrica de calidad de la curación.
+  \item[OE2. Clasificación supervisada con validación externa.]
+  Entrenar clasificadores (LASSO L1, Random Forest y SVM) sobre las dos
+  tareas contempladas (tumor \emph{vs.} sano y subtipo ADC \emph{vs.}
+  SQC), y evaluarlos mediante \textbf{Leave-One-Dataset-Out} (LODO)
+  sobre las cohortes que cumplen los criterios de inclusión.
 
-  \item[OE3. Aplicación transparente de criterios de inclusión.] Definir y
-  aplicar los criterios que una cohorte debe cumplir para entrar al
-  entrenamiento y evaluación (presencia de casos y controles, curación
-  exitosa por encima de un umbral mínimo, alineamiento verificado por
-  identificador \texttt{geo\_accession}). Las cohortes que no cumplan
-  algún criterio se documentan explícitamente, sin descartes silenciosos.
+  \item[OE3. Firma génica validada por consenso y panel mínimo.]
+  Construir una firma de biomarcadores por meta-análisis multi-cohorte
+  (mismo signo y $|d|>0{,}5$ en las tres cohortes evaluables), y
+  derivar un \textbf{panel mínimo clínicamente manejable} cuya AUC se
+  mantenga a menos de 0,01 del máximo de la firma completa.
 
-  \item[OE4. Análisis diferencial y clasificación supervisada.] Ejecutar
-  análisis diferencial (test $t$ de Welch con corrección FDR de
-  Benjamini-Hochberg) y entrenar clasificadores supervisados (regresión
-  logística L1, Random Forest y máquinas de vectores soporte) para las dos
-  tareas contempladas: (a) tumor \emph{vs.} sano, y (b) subtipo
-  histológico ADC \emph{vs.} SQC.
+  \item[OE4. Validación externa contra marcadores clínicos IHC.]
+  Comprobar en qué medida la firma, seleccionada por criterio
+  estadístico puro, recupera el panel de inmunohistoquímica
+  diagnóstica recomendado por la OMS para adenocarcinoma y carcinoma
+  escamoso.
 
-  \item[OE5. Validación externa Leave-One-Dataset-Out.] Evaluar cada
-  clasificador mediante LODO sobre las cohortes evaluables, reportando AUC,
-  balanced accuracy, sensibilidad, especificidad y ganancia respecto al
-  baseline mayoritario informado.
-
-  \item[OE6. Identificación de una firma génica validada por consenso.]
-  Construir una firma de biomarcadores mediante meta-análisis por consenso
-  multi-cohorte: un gen entra en la firma sólo si mantiene el mismo signo
-  de cambio y una magnitud mínima (medida como $d$ de Cohen) en las tres
-  cohortes evaluables simultáneamente.
-
-  \item[OE7. Panel mínimo clínicamente manejable.] Derivar, a partir de la
-  firma validada, un panel mínimo del menor número de genes cuya AUC se
-  mantenga a menos de 0,01 del máximo alcanzado por la firma completa. El
-  objetivo es un panel del orden de las decenas de genes, susceptible de
-  ser medido mediante PCR cuantitativa o \emph{NanoString}.
-
-  \item[OE8. Validación externa contra marcadores clínicos IHC.]
-  Comprobar en qué medida la firma validada, seleccionada de forma
-  puramente estadística sin declararle los marcadores clínicos, recupera el
-  panel de inmunohistoquímica diagnóstica recomendado por la OMS para
-  adenocarcinoma y carcinoma escamoso.
-
-  \item[OE9. Interfaz web reproducible.] Desarrollar una interfaz web
-  interactiva (Streamlit) que permita a un revisor navegar por los
-  resultados del framework, consultar cifras y figuras por cohorte y por
-  gen, y verificar en tiempo real la trazabilidad de cualquier afirmación
-  cuantitativa a los CSV/JSON generados por el pipeline.
-
-  \item[OE10. Asistente conversacional acotado a los resultados.]
-  Integrar en la interfaz un asistente conversacional basado en el mismo
-  modelo Llama~3.3-70b, alimentado con un contexto que se lee dinámicamente
-  de los resultados y con reglas explícitas que impiden inventar cifras o
-  citar biomarcadores que no estén en la firma.
+  \item[OE5. Interfaz web con asistente conversacional acotado.]
+  Desarrollar una interfaz interactiva (Streamlit) que permita
+  navegar los resultados por cohorte y por gen, con un asistente
+  conversacional (Llama~3.3-70b) alimentado dinámicamente de los CSV
+  del pipeline y con reglas explícitas que impiden inventar cifras o
+  citar biomarcadores fuera de la firma.
 \end{description}
 
 \section*{Hipótesis de partida}
