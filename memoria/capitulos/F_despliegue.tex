@@ -8,6 +8,7 @@ la clave API de Groq, la ejecución del pipeline y el arranque de la
 aplicación web.
 
 \section*{Requisitos previos}
+\phantomsection
 \addcontentsline{toc}{section}{Requisitos previos}
 
 \begin{itemize}
@@ -24,6 +25,7 @@ aplicación web.
 \end{itemize}
 
 \section*{Instalación de dependencias}
+\phantomsection
 \addcontentsline{toc}{section}{Instalación de dependencias}
 
 Desde la raíz del repositorio:
@@ -41,6 +43,7 @@ El fichero \texttt{requirements.txt} incluye:
 \texttt{seaborn} y \texttt{pytest} (esta última sólo para tests).
 
 \section*{Configuración de la clave API}
+\phantomsection
 \addcontentsline{toc}{section}{Configuración de la clave API}
 
 Crear un fichero \texttt{.env} en la raíz del repositorio con el
@@ -57,6 +60,7 @@ si ya existe un \texttt{AUDITORIA\_COHORTES.csv} previo con las
 etiquetas asignadas.
 
 \section*{Ejecución del pipeline completo}
+\phantomsection
 \addcontentsline{toc}{section}{Ejecución del pipeline completo}
 
 Los pasos en orden lógico, ejecutables desde la raíz:
@@ -95,6 +99,7 @@ cohortes (fase 1) y por la curación LLM (fase 2). Los pasos 13-19
 tardan típicamente entre 3 y 6 minutos.
 
 \section*{Ejecución selectiva}
+\phantomsection
 \addcontentsline{toc}{section}{Ejecución selectiva}
 
 Cada paso persiste sus salidas en disco, por lo que no es necesario
@@ -113,6 +118,7 @@ escenarios más frecuentes son:
 \end{description}
 
 \section*{Interfaz web}
+\phantomsection
 \addcontentsline{toc}{section}{Interfaz web}
 
 Una vez ejecutado el pipeline (o al menos los pasos 14, 15, 16, 17, 18,
@@ -133,6 +139,7 @@ streamlit run agentes/paso12_web_chatbot.py \
 \end{lstlisting}
 
 \section*{Tests automáticos}
+\phantomsection
 \addcontentsline{toc}{section}{Tests automáticos}
 
 La suite mínima de tests se ejecuta con:
@@ -151,6 +158,7 @@ El flujo de integración continua está configurado en
 cada \emph{push} y \emph{pull request} a la rama principal.
 
 \section*{Integración con LaTeX (esta memoria)}
+\phantomsection
 \addcontentsline{toc}{section}{Integración con LaTeX (esta memoria)}
 
 La memoria del TFM (fuente en \texttt{memoria/}) se compila con la
@@ -186,6 +194,7 @@ bibliografía está en \texttt{memoria/bibliografia.bib} en formato
 BibTeX.
 
 \section*{Resolución de problemas frecuentes}
+\phantomsection
 \addcontentsline{toc}{section}{Resolución de problemas frecuentes}
 
 \begin{description}
