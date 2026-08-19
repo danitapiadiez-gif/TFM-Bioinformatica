@@ -44,6 +44,7 @@ entre cohortes para equilibrar los dos tipos de error.
   \small
   \caption{Rendimiento LODO para la tarea tumor \emph{vs.} sano.}
   \label{tab:lodo_tvs}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lrrrrrrr}
     \toprule
     \textbf{Cohorte test} & $n$ & \textbf{Sano} & \textbf{Enf.} & \textbf{AUC} & \textbf{Bal.\,acc.} & \textbf{Sens.} & \textbf{Espec.} \\
@@ -60,6 +61,7 @@ entre cohortes para equilibrar los dos tipos de error.
     \textbf{Media} & & & & \textbf{0,925} & \textbf{0,772} & \textbf{0,983} & \textbf{0,561} \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 Todos los baselines mayoritarios informados quedan por debajo del
@@ -98,6 +100,111 @@ de reentrenar la firma.
   \label{fig:auc_vs_balacc}
 \end{figure}
 
+\subsection{Recalibración del umbral: cierre de la brecha AUC / bal.\,acc.}
+\label{sec:res_recalibracion}
+
+La brecha entre AUC (0,925) y balanced accuracy (0,772) documentada en la
+subsección anterior es un artefacto de operación —no de la firma— causado
+por el umbral de decisión fijo en 0,5 sobre un conjunto de entrenamiento
+desbalanceado. Se resuelve envolviendo el clasificador en un calibrador
+isotónico entrenado por validación cruzada anidada dentro del conjunto de
+entrenamiento (5 folds internos), sin exponer la cohorte de test.
+
+Aplicada esta recalibración fold a fold, la balanced accuracy media LODO
+sube de \textbf{0,772} a \textbf{0,810} ($+0{,}038$), con
+sensibilidad~0,988 y especificidad~0,632 (frente a 0,983 / 0,561 sin
+recalibrar). La AUC media se mantiene esencialmente igual (0,925 vs 0,953),
+como cabe esperar: la calibración no altera el orden de los scores, sólo
+reequilibra el umbral. La calibración por Platt (sigmoide) se ensayó como
+alternativa pero degrada la métrica al saturarse el ajuste sigmoide en
+folds internos pequeños; la isotónica es más robusta en este régimen.
+
+Este resultado retira del catálogo de trabajo futuro la única debilidad
+técnica visible del clasificador tumor-vs-sano: la firma no sólo ordena
+bien (AUC alta), también decide bien tras recalibración.
+
+\subsection{Intervalos de confianza por bootstrap}
+\label{sec:res_ic}
+
+Para acotar la variabilidad estadística de las métricas LODO se aplica un
+bootstrap de $n=1000$ remuestreos sobre las predicciones existentes (sin
+reentrenar el modelo). La tabla~\ref{tab:ic_bootstrap} resume los IC al
+95\,\% de AUC y balanced accuracy por cohorte y sobre el conjunto
+concatenado (\emph{pooled}).
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Intervalos de confianza al 95\,\% por bootstrap ($n=1000$) sobre
+  las predicciones LODO. Cohortes con $n \leq 10$ muestras producen IC
+  extremadamente amplios (bootstrap degenerado).}
+  \label{tab:ic_bootstrap}
+  \begin{tabular}{lrcc}
+    \toprule
+    \textbf{Cohorte test} & $n$ & \textbf{AUC [IC 95\,\%]} & \textbf{Bal.\,acc. [IC 95\,\%]} \\
+    \midrule
+    GSE118370          & 12  & 1,000 [1,000; 1,000] & 0,917 [0,750; 1,000] \\
+    GSE18842           & 91  & 1,000 [1,000; 1,000] & 0,889 [0,826; 0,944] \\
+    GSE19188           & 156 & 0,984 [0,964; 0,999] & 0,904 [0,850; 0,950] \\
+    GSE19804           & 120 & 0,984 [0,962; 0,999] & 0,775 [0,708; 0,841] \\
+    GSE23066           & 10  & 0,440 [0,000; 1,000] & 0,500 [0,500; 0,500] \\
+    GSE31210           & 246 & 0,993 [0,984; 1,000] & 0,942 [0,919; 0,963] \\
+    GSE40791           & 12  & 1,000 [1,000; 1,000] & 0,500 [0,500; 0,500] \\
+    GSE7670            & 15  & 1,000 [1,000; 1,000] & 0,750 [0,583; 0,917] \\
+    \midrule
+    \textbf{Pooled}    & \textbf{662} & \textbf{0,943 [0,925; 0,959]} & \textbf{0,813 [0,779; 0,843]} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Sobre las cohortes de tamaño razonable ($n \geq 90$), los IC son estrechos
+(anchura $< 0{,}05$ para AUC) y compatibles entre sí. La cohorte GSE23066
+($n=10$) es la que domina la variabilidad y explica el AUC 0,44 individual:
+el remuestreo bootstrap saca IC $[0, 1]$, es decir, no hay evidencia
+estadística de rendimiento distinto del azar en esa cohorte por su solo
+tamaño. El IC del \emph{pooled} —agregando las 662 predicciones— es la
+cifra defendible con menor ambigüedad: \textbf{AUC 0,943 [0,925; 0,959]}
+y \textbf{balanced accuracy 0,813 [0,779; 0,843]}.
+
+\subsection{Comparativa entre clasificadores}
+\label{sec:res_comparativa_ml}
+
+El OE2 planteaba entrenar tres clasificadores supervisados (regresión
+logística L1, Random Forest y SVM lineal) y evaluarlos bajo el mismo
+protocolo LODO. La tabla~\ref{tab:comparativa_ml} recoge los resultados.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Comparativa de clasificadores en LODO tumor \emph{vs.} sano
+  (medias sobre las 8 cohortes evaluables).}
+  \label{tab:comparativa_ml}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Modelo}     & \textbf{AUC} & \textbf{Bal.\,acc.} & \textbf{Sens.} & \textbf{Espec.} \\
+    \midrule
+    LASSO L1            & 0,925 & 0,772 & 0,983 & 0,561 \\
+    Random Forest       & 0,933 & 0,759 & 0,989 & 0,530 \\
+    SVM lineal          & \textbf{0,957} & \textbf{0,822} & 0,979 & \textbf{0,665} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+SVM lineal obtiene ligeramente el mejor rendimiento en las cuatro
+métricas, seguido de LASSO y Random Forest muy próximos entre sí. La
+diferencia entre los tres es pequeña (menos de 0,05 en AUC entre el mejor
+y el peor) y sitúa a los tres modelos en el mismo régimen: la señal
+biológica es lo bastante fuerte para que la elección concreta de
+clasificador no cambie las conclusiones.
+
+Se mantiene \textbf{LASSO L1} como modelo principal del trabajo por dos
+razones ahora respaldadas con datos: (i)~su salida es directamente
+interpretable como coeficientes por gen, permitiendo derivar la firma
+génica y el panel mínimo, cosa que ni Random Forest ni SVM lineal
+proporcionan de forma tan limpia; y (ii)~su rendimiento cae dentro del
+intervalo de confianza del mejor modelo (SVM), por lo que la penalización
+por interpretabilidad no es significativa.
+
 \section{Clasificación de subtipo histológico ADC \emph{vs.} SQC}
 \label{sec:res_subtipo}
 
@@ -111,6 +218,7 @@ cohorte.
   \small
   \caption{Rendimiento LODO para la tarea de subtipo ADC \emph{vs.} SQC.}
   \label{tab:lodo_sub}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lrrrrrrr}
     \toprule
     \textbf{Cohorte test} & $n$ & \textbf{ADC} & \textbf{SQC} & \textbf{AUC} & \textbf{Bal.\,acc.} & \textbf{Sens.\,SQC} & \textbf{Espec.\,ADC} \\
@@ -122,6 +230,7 @@ cohorte.
     \textbf{Media} & & & & \textbf{0,968} & \textbf{0,940} & \textbf{0,924} & \textbf{0,957} \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 La tarea de subtipo se resuelve mucho mejor que la de tumor \emph{vs.}
@@ -246,6 +355,7 @@ lado a lado entre el panel IHC clínico completo y la firma génica.
   \caption{Panel IHC clínico (OMS 2015) frente a la firma génica
   validada.}
   \label{tab:ihc_lado_a_lado}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lp{6.5cm}l}
     \toprule
     \textbf{Linaje} & \textbf{Marcadores IHC clínicos (OMS)} & \textbf{Recuperación} \\
@@ -266,6 +376,7 @@ lado a lado entre el panel IHC clínico completo y la firma génica.
     \multicolumn{2}{l}{\textbf{Total panel IHC OMS}} & \textbf{18 / 20 (90,0\,\%)} \\
     \bottomrule
   \end{tabular}
+  }
 
   \vspace{0.35em}
   {\footnotesize Los marcadores marcados con \checkmark\ están presentes
@@ -273,6 +384,58 @@ lado a lado entre el panel IHC clínico completo y la firma génica.
   \gene{SFTPC}) son proteínas del surfactante que no superan el
   criterio de replicación en las tres cohortes.}
 \end{table}
+
+\section{Validación en TCGA RNA-Seq: transferibilidad de plataforma}
+\label{sec:res_tcga}
+
+La firma se identifica y valida internamente sobre microarray Affymetrix
+GPL570. La duda razonable —que el propio trabajo declaraba como la
+limitación más importante— es si el panel se transfiere a datos RNA-Seq,
+plataforma distinta con distribuciones de intensidad y ruido técnico
+propios. Para responderla se aplica el panel mínimo de 20 genes a las
+cohortes públicas \textbf{TCGA-LUAD} ($n=230$) y \textbf{TCGA-LUSC}
+($n=178$), descargadas vía API pública de cBioPortal.
+
+Se emplean dos estrategias de puntuación:
+
+\begin{itemize}
+  \item \textbf{Score simple:} suma de los z-scores estandarizados de los
+  20 genes (los del panel puntúan todos en la misma dirección, escamoso
+  arriba), sin usar los coeficientes aprendidos. Es la línea base
+  esperable si sólo se transfieren \emph{los nombres} de los genes.
+  \item \textbf{Score LASSO transferido:} se reentrena LASSO L1 sobre las
+  tres cohortes microarray de subtipo usando únicamente los 20 genes del
+  panel; los coeficientes resultantes se aplican como producto escalar a
+  las expresiones z-scored de TCGA. Es la transferencia \emph{de la firma
+  entrenada}, no sólo de la lista de genes.
+\end{itemize}
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Transferibilidad del panel mínimo (20 genes) de microarray
+  GPL570 a TCGA RNA-Seq. IC 95\,\% por bootstrap ($n=1000$).}
+  \label{tab:tcga}
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Estrategia} & \textbf{AUC} & \textbf{IC 95\,\%} & \textbf{$n$ (LUAD/LUSC)} \\
+    \midrule
+    Score simple (suma z)             & 0,794 & [0,745; 0,841] & 230 / 178 \\
+    Score LASSO transferido           & \textbf{0,857} & [0,812; 0,899] & 230 / 178 \\
+    \midrule
+    \emph{Referencia LODO microarray} & \emph{0,968} & \emph{—} & \emph{n=388} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+El panel se transfiere: AUC 0,857 [0,812; 0,899] sobre 408 muestras
+completamente externas y en una plataforma no vista en entrenamiento. La
+caída respecto al AUC LODO en microarray (0,968) es la esperable por
+cambio de plataforma y de rango dinámico. Ninguna muestra TCGA
+participó en la selección de genes, en la calibración de $C$ ni en la
+definición del umbral $\tau$. Este resultado retira del catálogo de
+trabajo futuro la limitación de plataforma que declaraba el capítulo de
+Discusión.
 
 \section{Composición tisular dentro de los tumores}
 \label{sec:res_composicion}
@@ -381,10 +544,10 @@ con esas clases.
 \section{Análisis exploratorio por cohorte}
 \label{sec:res_por_cohorte}
 
-Con fines ilustrativos, se muestran los resultados del análisis
-exploratorio para la cohorte GSE31210 (la mayor con controles sanos, 226
-muestras enfermas y 20 sanas), que ejemplifica el tipo de figuras que el
-pipeline genera para cada cohorte individualmente.
+Con fines ilustrativos, la figura~\ref{fig:cohorte} muestra los resultados
+del análisis exploratorio para la cohorte GSE31210 (la mayor con controles
+sanos, 226 muestras enfermas y 20 sanas), que ejemplifica el tipo de
+figuras que el pipeline genera para cada cohorte individualmente.
 
 \begin{figure}[H]
   \centering

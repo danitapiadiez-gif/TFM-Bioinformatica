@@ -1,35 +1,49 @@
 % ==========================================================================
-% Preámbulo: paquetes, geometría, tipografía, capítulos, referencias.
+% Preambulo - estilo clasico institucional UAX
 % ==========================================================================
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish,es-tabla]{babel}
 \usepackage{lmodern}
 
-% Geometría
-\usepackage[a4paper, top=2.8cm, bottom=2.8cm, left=3cm, right=2.5cm]{geometry}
-\usepackage{setspace}
-\onehalfspacing
+% Nota: LaTeX puede emitir el warning 'Font shape T1/lmr/bx/sc undefined'
+% al procesar el TOC. La sustitucion automatica a bold-normal es correcta.
 
-% Cabecera y pie: cabecera muestra el capitulo actual, pie el numero de pagina
+% -------- Geometria --------
+\usepackage[a4paper, top=3cm, bottom=3cm, left=3cm, right=2.5cm,
+            headheight=14pt, headsep=0.5cm, footskip=1.2cm]{geometry}
+\usepackage{setspace}
+% Interlineado 1,15 seg\'un normativa UAX
+\setstretch{1.15}
+
+% Permitir mas margen de estiramiento en lineas dificiles.
+\emergencystretch=3em
+\tolerance=1000
+\hbadness=10000
+
+% -------- Cabecera y pie clasicos --------
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\renewcommand{\chaptermark}[1]{\markboth{Capítulo \thechapter.\ #1}{}}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}
 \renewcommand{\sectionmark}[1]{}
-\fancyhead[L]{\small\itshape\nouppercase{\leftmark}}
-\fancyhead[R]{\small\thepage}
+\fancyhead[LE,RO]{\small\thepage}
+\fancyhead[LO,RE]{\small\itshape\nouppercase{\leftmark}}
 \renewcommand{\headrulewidth}{0.4pt}
-\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\thepage}\renewcommand{\headrulewidth}{0pt}}
-% Estilo para las paginas del front matter (Resumen, Objetivos, indice):
-% solo pie con numero romano, sin cabecera lateral.
-\fancypagestyle{frontmatter}{
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[C]{\small\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+\fancypagestyle{frontmatter}{%
   \fancyhf{}
   \fancyfoot[C]{\small\thepage}
   \renewcommand{\headrulewidth}{0pt}
 }
 
-% Figuras, tablas, código
+% -------- Figuras, tablas, codigo --------
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{booktabs}
@@ -41,7 +55,10 @@
 \usepackage{xcolor}
 \usepackage{listings}
 
-\definecolor{codegray}{gray}{0.95}
+\captionsetup{font=small, labelfont=bf, labelsep=period,
+              justification=raggedright, singlelinecheck=false}
+
+\definecolor{codegray}{gray}{0.96}
 \definecolor{codestring}{RGB}{163,21,21}
 \definecolor{codecomment}{RGB}{92,122,72}
 \definecolor{codekw}{RGB}{45,110,175}
@@ -66,35 +83,28 @@
 \lstdefinestyle{bash}{language=bash}
 \lstdefinestyle{python}{language=Python}
 
-% Matemáticas
+% -------- Listas con opciones --------
+\usepackage{enumitem}
+
+% -------- Matematicas --------
 \usepackage{amsmath,amssymb,mathtools}
 
-% Diagramas TikZ
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc, shadows}
-\tikzset{
-  paso/.style={rectangle, rounded corners, draw=black!60, thick,
-               fill=blue!5, minimum width=3.2cm, minimum height=0.9cm,
-               align=center, font=\small},
-  entrada/.style={paso, fill=green!8, draw=green!60!black},
-  salida/.style={paso, fill=orange!8, draw=orange!60!black},
-  flecha/.style={-{Latex[length=2.5mm]}, thick, black!60},
-  grupo/.style={rectangle, dashed, draw=black!40, inner sep=8pt,
-                rounded corners, fill=black!2},
-}
+% -------- Referencias cruzadas y bibliografia --------
+% Azul institucional UAX para todos los enlaces (interno y externo)
+\definecolor{uaxblue}{HTML}{1866B6}
 
-% Referencias cruzadas y bibliografía
 \usepackage{hyperref}
 \hypersetup{
   colorlinks=true,
-  linkcolor=blue,
-  citecolor=blue,
-  urlcolor=blue,
-  filecolor=blue,
-  pdftitle={Framework transcriptómico para biomarcadores en cáncer de pulmón},
-  pdfauthor={Daniel Tapia Díez},
-  pdfsubject={TFM Bioinformática, UAX},
-  pdfkeywords={transcriptómica, cáncer de pulmón, machine learning, biomarcadores, LODO, LLM, NCBI GEO}
+  linkcolor=uaxblue,
+  citecolor=uaxblue,
+  urlcolor=uaxblue,
+  filecolor=uaxblue,
+  linktoc=all,
+  pdftitle={Framework transcriptomico para biomarcadores en cancer de pulmon},
+  pdfauthor={Daniel Tapia Diez},
+  pdfsubject={TFM Bioinformatica, UAX},
+  pdfkeywords={transcriptomica, cancer de pulmon, machine learning, biomarcadores, LODO, LLM, NCBI GEO}
 }
 \usepackage[numbers,sort&compress]{natbib}
 \bibliographystyle{unsrtnat}
@@ -102,16 +112,34 @@
 % Espacio en tablas
 \renewcommand{\arraystretch}{1.15}
 
-% Título de capítulos más compacto
+% -------- Titulos clasicos: "Capitulo N" arriba, titulo Huge debajo --------
 \usepackage{titlesec}
+
 \titleformat{\chapter}[display]
-  {\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{18pt}{\Huge}
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter}
+  {20pt}
+  {\Huge}
 \titlespacing*{\chapter}{0pt}{-20pt}{20pt}
 
-% Comandos útiles
+\titleformat{\section}
+  {\normalfont\Large\bfseries}
+  {\thesection.}{0.6em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.6em}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries}
+  {\thesubsection.}{0.5em}{}
+\titlespacing*{\subsection}{0pt}{1em}{0.4em}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries}
+  {\thesubsubsection.}{0.5em}{}
+
+% -------- Comandos utiles (SIN color verde) --------
 \newcommand{\framework}{\texttt{data.lung}}
 \newcommand{\gene}[1]{\textit{#1}}
 \newcommand{\cohorte}[1]{\texttt{#1}}
 
-% Índice, glosario
+% -------- Anexos --------
 \usepackage[toc,page]{appendix}

@@ -128,16 +128,18 @@ podría beneficiarse de restringir la evaluación a cohortes con al menos
 \label{sec:disc_literatura}
 
 Los resultados obtenidos se sitúan en el rango alto de la literatura
-publicada sobre clasificación de subtipos NSCLC a partir de expresión
-génica. Girard et al.~\cite{girard2016comprehensive} publican una
-clasificación de subtipos moleculares en NSCLC con AUC en torno a 0,92
-sobre TCGA, sin validación externa en cohortes independientes. Chen et
-al.~\cite{chen2017gene} proponen una firma pronóstica de 12 genes con AUC
-0,83 en validación externa. La firma presentada en este trabajo obtiene
-AUC 0,968 en validación externa sobre tres cohortes independientes, con un
-panel mínimo de 20 genes. La tabla~\ref{tab:comparativa} sitúa la firma
-frente a algunas de las más relevantes publicadas en las últimas dos
-décadas.
+publicada sobre clasificación molecular de NSCLC a partir de expresión
+génica. Wilkerson et al.~\cite{wilkerson2010lusc} definen los subtipos
+moleculares reproducibles del carcinoma escamoso; el consorcio TCGA
+publica caracterizaciones moleculares comprehensivas de adenocarcinoma
+sobre grandes cohortes~\cite{tcga2014luad}, pero sin validación externa
+en cohortes independientes. Chen et al.~\cite{chen2017gene} proponen una
+firma pronóstica de 5 genes con AUC 0,83 en validación externa. La firma
+presentada en este trabajo obtiene AUC 0,968 en validación externa sobre
+tres cohortes independientes microarray, y AUC 0,857 al transferirla a
+TCGA RNA-Seq (n=408), con un panel mínimo de 20 genes.
+La tabla~\ref{tab:comparativa} sitúa la firma frente a algunas de las más
+relevantes publicadas en las últimas dos décadas.
 
 \begin{table}[H]
   \centering
@@ -145,6 +147,7 @@ décadas.
   \caption{Comparación con firmas génicas publicadas para cáncer de
   pulmón.}
   \label{tab:comparativa}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lllrrl}
     \toprule
     \textbf{Firma} & \textbf{Año} & \textbf{Tarea} & \textbf{$n$ genes} & \textbf{AUC} & \textbf{Validación} \\
@@ -152,13 +155,15 @@ décadas.
     Beer et al.~\cite{beer2002gene}           & 2002 & Pronóstico ADC           & 50   & --    & Interna (1 cohorte) \\
     Chen et al.~\cite{chen2017gene}           & 2007 & Pronóstico NSCLC estadio I & 5    & 0,83  & Externa (1 cohorte) \\
     Kratz et al.~\cite{kratz2012practical}    & 2012 & Pronóstico NSCLC no escamoso & 14  & --    & Externa (2 cohortes) \\
-    Girard et al.~\cite{girard2016comprehensive} & 2016 & Subtipo NSCLC           & \emph{n.\,d.} & 0,92 & Interna (TCGA) \\
+    Wilkerson et al.~\cite{wilkerson2010lusc}    & 2010 & Subtipos SQC (mRNA)     & \emph{n.\,d.} & --    & Múltiples cohortes \\
+    TCGA~\cite{tcga2014luad}                  & 2014 & Perfilado LUAD           & \emph{n.\,d.} & --    & Interna (TCGA) \\
     Faruki et al.~\cite{faruki2017lung}       & 2017 & Subtipo NSCLC            & \emph{n.\,d.} & --    & Múltiples cohortes \\
     \midrule
     \textbf{Este trabajo}                     & 2026 & \textbf{Subtipo ADC vs SQC} & \textbf{1174} & \textbf{0,968} & \textbf{LODO estricto (3 cohortes)} \\
     \textbf{Este trabajo (panel mínimo)}      & 2026 & \textbf{Subtipo ADC vs SQC} & \textbf{20}   & \textbf{0,966} & \textbf{LODO estricto (3 cohortes)} \\
     \bottomrule
   \end{tabular}
+  }
 
   \vspace{0.35em}
   {\footnotesize \emph{n.\,d.}: no disponible en el artículo original.

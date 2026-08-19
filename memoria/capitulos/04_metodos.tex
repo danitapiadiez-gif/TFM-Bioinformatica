@@ -1,4 +1,4 @@
-\chapter{Materiales y métodos}
+\chapter{Metodología}
 \label{cap:metodos}
 
 \section{Visión general del \emph{pipeline}}
@@ -35,40 +35,9 @@ La figura~\ref{fig:pipeline} representa gráficamente la arquitectura del
 pipeline, agrupando los pasos por fase y señalando los artefactos
 principales que fluyen entre ellos.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
-  \begin{tikzpicture}[node distance=0.55cm and 0.9cm]
-    % Fila 1: entrada
-    \node[entrada] (geo)      {NCBI GEO};
-    \node[paso, right=of geo] (descarga) {\textbf{1} Descarga};
-    \node[paso, right=of descarga] (norma) {\textbf{2} Normalización};
-    % Fila 2: curación
-    \node[paso, below=of descarga] (llm)  {\textbf{3} Curación LLM\\(Llama 3.3-70b)};
-    \node[paso, right=of llm]     (crit) {\textbf{4} Criterios de\\inclusión};
-    % Fila 3: analisis
-    \node[paso, below=of llm]     (dif)  {\textbf{5} Diferencial\\Welch + FDR};
-    \node[paso, right=of dif]     (ml)   {\textbf{6} Clasificación\\LASSO L1 · RF · SVM};
-    % Fila 4: LODO
-    \node[paso, below=of dif]     (lodo) {\textbf{7} LODO\\externa};
-    \node[paso, right=of lodo]    (cons) {\textbf{8} Consenso\\multi-cohorte};
-    % Fila 5: entregables
-    \node[salida, below=of lodo]  (firma) {\textbf{9} Firma\\1174 genes};
-    \node[salida, right=of firma] (panel) {\textbf{9} Panel\\mínimo 20};
-    \node[salida, right=of panel] (ihc)   {\textbf{9} Validación\\IHC 18/20};
-
-    % Flechas principales
-    \draw[flecha] (geo) -- (descarga);
-    \draw[flecha] (descarga) -- (norma);
-    \draw[flecha] (norma.south) |- (llm.east);
-    \draw[flecha] (llm) -- (crit);
-    \draw[flecha] (crit.south) |- (dif.east);
-    \draw[flecha] (dif) -- (ml);
-    \draw[flecha] (ml.south) |- (lodo.east);
-    \draw[flecha] (lodo) -- (cons);
-    \draw[flecha] (cons.south) |- (firma.east);
-    \draw[flecha] (firma) -- (panel);
-    \draw[flecha] (panel) -- (ihc);
-  \end{tikzpicture}
+  \includegraphics[width=0.55\linewidth]{figuras/diagramas/pipeline.pdf}
   \caption{Arquitectura del \emph{pipeline} de \framework. Los pasos con
   fondo verde son entradas (repositorios públicos), los pasos naranjas
   son entregables (firma, panel mínimo y validación externa contra IHC
@@ -94,6 +63,7 @@ cohortes seleccionadas.
   \small
   \caption{Cohortes GEO utilizadas en el trabajo.}
   \label{tab:cohortes}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lrrrrl}
     \toprule
     \textbf{Cohorte} & \textbf{Muestras totales} & \textbf{Sanas} & \textbf{Enfermas} & \textbf{Sin clasificar} & \textbf{Evaluable} \\
@@ -113,6 +83,7 @@ cohortes seleccionadas.
     \textbf{Total} & \textbf{1\,346} & \textbf{219} & \textbf{938} & \textbf{189} & \textbf{8 / 11} \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 \subsection{Descarga y mapeo}
@@ -275,6 +246,7 @@ propiedades relevantes de cada clasificador.
   \small
   \caption{Hiperparámetros y propiedades de los tres clasificadores.}
   \label{tab:hiperparametros}
+  \resizebox{\textwidth}{!}{%
   \begin{tabular}{lllll}
     \toprule
     \textbf{Modelo} & \textbf{Hiperparámetros} & \textbf{Regularización} & \textbf{Interpretabilidad} & \textbf{Determinismo} \\
@@ -286,6 +258,7 @@ propiedades relevantes de cada clasificador.
     Baseline & Predice clase mayoritaria & — & — & determinista \\
     \bottomrule
   \end{tabular}
+  }
 \end{table}
 
 Como \emph{baseline} de comparación se emplea el clasificador
@@ -316,39 +289,7 @@ cohortes.
 
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[node distance=0.35cm and 0.55cm]
-    % Iteracion 1
-    \node[paso, fill=orange!20, draw=orange!70!black] (t1) {Test\\C1};
-    \node[paso, right=of t1] (a1) {Train C2};
-    \node[paso, right=of a1] (a2) {Train C3};
-    \node[paso, right=of a2] (a3) {Train C4};
-    \node[right=of a3, font=\footnotesize] (r1) {\;$\Rightarrow$ AUC$_1$, BalAcc$_1$};
-    % Iteracion 2
-    \node[paso, below=of t1] (b1) {Train C1};
-    \node[paso, fill=orange!20, draw=orange!70!black, right=of b1] (t2) {Test\\C2};
-    \node[paso, right=of t2] (b2) {Train C3};
-    \node[paso, right=of b2] (b3) {Train C4};
-    \node[right=of b3, font=\footnotesize] (r2) {\;$\Rightarrow$ AUC$_2$, BalAcc$_2$};
-    % Iteracion 3
-    \node[paso, below=of b1] (c1) {Train C1};
-    \node[paso, right=of c1] (c2) {Train C2};
-    \node[paso, fill=orange!20, draw=orange!70!black, right=of c2] (t3) {Test\\C3};
-    \node[paso, right=of t3] (c3) {Train C4};
-    \node[right=of c3, font=\footnotesize] (r3) {\;$\Rightarrow$ AUC$_3$, BalAcc$_3$};
-    % Iteracion 4
-    \node[paso, below=of c1] (d1) {Train C1};
-    \node[paso, right=of d1] (d2) {Train C2};
-    \node[paso, right=of d2] (d3) {Train C3};
-    \node[paso, fill=orange!20, draw=orange!70!black, right=of d3] (t4) {Test\\C4};
-    \node[right=of t4, font=\footnotesize] (r4) {\;$\Rightarrow$ AUC$_4$, BalAcc$_4$};
-    % Media
-    \node[salida, below=0.7cm of d2, minimum width=8cm] (media)
-      {Media LODO $=\frac{1}{k}\sum_{i=1}^{k}$ AUC$_i$, BalAcc$_i$};
-    \draw[flecha] (r1.south east) to[out=-15, in=45] (media.north east);
-    \draw[flecha] (r2.south east) to[out=-15, in=45] (media.east);
-    \draw[flecha] (r3.south east) to[out=-15, in=25] (media.east);
-    \draw[flecha] (r4.west) -- (media.east);
-  \end{tikzpicture}
+  \includegraphics[width=\linewidth]{figuras/diagramas/lodo.pdf}
   \caption{Esquema de la validación Leave-One-Dataset-Out con $k=4$
   cohortes. En cada iteración, una cohorte (naranja) actúa como test y
   las demás como entrenamiento. Las métricas se agregan como media al
@@ -377,41 +318,7 @@ visualmente el criterio de consenso sobre tres genes de ejemplo:
 
 \begin{figure}[H]
   \centering
-  \begin{tikzpicture}[node distance=0.45cm and 1cm]
-    % Cabeceras
-    \node[font=\small\bfseries] (h1) {Gen};
-    \node[right=1.3cm of h1, font=\small\bfseries] (h2) {Cohorte A};
-    \node[right=of h2, font=\small\bfseries]      (h3) {Cohorte B};
-    \node[right=of h3, font=\small\bfseries]      (h4) {Cohorte C};
-    \node[right=of h4, font=\small\bfseries]      (h5) {Decisión};
-
-    % Gen 1: DSG3 - consenso
-    \node[below=of h1, font=\small\ttfamily] (g1) {DSG3};
-    \node[paso, right=1.3cm of g1, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (a1) {$d = +4{,}12$};
-    \node[paso, right=of a1, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (b1) {$d = +4{,}05$};
-    \node[paso, right=of b1, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (c1) {$d = +4{,}36$};
-    \node[salida, right=of c1, minimum width=2.4cm, minimum height=0.7cm, font=\footnotesize, fill=green!25, draw=green!70!black] (d1) {\checkmark\ Entra};
-
-    % Gen 2: BRCA1 - signo opuesto
-    \node[below=of g1, font=\small\ttfamily] (g2) {\emph{Gen X}};
-    \node[paso, right=1.3cm of g2, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (a2) {$d = +1{,}20$};
-    \node[paso, right=of a2, fill=red!12, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (b2) {$d = -0{,}90$};
-    \node[paso, right=of b2, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (c2) {$d = +1{,}05$};
-    \node[paso, right=of c2, minimum width=2.4cm, minimum height=0.7cm, font=\footnotesize, fill=red!12, draw=red!70!black] (d2) {$\times$ Signo no coincide};
-
-    % Gen 3: magnitud insuficiente
-    \node[below=of g2, font=\small\ttfamily] (g3) {\emph{Gen Y}};
-    \node[paso, right=1.3cm of g3, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (a3) {$d = +0{,}90$};
-    \node[paso, right=of a3, fill=yellow!20, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (b3) {$d = +0{,}35$};
-    \node[paso, right=of b3, fill=green!15, minimum width=2cm, minimum height=0.7cm, font=\footnotesize] (c3) {$d = +1{,}10$};
-    \node[paso, right=of c3, minimum width=2.4cm, minimum height=0.7cm, font=\footnotesize, fill=yellow!30, draw=orange!80!black] (d3) {$\times$ $|d| < 0{,}5$ en B};
-
-    % Regla al pie
-    \node[grupo, fit=(g1) (d3), inner sep=6pt] (box) {};
-    \node[below=0.4cm of box, font=\footnotesize\itshape, text width=13cm, align=center]
-      {Regla de consenso: un gen entra en la firma sólo si mantiene el
-      mismo signo y $|d| > 0{,}5$ en las 3 cohortes evaluables.};
-  \end{tikzpicture}
+  \includegraphics[width=\linewidth]{figuras/diagramas/consenso.pdf}
   \caption{Regla del meta-análisis por consenso. Sobre tres genes de
   ejemplo, sólo \gene{DSG3} pasa el filtro: mantiene signo positivo y
   $|d|$ grande en las tres cohortes. \emph{Gen X} tiene signo opuesto

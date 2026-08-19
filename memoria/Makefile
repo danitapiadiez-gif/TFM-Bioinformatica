@@ -8,7 +8,7 @@
 # ==========================================================================
 
 MAIN    = main
-LATEX   = pdflatex -interaction=nonstopmode -halt-on-error
+LATEX   = pdflatex -interaction=nonstopmode
 BIBTEX  = bibtex
 
 TEX_FILES = main.tex preambulo.tex portada.tex resumen.tex \

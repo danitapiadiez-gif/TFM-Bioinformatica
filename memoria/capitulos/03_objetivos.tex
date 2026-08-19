@@ -41,6 +41,7 @@ El framework debe cumplir tres propiedades irrenunciables:
 
 Los objetivos específicos que se derivan del objetivo general son:
 
+\begingroup\sloppy
 \begin{description}
   \item[OE1. Integración automatizada de cohortes GEO.] Descargar y
   normalizar (log$_2$ + cuantiles dentro de cada estudio) las cohortes
@@ -49,10 +50,11 @@ Los objetivos específicos que se derivan del objetivo general son:
   asigna cada muestra a una categoría binaria a partir del texto libre.
 
   \item[OE2. Clasificación supervisada con validación externa.]
-  Entrenar clasificadores (LASSO L1, Random Forest y SVM) sobre las dos
+  Entrenar clasificadores (LASSO~L1, Random~Forest y SVM) sobre las dos
   tareas contempladas (tumor \emph{vs.} sano y subtipo ADC \emph{vs.}
-  SQC), y evaluarlos mediante \textbf{Leave-One-Dataset-Out} (LODO)
-  sobre las cohortes que cumplen los criterios de inclusión.
+  SQC), y evaluarlos mediante \textbf{Leave-One-Dataset\--Out}
+  (\textbf{LODO}) sobre las cohortes que cumplen los criterios de
+  inclusión.
 
   \item[OE3. Firma génica validada por consenso y panel mínimo.]
   Construir una firma de biomarcadores por meta-análisis multi-cohorte
@@ -73,6 +75,7 @@ Los objetivos específicos que se derivan del objetivo general son:
   del pipeline y con reglas explícitas que impiden inventar cifras o
   citar biomarcadores fuera de la firma.
 \end{description}
+\endgroup
 
 \section*{Hipótesis de partida}
 \label{sec:hipotesis}

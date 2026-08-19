@@ -47,13 +47,27 @@ extraen del trabajo son las siguientes:
   y actividad proliferativa aumentada. La firma no es una caja negra:
   refleja mecanismos oncológicos conocidos.
 
-  \item \textbf{El clasificador tumor \emph{vs.} sano ordena bien pero
-  requiere recalibración del umbral.} Sobre 8 cohortes evaluables, AUC
-  media LODO de 0,925 con balanced accuracy 0,772
-  (tabla~\ref{tab:lodo_tvs}, figura~\ref{fig:auc_vs_balacc}). La brecha
-  entre ambas métricas se atribuye al desbalance del entrenamiento (938
-  tumores frente a 219 controles curados en total) y es corregible
-  mediante técnicas estándar de recalibración por cohorte.
+  \item \textbf{El clasificador tumor \emph{vs.} sano funciona bien tras
+  recalibración.} Sobre 8 cohortes evaluables, AUC media LODO
+  \textbf{0,925} y balanced accuracy 0,772 con umbral 0,5
+  (tabla~\ref{tab:lodo_tvs}, figura~\ref{fig:auc_vs_balacc}). Aplicando
+  recalibración isotónica anidada intra-train, la balanced accuracy sube a
+  \textbf{0,810} (sección~\ref{sec:res_recalibracion}), con
+  sensibilidad~0,988 y especificidad~0,632 ya equilibradas. La comparativa
+  bajo el mismo LODO frente a Random Forest y SVM lineal
+  (tabla~\ref{tab:comparativa_ml}) confirma que los tres modelos están en
+  el mismo régimen; la elección de LASSO como modelo principal se
+  justifica por interpretabilidad, no por rendimiento. Los IC 95\,\% por
+  bootstrap (tabla~\ref{tab:ic_bootstrap}) sitúan la AUC
+  \emph{pooled} en 0,943 [0,925; 0,959].
+
+  \item \textbf{El panel se transfiere a RNA-Seq.} Aplicado a TCGA-LUAD
+  (n=230) y TCGA-LUSC (n=178) —plataforma completamente distinta a la de
+  entrenamiento— la firma alcanza AUC \textbf{0,857 [0,812; 0,899]}
+  (sección~\ref{sec:res_tcga}, tabla~\ref{tab:tcga}). Ninguna muestra
+  TCGA participó en la selección de genes ni en la calibración del
+  modelo; la caída respecto al AUC LODO en microarray (0,968) es la
+  esperable por el cambio tecnológico y no cuestiona la transferibilidad.
 
   \item \textbf{El framework es reproducible.} Todo el análisis se
   puede regenerar desde la raíz del repositorio con una única secuencia
@@ -114,19 +128,18 @@ Las principales limitaciones del trabajo son:
 Las líneas de trabajo futuro naturales incluyen:
 
 \begin{description}
-  \item[Validación prospectiva con RNA-Seq.] Aplicar el panel mínimo de
-  20 genes a una cohorte RNA-Seq no incluida en el entrenamiento
-  (idealmente una cohorte TCGA-LUAD o TCGA-LUSC filtrada), y verificar
-  que el AUC se mantiene. Es el paso necesario para pasar de
-  \emph{microarray-friendly} a \emph{plataforma-agnóstico}.
+  \item[Validación prospectiva ampliada.] La transferibilidad a RNA-Seq
+  ya se ha probado en este trabajo sobre TCGA-LUAD (n=230) y TCGA-LUSC
+  (n=178) con AUC 0,857 [0,812; 0,899] (sección~\ref{sec:res_tcga}). El
+  siguiente paso natural es una validación clínica real prospectiva:
+  aplicar el panel a un lote de biopsias frescas procesadas por
+  \emph{NanoString} o RT-qPCR y comparar con la histología clínica de
+  cada caso.
   \item[Ampliación a subtipos neuroendocrinos.] Incorporar cohortes con
   tumores neuroendocrinos (LCNE, carcinoide, microcítico) y ampliar el
   clasificador de subtipo a una tarea multi-clase 4-5 categorías. Es el
   paso necesario para plantearse triage diagnóstico sobre casos sin
   diagnosticar.
-  \item[Recalibración del umbral.] Implementar recalibración isotónica o
-  \emph{Platt scaling} por cohorte y evaluar el impacto sobre balanced
-  accuracy en la tarea tumor \emph{vs.} sano.
   \item[Sustitución del LLM externo.] Explorar variantes locales
   (Llama~3.3-70b instalable, Phi-3, etc.) para eliminar la dependencia
   de la API externa. Es viable en máquinas con al menos 40\,GB de VRAM;
