@@ -78,8 +78,7 @@ Los pasos se ejecutan como módulos Python independientes y depositan sus output
 │   ├── capitulos/              #   8 capítulos + 7 anexos
 │   ├── figuras/                #   diagramas y figuras
 │   └── bibliografia.bib
-├── presentacion/               # Defensa (LaTeX beamer + PowerPoint UAX)
-├── poster/                     # Póster A0 (opcional)
+├── presentacion/               # Defensa Beamer + resumen ejecutivo UAX
 ├── datasets.txt                # Lista de cohortes GEO a descargar
 ├── requirements.txt            # Dependencias Python
 ├── pyproject.toml              # Paquete tfm/ instalable
