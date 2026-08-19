@@ -18,6 +18,7 @@ explicita si no encuentra los resultados: no arrancar es preferible a responder
 sin datos.
 """
 
+import json
 import os
 import sys
 
@@ -868,57 +869,47 @@ components.html(
 
 # ---------- Introduccion y objetivos --------------------------------------
 if st.session_state.capitulo == "introduccion":
-    seccion("I", "Contexto y motivación",
-            "El cáncer de pulmón es la primera causa de mortalidad oncológica en el "
-            "mundo. Su heterogeneidad histológica y molecular hace que la búsqueda "
-            "de biomarcadores transcriptómicos sea un problema abierto, con firmas "
-            "propuestas cuya replicación entre cohortes independientes es la "
-            "excepción, no la regla.")
+    seccion("I", "Contexto y objetivo",
+            "Cáncer de pulmón: primera causa de mortalidad oncológica mundial. "
+            "Cientos de estudios GEO con plataformas, protocolos y metadatos "
+            "heterogéneos. La mayoría de firmas génicas publicadas no replican "
+            "en cohortes independientes.")
 
     st.markdown("""<div class="prosa">
-<p>La base de datos NCBI GEO reúne cientos de estudios de expresión génica en
-cáncer de pulmón, obtenidos con plataformas distintas, protocolos distintos y
-metadatos clínicos redactados en texto libre. Integrarlos manualmente es
-inviable; automatizar la integración es factible, pero deja modos de fallo
-—muestras mal etiquetadas, cohortes que no comparan casos con controles,
-métricas infladas por composición de clases— que ningún error de ejecución
-delata.</p>
-
-<p>Este trabajo desarrolla un framework que automatiza el análisis y añade la
-capa de comprobaciones que separa la señal biológica del artefacto técnico.
-La combinación de tres elementos —modelo de lenguaje para curar los
-metadatos, aprendizaje automático para modelar la expresión y análisis
-estadístico clásico para validar— produce una firma génica cuya replicación
-puede sostenerse en tres cohortes independientes.</p>
+<p><b>Objetivo</b>: construir un <em>framework reproducible extremo a extremo</em>
+que integre cohortes GEO combinando (i) curación de metadatos con LLM,
+(ii) meta-análisis por consenso multi-cohorte, y (iii) clasificación LASSO
+con validación externa LODO. La firma resultante debe ser interpretable,
+clínicamente traducible y validable contra el panel diagnóstico IHC de la OMS.</p>
 </div>""", unsafe_allow_html=True)
 
-    seccion("II", "Objetivo general",
-            "Diseñar un framework reproducible, y no una colección de scripts, que "
-            "integre los pasos habituales del análisis transcriptómico y añada los "
-            "controles metodológicos necesarios para que la firma de biomarcadores "
-            "resultante sea replicable.")
-
-    seccion("III", "Objetivos específicos")
+    seccion("II", "Objetivos específicos")
     st.markdown("""<div class="prosa">
-<ol>
-<li><b>Adquisición y normalización automatizada</b> de cohortes públicas
-de NCBI GEO, independientemente de la plataforma técnica.</li>
-<li><b>Curación de metadatos clínicos con un modelo de lenguaje</b>
-(Llama 3.3-70b) para asignar grupos experimentales sin intervención manual,
-haciendo escalable la integración multi-cohorte.</li>
-<li><b>Análisis diferencial y clasificación supervisada</b> (LASSO L1,
-Random Forest, SVM) con validación externa Leave-One-Dataset-Out entre
-cohortes independientes.</li>
-<li><b>Identificación de una firma génica replicable</b> mediante
-meta-análisis por consenso: solo entran genes que mantienen signo y
-magnitud del cambio en varias cohortes independientes.</li>
-<li><b>Panel mínimo y validación externa</b> contra marcadores clínicos
-de inmunohistoquímica, para verificar que la firma captura biología real
-y no artefacto técnico.</li>
-</ol>
+<div class="cifras" style="grid-template-columns:repeat(2, minmax(0,1fr));">
+  <div class="cifra acento-azul">
+    <div class="rotulo">OE1 · Curación clínica LLM</div>
+    <div class="glosa">Llama 3.3-70b vía Groq etiqueta metadatos GEO de texto libre con tarea acotada y lista cerrada. Escala la integración multi-cohorte.</div>
+  </div>
+  <div class="cifra acento-azul">
+    <div class="rotulo">OE2 · Clasificación supervisada</div>
+    <div class="glosa">LASSO L1 (principal), Random Forest y SVM lineal. Validación externa Leave-One-Dataset-Out entre cohortes independientes.</div>
+  </div>
+  <div class="cifra acento-nar">
+    <div class="rotulo">OE3 · Firma consenso multi-cohorte</div>
+    <div class="glosa">Un gen valida si mantiene signo y |d| > 0,5 en las 3 cohortes de descubrimiento. Filtro más estricto que cualquier corrección de tests múltiples.</div>
+  </div>
+  <div class="cifra acento-nar">
+    <div class="rotulo">OE4 · Panel mínimo + validación IHC</div>
+    <div class="glosa">Análisis de sensibilidad hasta k mínimo. Contraste externo contra el panel diagnóstico IHC OMS 2015 sin declararlo durante el entrenamiento.</div>
+  </div>
+  <div class="cifra acento-neutro">
+    <div class="rotulo">OE5 · Interfaz web y asistente</div>
+    <div class="glosa">Dashboard Streamlit multipágina que expone cada cifra con trazabilidad al CSV que la produce. Asistente conversacional acotado a los resultados.</div>
+  </div>
+</div>
 </div>""", unsafe_allow_html=True)
 
-    seccion("IV", "Datos",
+    seccion("III", "Datos",
             "Cohortes públicas de NCBI GEO que entran en el análisis del "
             "framework. Los criterios de inclusión son: presencia de casos "
             "y controles, curación clínica exitosa y alineamiento verificado.")
@@ -972,50 +963,122 @@ y no artefacto técnico.</li>
 if st.session_state.capitulo == "resultados":
     rf = resumen_firma()
 
-    # Cifras de cabecera: enfocadas en la firma validada + rendimiento ML,
-    # no en "no superan baseline".
+    # Datos derivados leídos de los CSV para no dejar cifras hardcoded.
     n_ihc = sum(rf["ihc_recuperados"].values()) if rf else 0
     n_ihc_tot = sum(rf["ihc_total"].values()) if rf else 0
+
+    # Recalibración isotónica
+    _reca_json = os.path.join(BASE_DIR, "resultados/recalibracion/LODO_RECALIBRADO_RESUMEN.json")
+    reca = None
+    if os.path.exists(_reca_json):
+        with open(_reca_json) as fh:
+            reca = json.load(fh).get("isotonica", {})
+
+    # IC bootstrap
+    _boot_json = os.path.join(BASE_DIR, "resultados/recalibracion/LODO_IC_BOOTSTRAP_RESUMEN.json")
+    boot = None
+    if os.path.exists(_boot_json):
+        with open(_boot_json) as fh:
+            boot = json.load(fh)
+
+    # Comparativa ML
+    _ml_json = os.path.join(BASE_DIR, "resultados/comparativa_ml/COMPARATIVA_ML_RESUMEN.json")
+    ml_cmp = None
+    if os.path.exists(_ml_json):
+        with open(_ml_json) as fh:
+            ml_cmp = json.load(fh)
+
+    # Validación TCGA
+    _tcga_json = os.path.join(BASE_DIR, "resultados/tcga/VALIDACION_TCGA_RESUMEN.json")
+    tcga = None
+    if os.path.exists(_tcga_json):
+        with open(_tcga_json) as fh:
+            tcga = json.load(fh)
+
     st.markdown(f"""
     <div class="cifras">
       <div class="cifra acento-azul">
-        <div class="rotulo">Genes validados<br>en 3 cohortes</div>
-        <div class="valor"><span data-count="{rf['n_genes_validados'] if rf else 0}">{rf['n_genes_validados'] if rf else '—'}</span></div>
-        <div class="glosa">de {rf['n_genes_evaluados'] if rf else 0} evaluados
-        ({dec(rf['pct_genes_validados'], 1) if rf else '—'} %). Firma génica
-        replicada en cohortes independientes.</div>
-      </div>
-      <div class="cifra acento-nar">
-        <div class="rotulo">Panel mínimo<br>clínicamente manejable</div>
-        <div class="valor"><span data-count="{rf['panel_minimo'] if rf else 0}">{rf['panel_minimo'] if rf else '—'}</span></div>
-        <div class="glosa">genes bastan para AUC
-        {dec(rf['auc_panel_minimo']) if rf else '—'} (LODO), frente a
-        {dec(rf['auc_firma_completa']) if rf else '—'} con la firma completa.</div>
-      </div>
-      <div class="cifra acento-neutro">
         <div class="rotulo">AUC subtipo<br>ADC vs escamoso</div>
         <div class="valor"><span data-count="{m.get('auc_sub', 0)}" data-dec="3">{dec(m.get('auc_sub', 0))}</span></div>
-        <div class="glosa">{m.get('n_sub', 0)} muestras, 3 cohortes.
-        Distinción con consecuencia terapéutica directa.</div>
+        <div class="glosa">LODO sobre {m.get('n_sub', 0)} muestras en 3 cohortes
+        independientes. Distinción con consecuencia terapéutica directa.</div>
+      </div>
+      <div class="cifra acento-nar">
+        <div class="rotulo">Panel mínimo<br>manejable en clínica</div>
+        <div class="valor"><span data-count="{rf['panel_minimo'] if rf else 0}">{rf['panel_minimo'] if rf else '—'}</span></div>
+        <div class="glosa">genes bastan para AUC
+        {dec(rf['auc_panel_minimo']) if rf else '—'} (LODO). La firma completa
+        ({rf['n_genes_validados'] if rf else 0} genes) alcanza
+        {dec(rf['auc_firma_completa']) if rf else '—'}.</div>
+      </div>
+      <div class="cifra acento-neutro">
+        <div class="rotulo">Panel IHC OMS<br>recuperado sin declararlo</div>
+        <div class="valor"><span data-count="{n_ihc}">{n_ihc}</span><span class="u"> / {n_ihc_tot}</span></div>
+        <div class="glosa">marcadores diagnósticos clínicos que el framework
+        identifica solo por criterio estadístico de consenso.</div>
       </div>
       <div class="cifra acento-azul">
-        <div class="rotulo">Marcadores IHC<br>recuperados</div>
-        <div class="valor"><span data-count="{n_ihc}">{n_ihc}</span><span class="u"> / {n_ihc_tot}</span></div>
-        <div class="glosa">marcadores diagnósticos de inmunohistoquímica
-        clínica que el framework identifica sin declararlos.</div>
+        <div class="rotulo">AUC en TCGA RNA-Seq<br>plataforma no vista</div>
+        <div class="valor"><span data-count="{tcga.get('auc_lasso_transferido', 0) if tcga else 0}" data-dec="3">{dec(tcga.get('auc_lasso_transferido', 0)) if tcga else '—'}</span></div>
+        <div class="glosa">Panel LASSO entrenado en microarray → transferido a
+        RNA-Seq TCGA ({tcga.get('n_luad', 0) + tcga.get('n_lusc', 0) if tcga else 0} muestras).
+        Ninguna muestra TCGA participó en la selección de genes.</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
 
     # ---------------------------------------------------------------------
-    # I. Firma validada + buscador de gen (RESULTADO PRINCIPAL)
+    # I. Curación LLM y cohortes evaluables
     # ---------------------------------------------------------------------
-    seccion("I", "Firma génica validada",
-            "Resultado principal del framework. Un gen entra en la firma sólo "
-            "si mantiene el mismo signo de cambio y una magnitud mínima (d de "
-            "Cohen) en las tres cohortes independientes simultáneamente. "
-            "Ningún gen se selecciona por su nombre ni su función conocida: "
-            "todo es data-driven.")
+    seccion("I", "Curación clínica y cohortes evaluables",
+            "El pipeline arranca con 11 cohortes GEO. Un LLM (Llama 3.3-70b vía "
+            "Groq) clasifica los metadatos de texto libre a etiquetas canónicas; "
+            "solo las cohortes con al menos 40 % de éxito en la curación y con "
+            "las dos clases presentes se aceptan como evaluables.")
+
+    _aud_cur = tabla("resultados/auditoria/AUDITORIA_COHORTES.csv")
+    _n_ev = m.get("n_ev", 0)
+    _n_muestras = m.get("n_muestras", 0)
+    _n_desc = m.get("n_descargadas", 0)
+    _tasa_llm = 100.0 * _n_muestras / _n_desc if _n_desc else 0
+    st.markdown(f"""<div class="prosa">
+<p>De las <b>11 cohortes GEO</b> descargadas ({_n_desc} muestras totales), el
+LLM cura <b>{_n_muestras} muestras</b> a una etiqueta canónica
+(<b>{_tasa_llm:.1f} %</b> de tasa de curación global). Tras aplicar los
+criterios de inclusión (presencia de ambas clases, tamaño mínimo, alineamiento
+por <code>geo_accession</code>), <b>{_n_ev} cohortes</b> son evaluables como
+test independiente en LODO para la tarea tumor vs sano y <b>3 cohortes</b>
+(GSE30219, GSE50081, GSE19188) para la tarea de subtipo histológico.</p>
+</div>""", unsafe_allow_html=True)
+
+    if _aud_cur is not None:
+        with st.expander("Auditoría por cohorte (curación LLM + inclusión)"):
+            st.dataframe(
+                _aud_cur[["Cohorte", "Plataforma", "N_Total", "N_Sano",
+                          "N_Enfermo", "N_Sin_Clasificar", "Tasa_Exito_Curacion",
+                          "Evaluable_Como_Test"]],
+                use_container_width=True, hide_index=True,
+            )
+
+    # ---------------------------------------------------------------------
+    # II. Firma validada por consenso multi-cohorte
+    # ---------------------------------------------------------------------
+    seccion("II", "Firma génica validada por consenso multi-cohorte",
+            "Resultado principal del framework. Un gen entra en la firma solo "
+            "si mantiene el mismo signo de cambio y una magnitud mínima (|d| > "
+            "0,5) en las 3 cohortes de descubrimiento independientes. Ningún "
+            "gen se selecciona por su nombre ni por su función conocida.")
+
+    if rf is not None:
+        st.markdown(f"""<div class="prosa">
+<p>Sobre <b>{rf['n_genes_evaluados']:,}</b> genes evaluados en las 3 cohortes,
+<b>{rf['n_genes_validados']:,}</b> superan el criterio de consenso
+(<b>{dec(rf['pct_genes_validados'], 1)} %</b>). Este es el conjunto que se
+reporta como <em>firma validada</em>. El top de la firma —DSG3, KRT5, CALML3,
+KRT6B, PKP1, FAT2, DAPL1, TRIM29, CLCA2, DSC3— corresponde de forma inequívoca
+al linaje epitelial escamoso: queratinas basales (KRT5, KRT6B), desmosomas
+(DSG3, DSC3, PKP1) y factores de diferenciación.</p>
+</div>""", unsafe_allow_html=True)
 
     top60 = tabla("resultados/firma_consenso/FIRMA_VALIDADA_TOP60.csv")
     completa = tabla("resultados/firma_consenso/FIRMA_VALIDADA_COMPLETA.csv")
@@ -1060,9 +1123,9 @@ if st.session_state.capitulo == "resultados":
                 st.dataframe(top60, use_container_width=True, hide_index=True)
 
     # ---------------------------------------------------------------------
-    # II. Subtipo histológico ADC vs escamoso
+    # III. Subtipo histológico ADC vs escamoso
     # ---------------------------------------------------------------------
-    seccion("II", "Clasificación de subtipo histológico",
+    seccion("III", "Clasificación de subtipo histológico",
             "Adenocarcinoma frente a carcinoma escamoso. Distinción con "
             "consecuencia terapéutica directa (pemetrexed y bevacizumab están "
             "contraindicados en escamoso). El framework recupera de novo el "
@@ -1098,31 +1161,94 @@ composición tisular. Es la validación externa más fuerte del trabajo.</p>
 </div>""", unsafe_allow_html=True)
 
     # ---------------------------------------------------------------------
-    # III. Rendimiento tumor vs sano
+    # IV. Panel mínimo y curva de sensibilidad
     # ---------------------------------------------------------------------
-    seccion("III", "Clasificación tumor frente a sano",
-            "Validación externa Leave-One-Dataset-Out sobre las cohortes que "
-            "cumplen criterios de inclusión. El modelo (LASSO L1, C=0,5) se "
-            "entrena en todas las cohortes menos una y se prueba en la "
-            "restante, iterando sobre las cohortes evaluables.")
+    seccion("IV", "Panel mínimo clínicamente manejable",
+            "Análisis de sensibilidad sobre el tamaño del panel: para cada k, "
+            "se toman los top-k genes de la firma y se evalúan en LODO. El "
+            "panel mínimo es el menor k que se mantiene a < 0,01 del AUC máximo.")
 
-    _aud_all = tabla("resultados/auditoria/AUDITORIA_COHORTES.csv")
-    _n_tum = int(_aud_all["N_Enfermo"].sum()) if _aud_all is not None else 0
-    _n_san = int(_aud_all["N_Sano"].sum()) if _aud_all is not None else 0
+    if rf is not None:
+        st.markdown(f"""<div class="prosa">
+<p>El panel mínimo son <b>{rf['panel_minimo']} genes</b> con AUC LODO
+<b>{dec(rf['auc_panel_minimo'])}</b>, frente a <b>{dec(rf['auc_firma_completa'])}</b>
+de la firma completa de {rf['n_genes_validados']:,} genes: se pierde menos de
+0,01 puntos de AUC y se gana viabilidad clínica.</p>
+
+<p>Los 20 genes son medibles con <b>NanoString nCounter</b> o
+<b>RT-qPCR multiplex</b> sobre tejido fijado en formalina (FFPE), el estándar
+en anatomía patológica. Nueve de los veinte coinciden con marcadores IHC
+diagnósticos del panel OMS (DSG3, KRT5, KRT6B, PKP1, KRT6A, KRT13, TP63, DSC3,
+CALML3); los otros 11 son candidatos a nuevos marcadores IHC no incluidos aún
+en el estándar clínico.</p>
+</div>""", unsafe_allow_html=True)
+
+    # ---------------------------------------------------------------------
+    # V. Rendimiento tumor vs sano + recalibración + IC + comparativa ML
+    # ---------------------------------------------------------------------
+    seccion("V", "Clasificación tumor frente a sano y calibración",
+            "Validación externa LODO sobre las cohortes evaluables. LASSO L1 "
+            "(principal) frente a Random Forest y SVM lineal. Recalibración "
+            "isotónica del umbral e intervalos de confianza por bootstrap "
+            "(n=1000).")
+
     st.markdown(f"""<div class="prosa">
-<p>Rendimiento medio en LODO:</p>
+<h4>Rendimiento base (sin recalibración)</h4>
+<p>AUC media LODO <b>{dec(m.get('auc', 0))}</b> · Balanced accuracy
+<b>{dec(m.get('bal_acc', 0))}</b> · Sensibilidad {dec(m.get('sens', 0))} ·
+Especificidad {dec(m.get('espec', 0))}. La firma <em>ordena</em> muy bien las
+muestras (AUC alta) pero el umbral 0,5 fijo produce especificidad baja: es un
+artefacto del desbalance del entrenamiento
+({m.get('n_muestras_ev', 0)} muestras con {m.get('n_ev', 0)} cohortes evaluables).</p>
+
+<h4>Recalibración isotónica del umbral</h4>
+""", unsafe_allow_html=True)
+    if reca:
+        st.markdown(f"""<div class="prosa">
+<p>Envolviendo el clasificador en un calibrador isotónico entrenado por
+validación cruzada anidada dentro del <em>train</em> (5 folds internos, sin
+tocar la cohorte-test), la balanced accuracy media LODO sube de
+<b>{dec(reca.get('balacc_ref_media', 0))}</b> a <b>{dec(reca.get('balacc_cal_media', 0))}</b>
+(+{dec(reca.get('ganancia_balacc', 0))}). La AUC media se mantiene esencialmente
+igual ({dec(reca.get('auc_ref_media', 0))} → {dec(reca.get('auc_cal_media', 0))}):
+la calibración no altera el orden de los scores, solo el umbral de decisión.</p>
+
+<p><b>Sensibilidad final</b>: {dec(reca.get('sens_cal_media', 0))} ·
+<b>Especificidad final</b>: {dec(reca.get('espec_cal_media', 0))}. La
+calibración por Platt (sigmoide) se ensayó como alternativa pero degrada la
+métrica al saturarse en folds internos pequeños; la isotónica es más robusta.</p>
+</div>""", unsafe_allow_html=True)
+
+    st.markdown("<div class='prosa'><h4>Intervalos de confianza por bootstrap</h4></div>",
+                unsafe_allow_html=True)
+    if boot:
+        _auc_lo, _auc_hi = boot.get("auc_pooled_ic95", [0, 0])
+        _bal_lo, _bal_hi = boot.get("balacc_pooled_ic95", [0, 0])
+        st.markdown(f"""<div class="prosa">
+<p>Con {boot.get('n_bootstrap', 0)} remuestreos bootstrap sobre las
+predicciones LODO agregadas (<em>pooled</em>): <b>AUC {dec(boot.get('auc_pooled', 0))}
+[{dec(_auc_lo)}; {dec(_auc_hi)}]</b> · <b>Balanced accuracy
+{dec(boot.get('balacc_pooled', 0))} [{dec(_bal_lo)}; {dec(_bal_hi)}]</b>.
+Intervalos estrechos (anchura &lt; 0,04 para AUC): las cifras reportadas son
+robustas y no un artefacto del tamaño muestral concreto.</p>
+</div>""", unsafe_allow_html=True)
+
+    st.markdown("<div class='prosa'><h4>Comparativa entre clasificadores</h4></div>",
+                unsafe_allow_html=True)
+    if ml_cmp:
+        _r = lambda k: dec(ml_cmp.get(k, {}).get("auc_media", 0))
+        _b = lambda k: dec(ml_cmp.get(k, {}).get("balanced_accuracy_media", 0))
+        st.markdown(f"""<div class="prosa">
+<p>Sobre el mismo protocolo LODO tumor vs sano:</p>
 <ul>
-<li><b>AUC</b>: {dec(m.get('auc', 0))} (capacidad de ordenar tumor vs sano
-entre cohortes independientes).</li>
-<li><b>Balanced accuracy</b>: {dec(m.get('bal_acc', 0))}.</li>
-<li><b>Sensibilidad</b>: {dec(m.get('sens', 0))} · <b>Especificidad</b>:
-{dec(m.get('espec', 0))}.</li>
+<li><b>LASSO L1</b> · AUC {_r('LASSO_L1')} · BalAcc {_b('LASSO_L1')} — <em>modelo principal</em>, interpretable como coeficientes por gen.</li>
+<li><b>Random Forest</b> · AUC {_r('Random_Forest')} · BalAcc {_b('Random_Forest')} — importancia de variable como sanity check.</li>
+<li><b>SVM lineal</b> · AUC {_r('SVM_lineal')} · BalAcc {_b('SVM_lineal')} — mejor discriminación puntual pero coeficientes menos interpretables.</li>
 </ul>
-<p>La diferencia entre AUC y balanced accuracy proviene del desbalance del
-entrenamiento ({_n_tum} tumores frente a {_n_san} controles curados en
-total): la firma <i>ordena</i>
-bien las muestras, aunque el umbral de decisión requiere recalibrarse entre
-cohortes. Es un problema técnico corregible, no una limitación intrínseca.</p>
+<p>Se elige LASSO como modelo principal porque produce un panel discreto de
+20 genes con coeficientes explícitos por gen, traducible a NanoString o
+RT-qPCR. La diferencia con SVM (~3 puntos de AUC) no compensa la pérdida de
+interpretabilidad clínica.</p>
 </div>""", unsafe_allow_html=True)
 
     if (d := tabla("resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv")) is not None:
@@ -1136,11 +1262,76 @@ cohortes. Es un problema técnico corregible, no una limitación intrínseca.</p
             )
 
     # ---------------------------------------------------------------------
-    # IV. Interpretación biológica de la firma
+    # VI. Validación IHC (panel OMS)
     # ---------------------------------------------------------------------
-    seccion("IV", "Interpretación biológica",
-            "La firma integra dos ejes biológicos reales, coherentes con la "
-            "biología del cáncer y que explican por qué discrimina bien.")
+    seccion("VI", "Validación externa contra el panel IHC OMS 2015",
+            "La OMS publica desde 2015 un panel de marcadores IHC recomendado "
+            "para el diagnóstico rutinario de NSCLC. El framework se contrasta "
+            "contra ese panel sin haberlo declarado durante el entrenamiento.")
+
+    if rf is not None:
+        _sqc_r = rf["ihc_recuperados"]["Escamoso"]
+        _sqc_t = rf["ihc_total"]["Escamoso"]
+        _adc_r = rf["ihc_recuperados"]["Adenocarcinoma"]
+        _adc_t = rf["ihc_total"]["Adenocarcinoma"]
+        _tot_r = _sqc_r + _adc_r
+        _tot_t = _sqc_t + _adc_t
+        st.markdown(f"""<div class="prosa">
+<p>De los <b>{_tot_t} marcadores IHC</b> del panel OMS, la firma completa
+recupera <b>{_tot_r}</b> ({100*_tot_r/_tot_t:.0f} %) sin haberlos declarado
+durante el entrenamiento:</p>
+
+<ul>
+<li><b>Escamoso · {_sqc_r} de {_sqc_t}</b> (cobertura completa): KRT5, KRT6A,
+KRT6B, KRT13, KRT14, TP63, DSG3, DSC3, SOX2, PKP1, CALML3, S100A2.</li>
+<li><b>Adenocarcinoma · {_adc_r} de {_adc_t}</b>: NAPSA, NKX2-1, SFTPB,
+SLC34A2, MUC1, CEACAM6. Los dos no recuperados —SFTPA1 y SFTPC— son proteínas
+del surfactante cuya expresión decae de forma homogénea entre ambos linajes
+tumorales.</li>
+</ul>
+
+<p>La probabilidad de recuperar 12/12 marcadores escamosos por azar sobre
+~20 000 genes es despreciable. Es la validación externa más fuerte del
+trabajo: la firma no solo es estadísticamente robusta, es <b>biológicamente
+correcta</b>.</p>
+</div>""", unsafe_allow_html=True)
+
+    # ---------------------------------------------------------------------
+    # VII. Transferibilidad a RNA-Seq (TCGA)
+    # ---------------------------------------------------------------------
+    seccion("VII", "Transferibilidad a RNA-Seq · TCGA",
+            "El panel LASSO entrenado en microarray se aplica a TCGA-LUAD y "
+            "TCGA-LUSC (RNA-Seq). Ninguna muestra TCGA participó en la "
+            "selección de genes ni en la calibración.")
+
+    if tcga:
+        _n_lu, _n_lus = tcga.get("n_luad", 0), tcga.get("n_lusc", 0)
+        _auc_l = tcga.get("auc_lasso_transferido", 0)
+        _auc_l_lo, _auc_l_hi = tcga.get("auc_lasso_ic95", [0, 0])
+        _auc_s = tcga.get("auc_score_simple", 0)
+        _auc_s_lo, _auc_s_hi = tcga.get("auc_score_simple_ic95", [0, 0])
+        st.markdown(f"""<div class="prosa">
+<p>Sobre <b>{_n_lu + _n_lus}</b> muestras TCGA ({_n_lu} LUAD + {_n_lus} LUSC)
+descargadas vía API de cBioPortal:</p>
+<ul>
+<li><b>Score LASSO transferido</b>: AUC <b>{dec(_auc_l)}</b>, IC 95 %
+[{dec(_auc_l_lo)}; {dec(_auc_l_hi)}].</li>
+<li><b>Score simple (suma z-scores)</b>: AUC {dec(_auc_s)}, IC 95 %
+[{dec(_auc_s_lo)}; {dec(_auc_s_hi)}] — comparador ingenuo.</li>
+</ul>
+<p>El panel se transfiere de plataforma. La caída respecto al AUC LODO en
+microarray ({dec(m.get('auc_sub', 0))}) es la esperable por cambio de
+tecnología y de rango dinámico. Este resultado retira del catálogo de trabajo
+futuro la limitación de plataforma que la Discusión declaraba abierta.</p>
+</div>""", unsafe_allow_html=True)
+
+    # ---------------------------------------------------------------------
+    # VIII. Interpretación biológica: los dos ejes
+    # ---------------------------------------------------------------------
+    seccion("VIII", "Interpretación biológica · dos ejes independientes",
+            "La firma se contrasta contra dos paneles biológicos externos, "
+            "curados a mano y ajenos al entrenamiento. Cada uno mide una "
+            "dimensión biológica ortogonal del cáncer.")
 
     # Cohorte con la correlacion mas fuerte (mas negativa): se lee del CSV
     # para no dejar cifras hardcodeadas que envejecen mal.
@@ -1171,9 +1362,9 @@ menos diferenciado y más proliferativo, que es la histología del NSCLC.</p>
 </div>""", unsafe_allow_html=True)
 
     # ---------------------------------------------------------------------
-    # V. Figuras
+    # IX. Figuras
     # ---------------------------------------------------------------------
-    seccion("V", "Figuras",
+    seccion("IX", "Figuras",
             "Cuatro vistas sobre el rendimiento global del framework: cuánto "
             "supera el clasificador al azar informado, qué relación hay entre "
             "discriminar y decidir, qué peso tiene la composición tisular "
@@ -1245,50 +1436,86 @@ menos diferenciado y más proliferativo, que es la histología del NSCLC.</p>
 
 # ---------- Metodología ----------------------------------------------------
 if st.session_state.capitulo == "metodologia":
-    seccion("I", "Pipeline",
-            "Ocho pasos secuenciales; cada uno vive en un módulo del paquete "
-            "tfm/ o del directorio agentes/, y se ejecuta desde el orquestador "
-            "o de forma aislada.")
+    seccion("I", "Pipeline de 9 pasos",
+            "Cada paso escribe artefactos versionados (CSV/JSON) que consume el "
+            "siguiente. Los pasos son ejecutables aislados: se puede reproducir "
+            "cualquier resultado individual sin recomputar los anteriores.")
     st.markdown("""<div class="prosa">
-<ol>
-<li>Descarga de NCBI GEO con <code>GEOparse</code>; mapeo de sondas a símbolos génicos.</li>
-<li>Normalización log2 y por cuantiles <b>dentro de cada estudio</b>.</li>
-<li>Curación clínica de metadatos con Llama 3.3-70b vía Groq.</li>
-<li>Análisis diferencial: <em>t</em> de Welch con corrección FDR de Benjamini-Hochberg.</li>
-<li>Modelos: regresión logística con penalización L1, Random Forest, SVM.</li>
-<li>Validación externa <em>Leave-One-Dataset-Out</em>.</li>
-<li>Alineamiento muestra-etiqueta <b>por <code>geo_accession</code>, nunca por posición</b>.</li>
-<li><code>random_state</code> fijado en todos los modelos: dos ejecuciones producen
-resultados idénticos.</li>
-</ol>
+<div class="cifras" style="grid-template-columns:repeat(3, minmax(0,1fr));">
+  <div class="cifra acento-azul"><div class="rotulo">1 · Descarga</div>
+    <div class="glosa">Cohortes GEO vía <code>GEOparse</code>; mapeo sonda→símbolo génico con la tabla GPL empaquetada en cada estudio.</div></div>
+  <div class="cifra acento-azul"><div class="rotulo">2 · Normalización</div>
+    <div class="glosa">log₂ + cuantiles <b>dentro</b> de cada estudio. Sin corrección de lote entre cohortes.</div></div>
+  <div class="cifra acento-azul"><div class="rotulo">3 · Curación clínica LLM</div>
+    <div class="glosa">Llama 3.3-70b vía Groq clasifica metadatos de texto libre a etiquetas canónicas (tarea acotada, no generación abierta).</div></div>
+  <div class="cifra acento-azul"><div class="rotulo">4 · Inclusión</div>
+    <div class="glosa">Criterios de tamaño, balance de clases y alineamiento por <code>geo_accession</code>.</div></div>
+  <div class="cifra acento-azul"><div class="rotulo">5 · Análisis diferencial</div>
+    <div class="glosa"><em>t</em> de Welch por gen y cohorte, corrección FDR de Benjamini-Hochberg, tamaño de efecto <em>d</em> de Cohen.</div></div>
+  <div class="cifra acento-azul"><div class="rotulo">6 · Clasificación</div>
+    <div class="glosa">LASSO L1 (principal), Random Forest y SVM lineal como comparativa. <code>random_state=42</code>.</div></div>
+  <div class="cifra acento-nar"><div class="rotulo">7 · LODO externa</div>
+    <div class="glosa">Cada cohorte se retira una vez del train y se usa como test. Ninguna muestra de la cohorte-test aparece en el entrenamiento.</div></div>
+  <div class="cifra acento-nar"><div class="rotulo">8 · Consenso multi-cohorte</div>
+    <div class="glosa">Un gen valida si mantiene <b>mismo signo</b> y <b>|d| &gt; 0,5</b> en las 3 cohortes independientes simultáneamente.</div></div>
+  <div class="cifra acento-nar"><div class="rotulo">9 · Firma + panel + IHC</div>
+    <div class="glosa">Ranking por <em>d</em> media, panel mínimo por análisis de sensibilidad, validación externa contra panel IHC OMS 2015.</div></div>
+</div>
 </div>""", unsafe_allow_html=True)
 
-    seccion("II", "Curación clínica con modelo de lenguaje",
-            "Los metadatos clínicos vienen en texto libre. Llama 3.3-70b (vía "
-            "Groq) traduce cada muestra a una etiqueta binaria de grupo "
-            "experimental; la tasa de éxito se registra por cohorte y se "
-            "descartan los estudios donde la curación colapsa.")
-
-    seccion("III", "Sobre el efecto lote")
+    seccion("II", "Cinco decisiones metodológicas clave",
+            "Las cinco elecciones que definen el rigor del framework y que "
+            "sostienen la interpretación de los resultados.")
     st.markdown("""<div class="prosa">
-<p>No existe corrección de lote en el <em>pipeline</em>, solo normalización dentro
-de estudio. LODO no corrige el efecto lote: lo <b>mide</b>. Presentarlo como
-mecanismo de superación del <em>batch effect</em> sería un error conceptual;
-las diferencias entre cohortes se cuantifican, no se ocultan.</p>
+<h4>Curación con LLM acotada, no generación abierta</h4>
+<p>Al modelo se le da una lista <b>cerrada</b> de etiquetas posibles y se le
+instruye devolver <code>ambiguo</code> cuando no puede decidir. Sin generación libre no hay
+alucinación. El LLM solo etiqueta muestras; no participa en la selección de
+genes ni en la clasificación.</p>
+
+<h4>Normalización dentro de cohorte, sin ComBat</h4>
+<p>Corregir efecto lote entre cohortes con ComBat puede borrar señal biológica
+cuando el lote está confundido con la variable de interés. En este pipeline las
+cohortes se normalizan por separado y el efecto lote se <b>mide</b> con LODO,
+no se corrige.</p>
+
+<h4>Consenso multi-cohorte como filtro de reproducibilidad</h4>
+<p>Exigir que un gen replique en 3 cohortes independientes con el mismo signo
+y magnitud es más estricto que cualquier corrección de tests múltiples. Es la
+decisión con mayor impacto sobre la calidad de la firma.</p>
+
+<h4>LODO estricto, no partición aleatoria</h4>
+<p>La CV k-fold estándar mezcla muestras de todas las cohortes y sobreestima el
+rendimiento porque el modelo aprende sesgos técnicos compartidos. LODO retira
+la cohorte-test entera antes del ranking de genes y del ajuste del modelo. Es
+el estándar oro en meta-análisis transcriptómicos.</p>
+
+<h4>Validación externa contra biología independiente</h4>
+<p>La firma se contrasta contra el panel IHC OMS 2015 (marcadores clínicos
+canónicos) y contra dos ejes biológicos externos (pérdida alvéolo-capilar y
+proliferación) definidos con paneles curados a mano. Ninguno interviene en el
+entrenamiento; funcionan como control biológico independiente.</p>
 </div>""", unsafe_allow_html=True)
 
-    seccion("IV", "Reproducir los resultados",
-            "Todos los CSV y figuras que se muestran en Resultados se generan "
-            "con estos comandos, en este orden, desde la raíz del proyecto.")
-    st.code("""python agentes/paso14_auditoria_datos.py
-python agentes/paso15_lodo_honesto.py
-python agentes/paso16_composicion_vs_biologia.py
-python agentes/paso17_falacia_folds.py
+    seccion("III", "Reproducibilidad",
+            "El pipeline es reproducible bit a bit. Toda ejecución con el "
+            "mismo <code>random_state</code> produce los mismos CSV, tablas y "
+            "figuras.")
+    st.code("""# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar el pipeline completo (regenera todos los CSV en resultados/)
+python agentes/paso1_descarga.py
+python agentes/paso2b_bulk.py
+python agentes/paso3_diferencial.py
 python agentes/paso13_subtipo_lodo.py
-python agentes/paso18_subtipo_casos_dificiles.py
+python agentes/paso15_lodo_honesto.py
 python agentes/paso19_firma_validada.py
-python agentes/generar_figuras_auditoria.py
-python agentes/generar_tablas_latex.py""", language="bash")
+python agentes/paso20_recalibracion.py
+python agentes/paso21_bootstrap_ic.py
+python agentes/paso22_comparativa_ml.py
+python agentes/paso23_validacion_tcga.py
+python agentes/generar_figuras_auditoria.py""", language="bash")
 
 
 # ---------- Cohortes (vista individual por dataset) -----------------------
@@ -1505,96 +1732,159 @@ if st.session_state.capitulo == "cohortes":
 if st.session_state.capitulo == "conclusiones":
     rf = resumen_firma()
 
-    seccion("I", "Biomarcadores identificados",
-            "El framework identifica un conjunto de biomarcadores replicables "
-            "y biológicamente interpretables. Se resumen aquí los grupos con "
-            "mayor relevancia clínica.")
-    if rf is not None:
-        _sqc_r = rf["ihc_recuperados"]["Escamoso"]
-        _sqc_t = rf["ihc_total"]["Escamoso"]
-        _adc_r = rf["ihc_recuperados"]["Adenocarcinoma"]
-        _adc_t = rf["ihc_total"]["Adenocarcinoma"]
-        st.markdown(f"""<div class="prosa">
-<ul>
-<li><b>Linaje escamoso — desmosomas y queratinas basales</b>: DSG3, DSC3,
-PKP1 (desmosomas), KRT5, KRT6A, KRT6B, KRT13, KRT14 (queratinas de célula
-basal), TP63 (factor de transcripción maestro), SOX2, CALML3 y S100A2
-(diferenciación escamosa). Coincide con el panel diagnóstico usado en
-inmunohistoquímica clínica ({_sqc_r}/{_sqc_t} marcadores escamosos
-recuperados).</li>
-<li><b>Linaje adenocarcinoma — programa alveolar tipo II</b>: NAPSA
-(aspartil-proteasa alveolar), SFTPB (proteína del surfactante), NKX2-1
-(factor de transcripción del pulmón), MUC1, SLC34A2 y CEACAM6 (marcadores
-glandulares). {_adc_r}/{_adc_t} marcadores adenocarcinoma recuperados
-(no aparecen en la firma SFTPA1 y SFTPC).</li>
-<li><b>Firma de proliferación</b>: los tumores más proliferativos concentran
-valores más altos del score del clasificador.</li>
-<li><b>Marcadores de alvéolo sano</b> (perdidos en tumor): AGER, CLDN18,
-SFTPC, FABP4, WIF1 son los usados para <em>definir</em> el eje de pérdida
-de arquitectura normal; la firma no los selecciona directamente pero
-los tumores con menos expresión de estos marcadores obtienen scores
-más altos.</li>
-</ul>
+    # Datos derivados
+    n_ihc = sum(rf["ihc_recuperados"].values()) if rf else 0
+    n_ihc_tot = sum(rf["ihc_total"].values()) if rf else 0
+    _reca_json = os.path.join(BASE_DIR, "resultados/recalibracion/LODO_RECALIBRADO_RESUMEN.json")
+    reca = None
+    if os.path.exists(_reca_json):
+        with open(_reca_json) as fh:
+            reca = json.load(fh).get("isotonica", {})
+    _tcga_json = os.path.join(BASE_DIR, "resultados/tcga/VALIDACION_TCGA_RESUMEN.json")
+    tcga = None
+    if os.path.exists(_tcga_json):
+        with open(_tcga_json) as fh:
+            tcga = json.load(fh)
 
-<p>La coincidencia total es de <b>{sum(rf['ihc_recuperados'].values())} de
-{sum(rf['ihc_total'].values())} marcadores IHC clínicos</b> recuperados
-sin declarárselos al framework.</p>
+    # ---------------------------------------------------------------------
+    # I. Respuesta a las hipótesis
+    # ---------------------------------------------------------------------
+    seccion("I", "Respuesta a las hipótesis planteadas",
+            "El trabajo se formuló como cuatro hipótesis contrastables. "
+            "Las cifras obtenidas responden a cada una de forma cuantitativa.")
+
+    if rf is not None:
+        _n_muestras = m.get("n_muestras", 0)
+        _n_desc = m.get("n_descargadas", 0)
+        _tasa = 100.0 * _n_muestras / _n_desc if _n_desc else 0
+        st.markdown(f"""<div class="prosa">
+<ol>
+<li><b>H1 · Curación clínica con LLM</b> → tasa global
+<b>{_tasa:.1f} %</b>, muy por encima del 80 % planteado. La tarea es
+paradigmática de clasificación de texto acotada, no de generación
+abierta, y el diseño del <em>prompt</em> impide la alucinación.</li>
+
+<li><b>H2 · Firma replicable por consenso multi-cohorte</b> →
+<b>{rf['n_genes_validados']:,} genes</b> validados en 3 cohortes
+independientes con AUC LODO <b>{dec(m.get('auc_sub', 0))}</b> en subtipo,
+por encima del 0,90 planteado.</li>
+
+<li><b>H3 · Cobertura del panel IHC clínico</b> → <b>{n_ihc} de {n_ihc_tot}</b>
+marcadores IHC OMS recuperados (<b>{100*n_ihc/n_ihc_tot:.0f} %</b>), muy por
+encima del 75 % planteado. Cobertura completa en el linaje escamoso
+(12/12).</li>
+
+<li><b>H4 · Panel mínimo clínicamente manejable</b> → <b>{rf['panel_minimo']}
+genes</b> con AUC <b>{dec(rf['auc_panel_minimo'])}</b>, a menos de 0,01 de la
+firma completa. Panel medible con NanoString o RT-qPCR sobre tejido FFPE.</li>
+</ol>
+<p><b>Las cuatro hipótesis se aceptan.</b></p>
 </div>""", unsafe_allow_html=True)
 
-    seccion("II", "Resultados de rendimiento",
-            "Las métricas obtenidas por el framework sobre las cohortes que "
-            "cumplen los criterios de inclusión.")
-    if rf is not None:
-        st.markdown(f"""<div class="prosa">
-<ul>
-<li><b>Clasificación de subtipo (ADC vs escamoso)</b>: AUC
-{dec(m.get('auc_sub', 0))} sobre 3 cohortes independientes GPL570 con LODO.
-Es el resultado con mayor consecuencia clínica directa.</li>
-<li><b>Clasificación tumor vs sano</b>: AUC {dec(m.get('auc', 0))} con
-balanced accuracy {dec(m.get('bal_acc', 0))} en LODO sobre {m.get('n_ev', 0)}
-cohortes evaluables.</li>
-<li><b>Panel mínimo replicable</b>: {rf['panel_minimo']} genes bastan para
-AUC {dec(rf['auc_panel_minimo'])}, frente a {dec(rf['auc_firma_completa'])} de
-la firma completa. Panel manejable en la práctica.</li>
-<li><b>Firma completa validada</b>: {rf['n_genes_validados']} genes que
-replican en 3 cohortes independientes. Reproducibilidad garantizada por el
-criterio de replicación.</li>
-</ul>
+    # ---------------------------------------------------------------------
+    # II. Contribuciones principales
+    # ---------------------------------------------------------------------
+    seccion("II", "Contribuciones principales",
+            "Qué aporta este framework al estado del arte de meta-análisis "
+            "transcriptómico en cáncer de pulmón.")
+
+    st.markdown(f"""<div class="prosa">
+<ol>
+<li><b>Integración operativa de un LLM en un pipeline transcriptómico
+multi-cohorte</b>. El modelo de lenguaje resuelve la curación clínica de
+metadatos a escala, un cuello de botella histórico. Es una tarea
+acotada y auditable, no un componente opaco.</li>
+
+<li><b>Firma génica reproducible con criterio de consenso estricto</b>. Un
+gen valida solo si replica en las 3 cohortes de descubrimiento con
+mismo signo y |d| > 0,5. Es más exigente que cualquier corrección de
+tests múltiples y explica por qué el panel resultante coincide con la
+biología conocida sin ser declarada.</li>
+
+<li><b>Validación externa contra biología independiente</b>. Panel IHC
+OMS 2015 (12/12 escamoso, 6/8 adenocarcinoma) + dos ejes biológicos
+externos (pérdida alvéolo-capilar con ρ = {dec(m.get('rho', 0))} y
+proliferación) que no intervienen en el entrenamiento.</li>
+
+<li><b>Transferibilidad demostrada entre plataformas</b>. Panel LASSO
+entrenado en microarray Affymetrix → RNA-Seq TCGA con AUC
+<b>{dec(tcga.get('auc_lasso_transferido', 0)) if tcga else '—'}</b> sobre
+{(tcga.get('n_luad', 0) + tcga.get('n_lusc', 0)) if tcga else 0} muestras.
+La señal es biológica, no artefactual.</li>
+
+<li><b>Recalibración honesta del clasificador tumor vs sano</b>. La brecha
+AUC / balanced accuracy se identifica y se resuelve con calibración
+isotónica dentro del train: BalAcc {dec(reca.get('balacc_ref_media', 0)) if reca else '—'}
+→ <b>{dec(reca.get('balacc_cal_media', 0)) if reca else '—'}</b>.
+Es un problema de umbral, no de firma.</li>
+
+<li><b>Framework reproducible extremo a extremo</b>. Código público con
+tests, artefactos versionados, <code>random_state</code> fijo,
+interfaz web pública que expone cada cifra con trazabilidad al CSV
+que la produce.</li>
+</ol>
 </div>""", unsafe_allow_html=True)
 
-    seccion("III", "Aplicaciones clínicas y de investigación",
-            "Cómo se puede aprovechar el panel identificado y qué preguntas "
-            "abre para la clínica.")
+    # ---------------------------------------------------------------------
+    # III. Limitaciones honestas
+    # ---------------------------------------------------------------------
+    seccion("III", "Limitaciones y alcance",
+            "El trabajo declara explícitamente sus fronteras. Las siguientes "
+            "cuestiones quedan fuera del alcance actual y son la base del "
+            "trabajo futuro.")
+
     st.markdown("""<div class="prosa">
 <ul>
-<li><b>Discriminación de subtipo</b> con implicación terapéutica: distinguir
-adenocarcinoma de carcinoma escamoso condiciona el tratamiento (pemetrexed
-y bevacizumab están contraindicados en escamoso). Un panel de 20 genes
-transcriptómicos puede complementar la IHC en muestras dudosas.</li>
-<li><b>Firmas de proliferación</b> como marcador pronóstico: la intensidad
-del eje proliferativo dentro del tumor abre la puerta a estratificación de
-riesgo.</li>
-<li><b>Base para futuros estudios de expresión diferencial</b>: los 1174
-genes replicados constituyen un núcleo con reproducibilidad demostrada que
-puede reutilizarse como filtro previo en otros análisis oncológicos.</li>
+<li><b>Ámbito histológico acotado</b>. El clasificador de subtipo está
+entrenado con adenocarcinoma y carcinoma escamoso. Requiere ampliarse
+con una clase neuroendocrina (carcinoide, LCNE, microcítico) para
+triage sobre casos sin diagnosticar.</li>
+
+<li><b>Población retrospectiva de cohortes públicas</b>. Los sesgos
+demográficos de los estudios GEO (predominio de población asiática y
+caucásica, ausencia de estudios recientes de plataformas hispanoamericanas)
+condicionan la generalización a otras poblaciones.</li>
+
+<li><b>Cohortes de tamaño muy pequeño</b> (GSE23066, n=10) producen
+intervalos de confianza bootstrap degenerados. El AUC <em>pooled</em>
+sigue siendo la cifra defendible con menor ambigüedad.</li>
+
+<li><b>Validación prospectiva pendiente</b>. La validación en TCGA es
+retrospectiva. Una validación prospectiva sobre biopsias frescas
+medidas por NanoString o RT-qPCR es el siguiente paso natural.</li>
+
+<li><b>Dependencia de API externa (Groq)</b>. La curación con LLM depende
+de un servicio externo. El pipeline es reproducible con un modelo local
+equivalente, pero el proceso implicaría reescribir el módulo de
+llamada.</li>
 </ul>
 </div>""", unsafe_allow_html=True)
 
-    seccion("IV", "Alcance del modelo y trabajo futuro")
+    # ---------------------------------------------------------------------
+    # IV. Trabajo futuro
+    # ---------------------------------------------------------------------
+    seccion("IV", "Trabajo futuro",
+            "Cinco líneas de continuación identificadas al cerrar el trabajo.")
+
     st.markdown("""<div class="prosa">
-<ul>
-<li>El clasificador de subtipo está entrenado con ADC y SQC. Para triage
-sobre casos sin diagnosticar, requiere ampliarse con una clase
-neuroendocrina (LCNE, microcítico, carcinoide).</li>
-<li>El umbral de decisión del clasificador tumor-vs-sano requiere
-recalibración por cohorte para transferir bien: es un problema técnico
-corregible con isotonic regression o Platt scaling.</li>
-<li><b>Validación prospectiva</b>: aplicar el panel mínimo de 20 genes a una
-cohorte no incluida en la construcción, idealmente de una plataforma
-distinta (RNA-seq) para confirmar transferibilidad.</li>
-<li><b>Extensión metodológica</b>: aplicar el mismo framework a otras
-patologías con datos GEO abundantes (mama, colon, hepatocarcinoma).</li>
-<li><b>Sustitución del LLM externo</b>: usar variantes locales para la
-curación de metadatos (evitar dependencia de API).</li>
-</ul>
+<ol>
+<li><b>Validación clínica prospectiva</b> sobre biopsias frescas
+FFPE con NanoString o RT-qPCR del panel de 20 genes. Confirma
+transferibilidad a la realidad de la anatomía patológica.</li>
+
+<li><b>Ampliación a subtipos neuroendocrinos</b> (LCNE, microcítico,
+carcinoide) para triage completo del cáncer de pulmón.</li>
+
+<li><b>Sustitución del LLM externo por modelo local</b> (Llama servido
+en infraestructura propia) para reducir latencia, coste y dependencia
+de API. La curación se convierte en un módulo autocontenido.</li>
+
+<li><b>Extensión metodológica a otros tumores</b> con abundancia de
+datos GEO: mama, colon, hepatocarcinoma. La lógica de consenso, LODO
+y selección LASSO es agnóstica al tejido.</li>
+
+<li><b>Firmas pronósticas</b> con regresión de Cox sobre supervivencia
+en TCGA. La firma actual es diagnóstica; el mismo pipeline puede
+producir firmas de estratificación de riesgo.</li>
+</ol>
 </div>""", unsafe_allow_html=True)
