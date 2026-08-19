@@ -171,14 +171,30 @@ def fig_auc_vs_balacc():
     ax.scatter(r["Balanced_Accuracy"], r["AUC"],
                s=26 + r["n_test"] * 0.6, color=AZUL, alpha=0.8,
                edgecolor="white", linewidth=1.4, zorder=4)
-    for _, row in r.iterrows():
-        ax.annotate(row["Cohorte_Test"],
-                    (row["Balanced_Accuracy"], row["AUC"]),
-                    xytext=(0, -13), textcoords="offset points",
-                    fontsize=6.8, color=INK_2, ha="center")
 
-    ax.set_xlim(0.42, 1.03)
-    ax.set_ylim(0.42, 1.03)
+    # Offsets manuales por cohorte para evitar solapamiento en el cluster
+    # superior derecho (AUC ~1, BalAcc ~0.9).
+    OFFSETS = {
+        "GSE40791":  (14, -4),    # aparta a la derecha del punto (aislado a la izq)
+        "GSE7670":   (-8, 12),    # arriba a la izquierda
+        "GSE19804":  (10, -12),   # abajo a la derecha
+        "GSE118370": (-14, 10),   # muy a la izquierda arriba
+        "GSE18842":  (-14, -12),  # abajo a la izquierda
+        "GSE19188":  (14, -12),   # abajo a la derecha
+        "GSE31210":  (14, 12),    # arriba a la derecha
+        "GSE23066":  (0, -12),    # abajo (esta aislada)
+    }
+    for _, row in r.iterrows():
+        cohorte = row["Cohorte_Test"]
+        dx, dy = OFFSETS.get(cohorte, (0, -13))
+        ha = "left" if dx > 4 else "right" if dx < -4 else "center"
+        ax.annotate(cohorte,
+                    (row["Balanced_Accuracy"], row["AUC"]),
+                    xytext=(dx, dy), textcoords="offset points",
+                    fontsize=6.8, color=INK_2, ha=ha)
+
+    ax.set_xlim(0.42, 1.08)
+    ax.set_ylim(0.42, 1.06)
     ax.set_xticks([0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     ax.set_yticks([0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
     ax.xaxis.set_major_formatter(plt.FuncFormatter(coma))
@@ -187,8 +203,11 @@ def fig_auc_vs_balacc():
     ax.set_ylabel("AUC  (capacidad de ordenación)")
     encabezado(ax, "Discriminación frente a decisión",
                "El área del punto es el tamaño de la cohorte")
-    ax.annotate("ordena bien,\ndecide mal", xy=(0.5, 0.985),
-                fontsize=7.4, color=ROJO, style="italic", va="top")
+    # Anotacion "ordena bien, decide mal": desplazada a la izquierda del cluster
+    # de GSE40791 para no invadir su label.
+    ax.annotate("ordena bien,\ndecide mal", xy=(0.44, 0.985),
+                fontsize=7.4, color=ROJO, style="italic", va="top",
+                ha="left")
     guardar(fig, "fig_auc_vs_balacc.pdf")
 
 
