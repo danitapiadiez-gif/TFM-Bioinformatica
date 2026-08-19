@@ -35,3 +35,4 @@ SINTESIS_MOLECULAR.json
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+*.json
