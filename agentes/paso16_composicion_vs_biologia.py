@@ -59,7 +59,7 @@ def main():
     panel_tumor = [g for grp in MARCADORES_TUMOR_GENERICO.values() for g in grp]
 
     print("\n[1] Composicion de la firma de consenso original")
-    ruta_firma = os.path.join(BASE_DIR, "FIRMA_CONSENSO_FINAL_TFM.csv")
+    ruta_firma = os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_CONSENSO_FINAL_TFM.csv")
     if os.path.exists(ruta_firma):
         firma = pd.read_csv(ruta_firma).head(50)
         top = set(firma["GENE_SYMBOL"])
@@ -174,11 +174,11 @@ def main():
         print("      como artefacto de composicion no se sostiene con este dato")
         print("      y debe revisarse.")
 
-    res.to_csv(os.path.join(BASE_DIR, "COMPOSICION_VS_BIOLOGIA.csv"), index=False)
+    res.to_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/COMPOSICION_VS_BIOLOGIA.csv"), index=False)
     pd.concat(por_muestra, ignore_index=True).to_csv(
-        os.path.join(BASE_DIR, "COMPOSICION_SCORES_POR_MUESTRA.csv"), index=False)
+        os.path.join(BASE_DIR, "resultados/firma_consenso/COMPOSICION_SCORES_POR_MUESTRA.csv"), index=False)
     print("\n  Guardado: COMPOSICION_VS_BIOLOGIA.csv, "
-          "COMPOSICION_SCORES_POR_MUESTRA.csv")
+          "resultados/firma_consenso/COMPOSICION_SCORES_POR_MUESTRA.csv")
     print("=" * 78)
     return res
 

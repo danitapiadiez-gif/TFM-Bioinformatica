@@ -12,7 +12,7 @@ Una tarea biologica se define en `configuracion/tareas.yaml`, no en codigo: eso
 es lo que permite plantear una pregunta nueva sin escribir un script nuevo.
 """
 
-from tfm import cohortes, comprobaciones, firma, tareas, validacion  # noqa: F401
+from tfm import cohortes, comprobaciones, firma, rutas, tareas, validacion  # noqa: F401
 
 __version__ = "1.0.0"
-__all__ = ["cohortes", "comprobaciones", "firma", "tareas", "validacion"]
+__all__ = ["cohortes", "comprobaciones", "firma", "rutas", "tareas", "validacion"]

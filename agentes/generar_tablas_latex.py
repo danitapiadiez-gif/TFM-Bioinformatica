@@ -31,7 +31,7 @@ def escribir(nombre, contenido):
 
 
 def tabla_auditoria():
-    a = pd.read_csv(os.path.join(BASE_DIR, "AUDITORIA_COHORTES.csv"))
+    a = pd.read_csv(os.path.join(BASE_DIR, "resultados/auditoria/AUDITORIA_COHORTES.csv"))
     filas = []
     for _, r in a.iterrows():
         alin = ("OK" if r["Alineamiento"] == "OK"
@@ -71,7 +71,7 @@ Cohorte & Plataforma & $n$ & Sanas & Enfermas & Sin clas. & Curacion & Desalin. 
 
 
 def tabla_lodo():
-    l = pd.read_csv(os.path.join(BASE_DIR, "LODO_HONESTO_RESULTADOS.csv"))
+    l = pd.read_csv(os.path.join(BASE_DIR, "resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv"))
     l = l.sort_values(["Evaluable", "Ganancia_vs_Baseline"], ascending=[False, False])
     ev = l[l["Evaluable"]]
 
@@ -128,7 +128,7 @@ Cohorte test & $n$ & Sano/Enf. & \\emph{{Baseline}} & Acc. & Bal.\\ acc. & AUC &
 
 
 def tabla_composicion():
-    c = pd.read_csv(os.path.join(BASE_DIR, "COMPOSICION_VS_BIOLOGIA.csv"))
+    c = pd.read_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/COMPOSICION_VS_BIOLOGIA.csv"))
     c = c.sort_values("n_tumores", ascending=False)
     filas = []
     for _, r in c.iterrows():
@@ -173,7 +173,7 @@ Cohorte & Tumores & Sanas & Todas (pulmon n.) & \\textbf{{Solo tumores}} & Proli
 
 
 def tabla_falacia():
-    f = pd.read_csv(os.path.join(BASE_DIR, "FALACIA_FOLDS_COMPARACION.csv"))
+    f = pd.read_csv(os.path.join(BASE_DIR, "resultados/auditoria/FALACIA_FOLDS_COMPARACION.csv"))
     a, b = f.iloc[0], f.iloc[1]
     escribir("tabla_falacia_folds.tex", f"""\\begin{{table}}[htbp]
 \\centering
@@ -202,7 +202,7 @@ Genes con acuerdo de signo perfecto & \\textbf{{{a['genes_acuerdo_signo_perfecto
 
 
 def tabla_subtipo():
-    s = pd.read_csv(os.path.join(BASE_DIR, "SUBTIPO_LODO_RESULTADOS.csv"))
+    s = pd.read_csv(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_LODO_RESULTADOS.csv"))
     filas = [
         f"{r['Cohorte_Test']} & {r['n_test']} & {r['n_ADC']}/{r['n_SQC']} & "
         f"{num(r['Baseline_Mayoritaria'])} & {num(r['Balanced_Accuracy'])} & "
@@ -233,7 +233,7 @@ $+${num(s['Ganancia_vs_Baseline'].mean())} \\\\
 
 
 def tabla_dificiles():
-    d = pd.read_csv(os.path.join(BASE_DIR, "SUBTIPO_CASOS_DIFICILES.csv"))
+    d = pd.read_csv(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_CASOS_DIFICILES.csv"))
     d = d[d["n"] >= 3].sort_values("n", ascending=False)
     filas = [
         f"{r['Histologia']} & {r['Cohorte']} & {r['n']} & "
@@ -274,7 +274,7 @@ def cifras_en_macros():
     import json
 
     d = {}
-    l = pd.read_csv(os.path.join(BASE_DIR, "LODO_HONESTO_RESULTADOS.csv"))
+    l = pd.read_csv(os.path.join(BASE_DIR, "resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv"))
     ev = l[l["Evaluable"]]
     d |= {
         "balacc": num(ev["Balanced_Accuracy"].mean()),
@@ -288,7 +288,7 @@ def cifras_en_macros():
         "ncohortes": str(len(l)),
         "nosuperan": str(int((~ev["Supera_Baseline"]).sum())),
     }
-    a = pd.read_csv(os.path.join(BASE_DIR, "AUDITORIA_COHORTES.csv"))
+    a = pd.read_csv(os.path.join(BASE_DIR, "resultados/auditoria/AUDITORIA_COHORTES.csv"))
     tot, sin_c = int(a["N_Total"].sum()), int(a["N_Sin_Clasificar"].sum())
     d |= {
         "nmuestras": str(tot),
@@ -297,7 +297,7 @@ def cifras_en_macros():
         "ndesalineadas": str(int(a["N_Muestras_Desalineadas"].fillna(0).sum())),
         "nmonoclase": str(int((~a["Evaluable_Como_Test"]).sum())),
     }
-    c = pd.read_csv(os.path.join(BASE_DIR, "COMPOSICION_VS_BIOLOGIA.csv"))
+    c = pd.read_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/COMPOSICION_VS_BIOLOGIA.csv"))
     v = c["Rho_SOLO_TUMORES_vs_PulmonNormal"].dropna()
     pr = c["Rho_SOLO_TUMORES_vs_Proliferacion"].dropna()
     d |= {
@@ -309,7 +309,7 @@ def cifras_en_macros():
         "rhoprolifmin": num(pr.min()),
         "rhoprolifmax": num(pr.max()),
     }
-    f = pd.read_csv(os.path.join(BASE_DIR, "FALACIA_FOLDS_COMPARACION.csv"))
+    f = pd.read_csv(os.path.join(BASE_DIR, "resultados/auditoria/FALACIA_FOLDS_COMPARACION.csv"))
     cl = f.iloc[0]["concordancia_pareja_media"] * 100
     cd = f.iloc[1]["concordancia_pareja_media"] * 100
     d |= {
@@ -319,14 +319,14 @@ def cifras_en_macros():
         "genesfolds": str(f.iloc[0]["genes_acuerdo_signo_perfecto"]),
         "genesdisjuntas": str(f.iloc[1]["genes_acuerdo_signo_perfecto"]),
     }
-    s = pd.read_csv(os.path.join(BASE_DIR, "SUBTIPO_LODO_RESULTADOS.csv"))
+    s = pd.read_csv(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_LODO_RESULTADOS.csv"))
     d |= {
         "balaccsub": num(s["Balanced_Accuracy"].mean()),
         "aucsub": num(s["AUC"].mean()),
         "gananciasub": num(s["Ganancia_vs_Baseline"].mean()),
         "nsub": str(int(s["n_test"].sum())),
     }
-    ruta_j = os.path.join(BASE_DIR, "SUBTIPO_DIFICILES_RESUMEN.json")
+    ruta_j = os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_DIFICILES_RESUMEN.json")
     if os.path.exists(ruta_j):
         with open(ruta_j) as fh:
             j = json.load(fh)
@@ -345,7 +345,7 @@ def cifras_en_macros():
             d[f"acc{alias}"] = num(li.loc[gse, "Accuracy"])
             d[f"base{alias}"] = num(li.loc[gse, "Baseline_Mayoritaria"])
 
-    firma = os.path.join(BASE_DIR, "SUBTIPO_FIRMA_REPLICADA.csv")
+    firma = os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_FIRMA_REPLICADA.csv")
     if os.path.exists(firma):
         d["ngenesfirma"] = str(len(pd.read_csv(firma)))
 

@@ -111,7 +111,7 @@ def auditar():
     print("\n[5] Tabla completa")
     print(aud.to_string(index=False))
 
-    ruta = os.path.join(BASE_DIR, "AUDITORIA_COHORTES.csv")
+    ruta = os.path.join(BASE_DIR, "resultados/auditoria/AUDITORIA_COHORTES.csv")
     aud.to_csv(ruta, index=False)
     print(f"\n  Guardado: {os.path.basename(ruta)}")
 

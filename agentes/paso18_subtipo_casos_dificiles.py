@@ -196,16 +196,16 @@ def main():
         print(f"    tumores YA confirmados como ADC o escamoso; el modelo no")
         print(f"    puede usarse como primer filtro sobre un caso sin diagnosticar.")
 
-    res.to_csv(os.path.join(BASE_DIR, "SUBTIPO_CASOS_DIFICILES.csv"), index=False)
+    res.to_csv(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_CASOS_DIFICILES.csv"), index=False)
     pd.concat(por_muestra, ignore_index=True).to_csv(
-        os.path.join(BASE_DIR, "SUBTIPO_PROBS_AMBIGUAS.csv"), index=False)
+        os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_PROBS_AMBIGUAS.csv"), index=False)
 
     # Resumen para que la memoria y la interfaz no citen cifras a mano.
     n_neuro = int(neuro["n"].sum()) if not neuro.empty else 0
     pct_adc_neuro = (
         100 - (neuro["Pct_Asignadas_Escamoso"] * neuro["n"]).sum() / n_neuro
         if n_neuro else float("nan"))
-    with open(os.path.join(BASE_DIR, "SUBTIPO_DIFICILES_RESUMEN.json"), "w") as fh:
+    with open(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_DIFICILES_RESUMEN.json"), "w") as fh:
         json.dump({
             "n_entrenables": int(n_ent),
             "n_ambiguas": int(n_amb),
@@ -216,7 +216,7 @@ def main():
             "pct_neuro_a_adenocarcinoma": float(pct_adc_neuro),
         }, fh, indent=2)
     print("\n  Guardado: SUBTIPO_CASOS_DIFICILES.csv, SUBTIPO_PROBS_AMBIGUAS.csv, "
-          "SUBTIPO_DIFICILES_RESUMEN.json")
+          "resultados/subtipo/SUBTIPO_DIFICILES_RESUMEN.json")
     print("=" * 78)
 
 

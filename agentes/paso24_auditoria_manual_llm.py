@@ -35,7 +35,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tfm.cohortes import RAIZ  # noqa: E402
 
-CSV_PATH = os.path.join(RAIZ, "AUDITORIA_MANUAL_LLM.csv")
+CSV_PATH = os.path.join(RAIZ, "resultados/auditoria/AUDITORIA_MANUAL_LLM.csv")
 N_MUESTRAS_TOTALES = 40
 RNG = np.random.default_rng(0)
 
@@ -159,7 +159,7 @@ def fase_B_evaluar():
         "aciertos":                 int((completadas["etiqueta_llm"] == completadas["etiqueta_manual"]).sum()),
         "precision_por_cohorte":    {k: float(v) for k, v in por_cohorte["precision"].items()},
     }
-    with open(os.path.join(RAIZ, "AUDITORIA_MANUAL_LLM_RESUMEN.json"), "w") as fh:
+    with open(os.path.join(RAIZ, "resultados/auditoria/AUDITORIA_MANUAL_LLM_RESUMEN.json"), "w") as fh:
         json.dump(resumen, fh, indent=2, ensure_ascii=False)
     print("\nGuardado AUDITORIA_MANUAL_LLM_RESUMEN.json")
 

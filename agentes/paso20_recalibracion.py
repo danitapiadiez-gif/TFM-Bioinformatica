@@ -123,7 +123,7 @@ def main():
                   f"(Δ {m_cal['balanced_accuracy']-r_ref.balanced_accuracy:+.3f})")
 
     df = pd.DataFrame(filas)
-    df.to_csv(os.path.join(RAIZ, "LODO_RECALIBRADO_RESULTADOS.csv"), index=False)
+    df.to_csv(os.path.join(RAIZ, "resultados/recalibracion/LODO_RECALIBRADO_RESULTADOS.csv"), index=False)
 
     # 3) Resumen
     resumen = {}
@@ -140,7 +140,7 @@ def main():
             "n_cohortes":       int(len(sub)),
         }
 
-    with open(os.path.join(RAIZ, "LODO_RECALIBRADO_RESUMEN.json"), "w") as fh:
+    with open(os.path.join(RAIZ, "resultados/recalibracion/LODO_RECALIBRADO_RESUMEN.json"), "w") as fh:
         json.dump(resumen, fh, indent=2, ensure_ascii=False)
 
     print("\n" + "=" * 78)

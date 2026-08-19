@@ -40,17 +40,17 @@ MARCADORES_ALVEOLO_SANO = ["AGER", "CLDN18", "SFTPC", "FABP4", "WIF1"]
 
 # Ficheros imprescindibles, con el script que los genera.
 REQUERIDOS = {
-    "AUDITORIA_COHORTES.csv": "agentes/paso14_auditoria_datos.py",
-    "LODO_HONESTO_RESULTADOS.csv": "agentes/paso15_lodo_honesto.py",
+    "resultados/auditoria/AUDITORIA_COHORTES.csv": "agentes/paso14_auditoria_datos.py",
+    "resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv": "agentes/paso15_lodo_honesto.py",
 }
 
 # Ficheros que enriquecen el contexto pero no lo bloquean.
 OPCIONALES = {
-    "COMPOSICION_VS_BIOLOGIA.csv": "agentes/paso16_composicion_vs_biologia.py",
-    "FALACIA_FOLDS_COMPARACION.csv": "agentes/paso17_falacia_folds.py",
-    "SUBTIPO_LODO_RESULTADOS.csv": "agentes/paso13_subtipo_lodo.py",
-    "SUBTIPO_CASOS_DIFICILES.csv": "agentes/paso18_subtipo_casos_dificiles.py",
-    "FIRMA_CONSENSO_FINAL_TFM.csv": "agentes/paso10_consenso_final.py",
+    "resultados/firma_consenso/COMPOSICION_VS_BIOLOGIA.csv": "agentes/paso16_composicion_vs_biologia.py",
+    "resultados/auditoria/FALACIA_FOLDS_COMPARACION.csv": "agentes/paso17_falacia_folds.py",
+    "resultados/subtipo/SUBTIPO_LODO_RESULTADOS.csv": "agentes/paso13_subtipo_lodo.py",
+    "resultados/subtipo/SUBTIPO_CASOS_DIFICILES.csv": "agentes/paso18_subtipo_casos_dificiles.py",
+    "resultados/firma_consenso/FIRMA_CONSENSO_FINAL_TFM.csv": "agentes/paso10_consenso_final.py",
 }
 
 
@@ -95,7 +95,7 @@ def construir_contexto():
     comprobar_datos()
 
     # Leemos cifras esenciales una vez. Nada de volcados to_string().
-    aud = _leer("AUDITORIA_COHORTES.csv")
+    aud = _leer("resultados/auditoria/AUDITORIA_COHORTES.csv")
     ev_aud = aud[aud["Evaluable_Como_Test"]] if aud is not None else None
     n_ev_coh = len(ev_aud) if ev_aud is not None else 0
     # Muestras evaluables reales: las que el LLM logro etiquetar (sano+enf),
@@ -108,19 +108,19 @@ def construir_contexto():
     n_tumor_total = int(aud["N_Enfermo"].sum()) if aud is not None else 0
     n_sano_total = int(aud["N_Sano"].sum()) if aud is not None else 0
 
-    lodo = _leer("LODO_HONESTO_RESULTADOS.csv")
+    lodo = _leer("resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv")
     ev = lodo[lodo["Evaluable"]] if lodo is not None else None
     auc = ev["AUC"].mean() if ev is not None else 0
     balacc = ev["Balanced_Accuracy"].mean() if ev is not None else 0
     sens = ev["Sensibilidad"].mean() if ev is not None else 0
     espec = ev["Especificidad"].mean() if ev is not None else 0
 
-    sub = _leer("SUBTIPO_LODO_RESULTADOS.csv")
+    sub = _leer("resultados/subtipo/SUBTIPO_LODO_RESULTADOS.csv")
     auc_sub = sub["AUC"].mean() if sub is not None else 0
     balacc_sub = sub["Balanced_Accuracy"].mean() if sub is not None else 0
     n_sub = int(sub["n_test"].sum()) if sub is not None else 388
 
-    comp = _leer("COMPOSICION_VS_BIOLOGIA.csv")
+    comp = _leer("resultados/firma_consenso/COMPOSICION_VS_BIOLOGIA.csv")
     rho_norm = 0
     coh_top_txt = ""
     if comp is not None:
@@ -133,7 +133,7 @@ def construir_contexto():
                            f"con p={f['p_SOLO_TUMORES']:.1e}")
 
     import json as _json
-    rf_path = os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")
+    rf_path = os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_VALIDADA_RESUMEN.json")
     rf = _json.load(open(rf_path)) if os.path.exists(rf_path) else None
     n_gv = rf["n_genes_validados"] if rf else 0
     n_ge = rf["n_genes_evaluados"] if rf else 0
@@ -145,7 +145,7 @@ def construir_contexto():
     # JSON aun no se ha regenerado, leemos la AUC correcta de la curva.
     auc_pcompl = rf["auc_firma_completa"] if rf else 0
     if rf and "auc_curva_maxima" not in rf:
-        curva = _leer("PANEL_MINIMO_CURVA.csv")
+        curva = _leer("resultados/firma_consenso/PANEL_MINIMO_CURVA.csv")
         if curva is not None:
             fila = curva[curva["N_Genes"] == n_gv]
             if not fila.empty:
@@ -155,7 +155,7 @@ def construir_contexto():
     top10 = ", ".join(rf["top10"]) if rf else ""
 
     # Marcadores IHC recuperados por linaje (interseccion real con la firma).
-    firma_comp = _leer("FIRMA_VALIDADA_COMPLETA.csv")
+    firma_comp = _leer("resultados/firma_consenso/FIRMA_VALIDADA_COMPLETA.csv")
     genes_firma = set(firma_comp["ID_REF"]) if firma_comp is not None else set()
     def _en_firma(gs): return [g for g in gs if g in genes_firma]
     def _fuera(gs):    return [g for g in gs if g not in genes_firma]
@@ -259,7 +259,7 @@ def _cifras_clave():
     valores = {"n_gv": 1174, "pmin": 20, "auc_pmin": 0.966,
                "auc_pcompl": 0.970, "ihc": 18, "ihc_tot": 20,
                "auc": 0.925, "auc_sub": 0.968}
-    rf_path = os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")
+    rf_path = os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_VALIDADA_RESUMEN.json")
     if os.path.exists(rf_path):
         rf = _json.load(open(rf_path))
         valores["n_gv"] = rf.get("n_genes_validados", valores["n_gv"])
@@ -269,16 +269,16 @@ def _cifras_clave():
         valores["ihc_tot"] = sum(rf["ihc_total"].values())
         # AUC firma completa (parche: en JSONs antiguos ese campo era el
         # maximo de la curva). Leemos el valor correcto de la curva.
-        curva = _leer("PANEL_MINIMO_CURVA.csv")
+        curva = _leer("resultados/firma_consenso/PANEL_MINIMO_CURVA.csv")
         if curva is not None:
             fila = curva[curva["N_Genes"] == valores["n_gv"]]
             if not fila.empty:
                 valores["auc_pcompl"] = float(fila["AUC_Media"].iloc[0])
-    lodo = _leer("LODO_HONESTO_RESULTADOS.csv")
+    lodo = _leer("resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv")
     if lodo is not None:
         ev = lodo[lodo["Evaluable"]]
         valores["auc"] = ev["AUC"].mean()
-    sub = _leer("SUBTIPO_LODO_RESULTADOS.csv")
+    sub = _leer("resultados/subtipo/SUBTIPO_LODO_RESULTADOS.csv")
     if sub is not None:
         valores["auc_sub"] = sub["AUC"].mean()
     return valores

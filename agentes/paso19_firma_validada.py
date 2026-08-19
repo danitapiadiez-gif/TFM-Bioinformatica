@@ -204,9 +204,9 @@ def main():
              + ["d_Media", "d_Minima_Abs", "Direccion",
                 "Marcador_IHC_Clinica", "En_Panel_Minimo"])
     salida = salida[orden]
-    salida.to_csv(os.path.join(BASE_DIR, "FIRMA_VALIDADA_TOP60.csv"))
-    curva.to_csv(os.path.join(BASE_DIR, "PANEL_MINIMO_CURVA.csv"), index=False)
-    firma.to_csv(os.path.join(BASE_DIR, "FIRMA_VALIDADA_COMPLETA.csv"))
+    salida.to_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_VALIDADA_TOP60.csv"))
+    curva.to_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/PANEL_MINIMO_CURVA.csv"), index=False)
+    firma.to_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_VALIDADA_COMPLETA.csv"))
 
     resumen = {
         "tarea_validada": "Adenocarcinoma frente a carcinoma escamoso",
@@ -225,7 +225,7 @@ def main():
         "top10": list(firma.index[:10]),
         "panel_minimo_genes": ranking[:int(suficiente)],
     }
-    with open(os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json"), "w") as fh:
+    with open(os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_VALIDADA_RESUMEN.json"), "w") as fh:
         json.dump(resumen, fh, indent=2, ensure_ascii=False)
 
     print("\n[E] Firma entregada: top 15")

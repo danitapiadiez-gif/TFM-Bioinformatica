@@ -14,7 +14,7 @@ def generar_dashboard_consenso():
     print(f" PASO 9: GENERANDO DASHBOARD DE CONSENSO ESTADÍSTICO (v8.0)")
     print(f"{'='*80}")
     
-    ruta_csv = os.path.join(BASE_PATH, "BIOMARCADORES_UNIVERSALES_CANCER_PULMON.csv")
+    ruta_csv = os.path.join(BASE_PATH, "resultados/firma_consenso/BIOMARCADORES_UNIVERSALES_CANCER_PULMON.csv")
     if not os.path.exists(ruta_csv):
         print(" Error: No se encuentra el archivo de meta-análisis.")
         return

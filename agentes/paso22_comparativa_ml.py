@@ -111,9 +111,9 @@ def main():
         }
 
     df = pd.DataFrame(filas)
-    df.to_csv(os.path.join(RAIZ, "COMPARATIVA_ML_LODO.csv"), index=False)
+    df.to_csv(os.path.join(RAIZ, "resultados/comparativa_ml/COMPARATIVA_ML_LODO.csv"), index=False)
 
-    with open(os.path.join(RAIZ, "COMPARATIVA_ML_RESUMEN.json"), "w") as fh:
+    with open(os.path.join(RAIZ, "resultados/comparativa_ml/COMPARATIVA_ML_RESUMEN.json"), "w") as fh:
         json.dump(resumen, fh, indent=2)
 
     print("\n" + "=" * 78)

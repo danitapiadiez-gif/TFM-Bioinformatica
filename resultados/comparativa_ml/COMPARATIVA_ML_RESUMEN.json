@@ -1,0 +1,26 @@
+{
+  "LASSO_L1": {
+    "n_cohortes_evaluables": 8,
+    "auc_media": 0.925156400521232,
+    "auc_desv": 0.1961585864009776,
+    "balanced_accuracy_media": 0.7721786295071693,
+    "sensibilidad_media": 0.982872216279296,
+    "especificidad_media": 0.5614850427350427
+  },
+  "Random_Forest": {
+    "n_cohortes_evaluables": 8,
+    "auc_media": 0.9332717549544474,
+    "auc_desv": 0.14375713938943896,
+    "balanced_accuracy_media": 0.7593419255891601,
+    "sensibilidad_media": 0.9889562870757561,
+    "especificidad_media": 0.529727564102564
+  },
+  "SVM_lineal": {
+    "n_cohortes_evaluables": 8,
+    "auc_media": 0.957108260116897,
+    "auc_desv": 0.09632087988864688,
+    "balanced_accuracy_media": 0.8221061325596724,
+    "sensibilidad_media": 0.9794152565723362,
+    "especificidad_media": 0.6647970085470085
+  }
+}

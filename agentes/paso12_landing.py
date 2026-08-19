@@ -372,8 +372,8 @@ components.html(
               " minimum panel: " + N("20") + " genes · AUC=" + N("0.966")
                 + " · bal_acc=" + N("0.938"),
               " IHC clinical markers recovered: " + N("18") + "/" + N("20"),
-              " writing " + T("FIRMA_VALIDADA_TOP60.csv"),
-              " writing " + T("FIRMA_VALIDADA_RESUMEN.json"),
+              " writing " + T("resultados/firma_consenso/FIRMA_VALIDADA_TOP60.csv"),
+              " writing " + T("resultados/firma_consenso/FIRMA_VALIDADA_RESUMEN.json"),
               " " + OK("✓ pipeline done") + " · reset",
               " $ python -m tfm ejecutar " + T("tumor_vs_sano")
             ];

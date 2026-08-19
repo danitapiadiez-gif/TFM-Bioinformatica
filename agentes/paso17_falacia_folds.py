@@ -151,7 +151,7 @@ def main():
         print(f"\n  Genes que replican en las {k} cohortes independientes "
               f"(firma defendible):")
         print(replican[["Coef_Medio"]].head(20).to_string())
-        replican.to_csv(os.path.join(BASE_DIR, "FIRMA_REPLICADA_INDEPENDIENTE.csv"))
+        replican.to_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_REPLICADA_INDEPENDIENTE.csv"))
 
     # Contraste directo con los genes estrella de la memoria (§5.3.2, Tabla 7).
     estrella = ["SLC6A4", "S100A10", "KANK3", "SH3GL3", "HIST1H2BM", "ZNF702P", "TOX3"]
@@ -250,9 +250,9 @@ def main():
         print(f"      debilitada y debe reformularse.")
 
     comp["concordancia_pareja_media"] = [np.mean(v_lodo), np.mean(conc_disj)]
-    comp.to_csv(os.path.join(BASE_DIR, "FALACIA_FOLDS_COMPARACION.csv"), index=False)
+    comp.to_csv(os.path.join(BASE_DIR, "resultados/auditoria/FALACIA_FOLDS_COMPARACION.csv"), index=False)
     print("\n  Guardado: FALACIA_FOLDS_COMPARACION.csv, "
-          "FIRMA_REPLICADA_INDEPENDIENTE.csv")
+          "resultados/firma_consenso/FIRMA_REPLICADA_INDEPENDIENTE.csv")
     print("=" * 78)
 
 

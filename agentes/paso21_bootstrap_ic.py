@@ -106,7 +106,7 @@ def main():
           f"BalAcc {bal_pool:.3f} [{bal_lo:.3f}, {bal_hi:.3f}]")
 
     df = pd.DataFrame(filas)
-    df.to_csv(os.path.join(RAIZ, "LODO_IC_BOOTSTRAP.csv"), index=False)
+    df.to_csv(os.path.join(RAIZ, "resultados/recalibracion/LODO_IC_BOOTSTRAP.csv"), index=False)
 
     resumen = {
         "n_bootstrap": N_BOOT,
@@ -115,7 +115,7 @@ def main():
         "balacc_pooled":      float(bal_pool),
         "balacc_pooled_ic95": [float(bal_lo), float(bal_hi)],
     }
-    with open(os.path.join(RAIZ, "LODO_IC_BOOTSTRAP_RESUMEN.json"), "w") as fh:
+    with open(os.path.join(RAIZ, "resultados/recalibracion/LODO_IC_BOOTSTRAP_RESUMEN.json"), "w") as fh:
         json.dump(resumen, fh, indent=2)
 
     print("\nGuardado:")

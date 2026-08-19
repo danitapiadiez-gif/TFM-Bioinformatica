@@ -225,8 +225,8 @@ def main():
     print(firma[["d_Media", "d_Minima_Abs", "Direccion"]]
           .head(15).to_string())
 
-    res.to_csv(os.path.join(BASE_DIR, "SUBTIPO_LODO_RESULTADOS.csv"), index=False)
-    firma.to_csv(os.path.join(BASE_DIR, "SUBTIPO_FIRMA_REPLICADA.csv"))
+    res.to_csv(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_LODO_RESULTADOS.csv"), index=False)
+    firma.to_csv(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_FIRMA_REPLICADA.csv"))
 
     resumen = {
         "tarea": "ADC vs Escamoso (subtipo histologico)",
@@ -237,7 +237,7 @@ def main():
         "ganancia_media_vs_baseline": float(res["Ganancia_vs_Baseline"].mean()),
         "n_genes_firma_replicada": int(len(firma)),
     }
-    with open(os.path.join(BASE_DIR, "SUBTIPO_RESUMEN.json"), "w") as fh:
+    with open(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_RESUMEN.json"), "w") as fh:
         json.dump(resumen, fh, indent=2, ensure_ascii=False)
 
     print("\n" + "=" * 72)

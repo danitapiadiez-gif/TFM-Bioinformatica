@@ -922,7 +922,7 @@ y no artefacto técnico.</li>
             "Cohortes públicas de NCBI GEO que entran en el análisis del "
             "framework. Los criterios de inclusión son: presencia de casos "
             "y controles, curación clínica exitosa y alineamiento verificado.")
-    if (a := tabla("AUDITORIA_COHORTES.csv")) is not None:
+    if (a := tabla("resultados/auditoria/AUDITORIA_COHORTES.csv")) is not None:
         a = a.copy()
         a["N_Analizadas"] = a["N_Sano"] + a["N_Enfermo"]
         a_ev = a[a["Evaluable_Como_Test"]]
@@ -1017,8 +1017,8 @@ if st.session_state.capitulo == "resultados":
             "Ningún gen se selecciona por su nombre ni su función conocida: "
             "todo es data-driven.")
 
-    top60 = tabla("FIRMA_VALIDADA_TOP60.csv")
-    completa = tabla("FIRMA_VALIDADA_COMPLETA.csv")
+    top60 = tabla("resultados/firma_consenso/FIRMA_VALIDADA_TOP60.csv")
+    completa = tabla("resultados/firma_consenso/FIRMA_VALIDADA_COMPLETA.csv")
 
     if completa is not None:
         gen = st.text_input(
@@ -1106,7 +1106,7 @@ composición tisular. Es la validación externa más fuerte del trabajo.</p>
             "entrena en todas las cohortes menos una y se prueba en la "
             "restante, iterando sobre las cohortes evaluables.")
 
-    _aud_all = tabla("AUDITORIA_COHORTES.csv")
+    _aud_all = tabla("resultados/auditoria/AUDITORIA_COHORTES.csv")
     _n_tum = int(_aud_all["N_Enfermo"].sum()) if _aud_all is not None else 0
     _n_san = int(_aud_all["N_Sano"].sum()) if _aud_all is not None else 0
     st.markdown(f"""<div class="prosa">
@@ -1125,7 +1125,7 @@ bien las muestras, aunque el umbral de decisión requiere recalibrarse entre
 cohortes. Es un problema técnico corregible, no una limitación intrínseca.</p>
 </div>""", unsafe_allow_html=True)
 
-    if (d := tabla("LODO_HONESTO_RESULTADOS.csv")) is not None:
+    if (d := tabla("resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv")) is not None:
         d_ev = d[d["Evaluable"]]
         with st.expander(f"Rendimiento por cohorte (LODO, {len(d_ev)} evaluables)"):
             st.dataframe(
@@ -1145,7 +1145,7 @@ cohortes. Es un problema técnico corregible, no una limitación intrínseca.</p
     # Cohorte con la correlacion mas fuerte (mas negativa): se lee del CSV
     # para no dejar cifras hardcodeadas que envejecen mal.
     coh_top = ""
-    if (c_comp := tabla("COMPOSICION_VS_BIOLOGIA.csv")) is not None:
+    if (c_comp := tabla("resultados/firma_consenso/COMPOSICION_VS_BIOLOGIA.csv")) is not None:
         c_ok = c_comp.dropna(subset=["Rho_SOLO_TUMORES_vs_PulmonNormal"])
         if not c_ok.empty:
             fila = c_ok.loc[c_ok["Rho_SOLO_TUMORES_vs_PulmonNormal"].idxmin()]

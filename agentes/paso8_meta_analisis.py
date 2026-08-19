@@ -59,7 +59,7 @@ def ejecutar_meta_analisis():
     # Unir con la matriz de LogFC para el CSV final
     resultado_final = ganadores.join(matriz_logfc)
     
-    ruta_final = os.path.join(base_path, "BIOMARCADORES_UNIVERSALES_CANCER_PULMON.csv")
+    ruta_final = os.path.join(base_path, "resultados/firma_consenso/BIOMARCADORES_UNIVERSALES_CANCER_PULMON.csv")
     resultado_final.to_csv(ruta_final)
     
     print(f" Meta-análisis completado. Ganadores: {len(ganadores)} genes consistentes.")

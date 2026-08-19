@@ -1,0 +1,42 @@
+{
+  "plataforma_train": "microarray Affymetrix GPL570 (3 cohortes)",
+  "plataforma_test": "TCGA RNA-Seq (RSEM normalized)",
+  "n_luad": 230,
+  "n_lusc": 178,
+  "n_muestras_train": 388,
+  "n_genes_panel": 20,
+  "n_genes_disponibles": 20,
+  "n_genes_usados_lasso": 20,
+  "auc_score_simple": 0.7944308744504153,
+  "auc_score_simple_ic95": [
+    0.7453104276191657,
+    0.8411117244887693
+  ],
+  "auc_lasso_transferido": 0.8566927210552028,
+  "auc_lasso_ic95": [
+    0.8115961722460775,
+    0.8988400447428688
+  ],
+  "panel_genes": [
+    "DSG3",
+    "KRT5",
+    "CALML3",
+    "KRT6B",
+    "PKP1",
+    "FAT2",
+    "DAPL1",
+    "TRIM29",
+    "CLCA2",
+    "DSC3",
+    "S1PR5",
+    "KRT6A",
+    "KRT13",
+    "SERPINB5",
+    "TP63",
+    "GJB5",
+    "KRT16",
+    "BNC1",
+    "CERS3",
+    "TMEM40"
+  ]
+}

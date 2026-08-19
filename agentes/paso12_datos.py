@@ -26,7 +26,7 @@ def tabla(nombre):
 def metricas():
     """Cifras de cabecera, leidas de los CSV de los pasos 13-18."""
     m = {}
-    if (d := tabla("LODO_HONESTO_RESULTADOS.csv")) is not None:
+    if (d := tabla("resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv")) is not None:
         ev = d[d["Evaluable"]]
         m |= {
             "n_cohortes": len(d), "n_ev": len(ev),
@@ -39,7 +39,7 @@ def metricas():
             "no_superan": int((~ev["Supera_Baseline"]).sum()),
             "acc_11": d["Accuracy"].mean(),
         }
-    if (a := tabla("AUDITORIA_COHORTES.csv")) is not None:
+    if (a := tabla("resultados/auditoria/AUDITORIA_COHORTES.csv")) is not None:
         # "Analizadas" = solo las que el LLM logro etiquetar (sano + enfermo).
         # "Total descargadas" (n_muestras) se mantiene por si algo lo usa.
         a = a.copy()
@@ -53,20 +53,20 @@ def metricas():
             "desal": int(a["N_Muestras_Desalineadas"].fillna(0).sum()),
             "n_mono": int((~a["Evaluable_Como_Test"]).sum()),
         }
-    if (s := tabla("SUBTIPO_LODO_RESULTADOS.csv")) is not None:
+    if (s := tabla("resultados/subtipo/SUBTIPO_LODO_RESULTADOS.csv")) is not None:
         m |= {"auc_sub": s["AUC"].mean(),
               "bal_sub": s["Balanced_Accuracy"].mean(),
               "n_sub": int(s["n_test"].sum())}
-    if (c := tabla("COMPOSICION_VS_BIOLOGIA.csv")) is not None:
+    if (c := tabla("resultados/firma_consenso/COMPOSICION_VS_BIOLOGIA.csv")) is not None:
         v = c["Rho_SOLO_TUMORES_vs_PulmonNormal"].dropna()
         m |= {"rho": v.mean(), "n_rho": len(v),
               "rho_max": v.min(), "n_rho_sup": int((v.abs() > 0.7).sum())}
-    if (f := tabla("FALACIA_FOLDS_COMPARACION.csv")) is not None:
+    if (f := tabla("resultados/auditoria/FALACIA_FOLDS_COMPARACION.csv")) is not None:
         m |= {"conc_lodo": f.iloc[0]["concordancia_pareja_media"] * 100,
               "conc_disj": f.iloc[1]["concordancia_pareja_media"] * 100,
               "genes_folds": int(f.iloc[0]["genes_acuerdo_signo_perfecto"]),
               "genes_disj": int(f.iloc[1]["genes_acuerdo_signo_perfecto"])}
-    if (h := tabla("SUBTIPO_CASOS_DIFICILES.csv")) is not None:
+    if (h := tabla("resultados/subtipo/SUBTIPO_CASOS_DIFICILES.csv")) is not None:
         m |= {"pct_conf": 100 * h["N_Alta_Confianza"].sum() / h["n"].sum()}
     return m
 
@@ -82,12 +82,12 @@ def resumen_firma():
     el valor correcto (fila N_Genes == n_genes_validados). Asi la UI
     muestra la cifra correcta sin necesidad de regenerar el JSON.
     """
-    ruta = os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")
+    ruta = os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_VALIDADA_RESUMEN.json")
     if not os.path.exists(ruta):
         return None
     with open(ruta) as fh:
         rf = json.load(fh)
-    curva = tabla("PANEL_MINIMO_CURVA.csv")
+    curva = tabla("resultados/firma_consenso/PANEL_MINIMO_CURVA.csv")
     if curva is not None and "auc_curva_maxima" not in rf:
         n_val = rf.get("n_genes_validados")
         fila = curva[curva["N_Genes"] == n_val]

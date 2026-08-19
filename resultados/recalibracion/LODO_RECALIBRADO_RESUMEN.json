@@ -1,0 +1,22 @@
+{
+  "isotonica": {
+    "auc_ref_media": 0.9251625,
+    "auc_cal_media": 0.952775,
+    "balacc_ref_media": 0.7721875,
+    "balacc_cal_media": 0.8100125,
+    "sens_cal_media": 0.9884,
+    "espec_cal_media": 0.631625,
+    "ganancia_balacc": 0.0378375,
+    "n_cohortes": 8
+  },
+  "platt": {
+    "auc_ref_media": 0.9251625,
+    "auc_cal_media": 0.9504,
+    "balacc_ref_media": 0.7721875,
+    "balacc_cal_media": 0.638625,
+    "sens_cal_media": 0.9922625,
+    "espec_cal_media": 0.285025,
+    "ganancia_balacc": -0.13356250000000003,
+    "n_cohortes": 8
+  }
+}

@@ -189,7 +189,7 @@ def main():
         "auc_lasso_ic95":        [float(lo_l), float(hi_l)],
         "panel_genes":           genes_ok,
     }
-    with open(os.path.join(RAIZ, "VALIDACION_TCGA_RESUMEN.json"), "w") as fh:
+    with open(os.path.join(RAIZ, "resultados/tcga/VALIDACION_TCGA_RESUMEN.json"), "w") as fh:
         json.dump(resumen, fh, indent=2, ensure_ascii=False)
 
     # Detalle por muestra
@@ -197,7 +197,7 @@ def main():
     out["subtipo_txt"]  = out["subtipo"].map({0: "LUAD", 1: "LUSC"})
     out["score_simple"] = score_simple
     out["score_lasso"]  = score_lasso
-    out.to_csv(os.path.join(RAIZ, "VALIDACION_TCGA_MUESTRAS.csv"), index=False)
+    out.to_csv(os.path.join(RAIZ, "resultados/tcga/VALIDACION_TCGA_MUESTRAS.csv"), index=False)
 
     print("\nGuardado:")
     print("  VALIDACION_TCGA_RESUMEN.json")

@@ -16,9 +16,9 @@ def generar_consenso_tfm():
     
     # Rutas de archivos
     desktop = _RAIZ
-    ruta_est = os.path.join(desktop, "BIOMARCADORES_UNIVERSALES_CANCER_PULMON.csv")
-    ruta_ml = os.path.join(desktop, "BIOMARCADORES_DE_ORO_CONSENSO.csv")
-    ruta_salida = os.path.join(desktop, "FIRMA_CONSENSO_FINAL_TFM.csv")
+    ruta_est = os.path.join(desktop, "resultados/firma_consenso/BIOMARCADORES_UNIVERSALES_CANCER_PULMON.csv")
+    ruta_ml = os.path.join(desktop, "resultados/firma_consenso/BIOMARCADORES_DE_ORO_CONSENSO.csv")
+    ruta_salida = os.path.join(desktop, "resultados/firma_consenso/FIRMA_CONSENSO_FINAL_TFM.csv")
     
     if not os.path.exists(ruta_est) or not os.path.exists(ruta_ml):
         print("Error: No se encuentran los archivos CSV en el escritorio.")

@@ -62,7 +62,7 @@ def main():
               f"vs baseline={r['Baseline_Mayoritaria']:.3f} "
               f"({r['Ganancia_vs_Baseline']:+.3f})")
 
-    tabla.to_csv(os.path.join(RAIZ, "LODO_HONESTO_RESULTADOS.csv"), index=False)
+    tabla.to_csv(os.path.join(RAIZ, "resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv"), index=False)
 
     print("\n" + "=" * 78)
     print("CONTRASTE CON LO REPORTADO EN LA MEMORIA PREVIA")

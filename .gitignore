@@ -8,13 +8,22 @@ __pycache__/
 venv/
 .venv/
 
-# Datos y Resultados (Demasiado pesados para GitHub)
+# Datos crudos (demasiado pesados para GitHub)
 TFM_GSE*
 *.soft.gz
-*.csv
-*.png
-*.html
+
+# Resultados intermedios en la raiz: no se trackean
+/*.csv
+/*.json
+/*.png
+/*.html
 SINTESIS_MOLECULAR.json
+
+# Excepcion: los ficheros bajo resultados/ SI se trackean (utiles
+# para reproducibilidad y para que el tribunal pueda auditar sin
+# ejecutar el pipeline). Se puede excluir en el futuro si pesan
+# demasiado descomentando la linea siguiente:
+# resultados/
 
 # Sistema
 .DS_Store
@@ -32,7 +41,10 @@ SINTESIS_MOLECULAR.json
 *.log
 *.out
 *.toc
+*.lof
+*.lot
+*.bbl
+*.blg
 *.fls
 *.fdb_latexmk
 *.synctex.gz
-*.json

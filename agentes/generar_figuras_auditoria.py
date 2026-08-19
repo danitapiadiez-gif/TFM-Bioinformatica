@@ -66,7 +66,7 @@ def fig_curacion_llm():
     secuencial de un solo tono (magnitud), y el rojo marca el estado de fallo,
     siempre acompanado de etiqueta directa.
     """
-    aud = pd.read_csv(os.path.join(BASE_DIR, "AUDITORIA_COHORTES.csv"))
+    aud = pd.read_csv(os.path.join(BASE_DIR, "resultados/auditoria/AUDITORIA_COHORTES.csv"))
     aud = aud.sort_values("Tasa_Exito_Curacion")
     t = aud["Tasa_Exito_Curacion"].values * 100
 
@@ -111,7 +111,7 @@ def fig_lodo_vs_baseline():
     La oposicion "supera / no supera" usa la pareja divergente azul-rojo, nunca
     verde-rojo. El gris queda reservado a "no evaluable", que no es una serie.
     """
-    r = pd.read_csv(os.path.join(BASE_DIR, "LODO_HONESTO_RESULTADOS.csv"))
+    r = pd.read_csv(os.path.join(BASE_DIR, "resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv"))
     r = r.sort_values(["Evaluable", "Ganancia_vs_Baseline"],
                       ascending=[False, False]).reset_index(drop=True)
     x = np.arange(len(r))
@@ -157,7 +157,7 @@ def fig_auc_vs_balacc():
     El area de cada punto codifica el tamano de la cohorte; la diagonal es la
     referencia de "decision perfectamente calibrada".
     """
-    r = pd.read_csv(os.path.join(BASE_DIR, "LODO_HONESTO_RESULTADOS.csv"))
+    r = pd.read_csv(os.path.join(BASE_DIR, "resultados/tumor_vs_sano/LODO_HONESTO_RESULTADOS.csv"))
     r = r[r["Evaluable"]].copy()
 
     fig, ax = plt.subplots(figsize=(4.9, 4.5))
@@ -215,7 +215,7 @@ def fig_auc_vs_balacc():
 def fig_concordancia_folds():
     """Dos condiciones que solo difieren en el solapamiento: dos slots
     categoricos, con el valor etiquetado directamente en cada barra."""
-    c = pd.read_csv(os.path.join(BASE_DIR, "FALACIA_FOLDS_COMPARACION.csv"))
+    c = pd.read_csv(os.path.join(BASE_DIR, "resultados/auditoria/FALACIA_FOLDS_COMPARACION.csv"))
     v = c["concordancia_pareja_media"].values * 100
 
     fig, ax = plt.subplots(figsize=(4.7, 3.7))
@@ -248,8 +248,8 @@ def fig_concordancia_folds():
 def fig_composicion():
     """Multiplos pequenos, serie unica. La recta de ajuste va en ink
     secundario, no en un segundo color de serie."""
-    d = pd.read_csv(os.path.join(BASE_DIR, "COMPOSICION_SCORES_POR_MUESTRA.csv"))
-    res = pd.read_csv(os.path.join(BASE_DIR, "COMPOSICION_VS_BIOLOGIA.csv"))
+    d = pd.read_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/COMPOSICION_SCORES_POR_MUESTRA.csv"))
+    res = pd.read_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/COMPOSICION_VS_BIOLOGIA.csv"))
     ev = (res.dropna(subset=["Rho_SOLO_TUMORES_vs_PulmonNormal"])
           .sort_values("n_tumores", ascending=False))
 
@@ -286,7 +286,7 @@ def fig_composicion():
 def fig_neuroendocrinos():
     """Dos grupos: leyenda obligatoria (>= 2 series) ademas del eje, que ya
     nombra cada histologia."""
-    p = pd.read_csv(os.path.join(BASE_DIR, "SUBTIPO_PROBS_AMBIGUAS.csv"))
+    p = pd.read_csv(os.path.join(BASE_DIR, "resultados/subtipo/SUBTIPO_PROBS_AMBIGUAS.csv"))
     orden = (p.groupby("Histologia")["P_Escamoso"].agg(["median", "count"])
              .query("count >= 3").sort_values("median"))
     grupos = [p.loc[p["Histologia"] == h, "P_Escamoso"].values for h in orden.index]
@@ -340,8 +340,8 @@ def fig_panel_minimo():
     minimo entre cohortes. El minimo importa mas que la media: un panel util no
     puede depender de que la cohorte de destino sea la favorable.
     """
-    c = pd.read_csv(os.path.join(BASE_DIR, "PANEL_MINIMO_CURVA.csv"))
-    with open(os.path.join(BASE_DIR, "FIRMA_VALIDADA_RESUMEN.json")) as fh:
+    c = pd.read_csv(os.path.join(BASE_DIR, "resultados/firma_consenso/PANEL_MINIMO_CURVA.csv"))
+    with open(os.path.join(BASE_DIR, "resultados/firma_consenso/FIRMA_VALIDADA_RESUMEN.json")) as fh:
         res = json.load(fh)
     k = res["panel_minimo"]
 
