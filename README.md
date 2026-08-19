@@ -65,6 +65,14 @@ Los pasos se ejecutan como módulos Python independientes y depositan sus output
 ├── configuracion/
 │   └── tareas.yaml             # Tareas biológicas (subtipo, tumor/sano...)
 ├── .streamlit/                 # Configuración de la app
+├── resultados/                 # Outputs del pipeline (CSV / JSON)
+│   ├── auditoria/              #   controles de cohortes y auditoría LLM
+│   ├── subtipo/                #   firma y métricas ADC vs SQC
+│   ├── tumor_vs_sano/          #   firma y métricas tumor vs sano
+│   ├── firma_consenso/         #   firma consenso final + panel IHC
+│   ├── recalibracion/          #   recalibración isotónica + IC bootstrap
+│   ├── comparativa_ml/         #   LASSO vs RF vs SVM
+│   └── tcga/                   #   validación externa TCGA RNA-Seq
 ├── memoria/                    # Fuente LaTeX de la memoria del TFM
 │   ├── main.tex + main.pdf     #   100 páginas, PDF final
 │   ├── capitulos/              #   8 capítulos + 7 anexos
