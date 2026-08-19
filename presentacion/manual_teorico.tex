@@ -1,0 +1,1419 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage{amssymb, amsmath}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{needspace}
+\usepackage{booktabs}
+\usepackage{array}
+
+% ---- Paleta ----
+\definecolor{verdeTerm}{HTML}{1C8A3F}
+\definecolor{verdeOsc}{HTML}{146A2F}
+\definecolor{tinta}{HTML}{0B0B0B}
+\definecolor{tinta2}{HTML}{4A4948}
+\definecolor{mute}{HTML}{8F8D87}
+\definecolor{plano}{HTML}{F7F4EB}
+\definecolor{planoOsc}{HTML}{EFEBDD}
+\definecolor{linea}{HTML}{DAD6C8}
+\definecolor{ambar}{HTML}{C78A1E}
+\definecolor{rojoSoft}{HTML}{B23A48}
+
+\hypersetup{
+  colorlinks=true, linkcolor=verdeTerm, urlcolor=verdeTerm,
+  pdftitle={Manual teorico - Defensa TFM data.lung},
+  pdfauthor={Daniel Tapia Diez}
+}
+
+\titleformat{\section}
+  {\Large\bfseries\color{tinta}}
+  {\thesection}{0.5em}{}
+  [\vspace{-0.4em}{\color{verdeTerm}\rule{2.5cm}{2pt}}]
+
+\titleformat{\subsection}
+  {\large\bfseries\color{verdeOsc}}
+  {\thesubsection}{0.5em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{tinta}}
+  {\thesubsubsection}{0.5em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\ttfamily\color{verdeTerm}\textbf{>}\color{tinta2}\ data\textcolor{verdeTerm}{.}lung}
+\fancyhead[R]{\small\color{tinta2}Manual te\'orico $\cdot$ defensa TFM}
+\fancyfoot[C]{\small\color{mute}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+\setlength{\headheight}{15pt}
+
+\newtcolorbox{concepto}[1]{
+  enhanced, breakable,
+  colback=plano, colframe=verdeTerm,
+  boxrule=1pt, arc=3pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt,
+  title={\bfseries\color{white}#1},
+  colbacktitle=verdeTerm,
+  attach boxed title to top left={xshift=6pt, yshift=-6pt},
+  boxed title style={colback=verdeTerm, sharp corners, boxrule=0pt}
+}
+\newtcolorbox{peligro}{enhanced, breakable,
+  colback=planoOsc, colframe=rojoSoft,
+  boxrule=0.9pt, arc=2pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt}
+\newtcolorbox{tipbox}{enhanced, breakable,
+  colback=planoOsc, colframe=ambar,
+  boxrule=0.8pt, arc=2pt,
+  left=8pt, right=8pt, top=5pt, bottom=5pt}
+\newtcolorbox{formula}{enhanced, breakable,
+  colback=white, colframe=linea,
+  boxrule=0.6pt, arc=2pt,
+  left=8pt, right=8pt, top=6pt, bottom=6pt}
+
+\newcommand{\gene}[1]{\textit{#1}}
+\newcommand{\slidebadge}[1]{{\colorbox{verdeTerm}{\color{white}\bfseries\;#1\;}}}
+
+\begin{document}
+
+% =================== PORTADA =========================
+\thispagestyle{empty}
+\vspace*{1.5cm}
+\begin{center}
+  {\ttfamily\fontsize{44pt}{44pt}\selectfont\bfseries
+   data\textcolor{verdeTerm}{.}lung}\\[0.2cm]
+  {\itshape\normalsize\color{tinta2}Del dataset a una firma g\'enica replicable}\\[0.8cm]
+
+  \textcolor{verdeTerm}{\rule{3cm}{2pt}}\\[0.6cm]
+
+  {\LARGE\bfseries Manual te\'orico}\\[0.3cm]
+  {\large\color{tinta2}Todo lo que necesitas saber\\para defenderte de cualquier pregunta}\\[1.5cm]
+
+  \begin{tabular}{rl}
+    \color{mute}\textbf{Autor}      & Daniel Tapia D\'iez \\
+    \color{mute}\textbf{Universidad}& UAX $\cdot$ M\'aster en Bioinform\'atica \\
+    \color{mute}\textbf{Defensa}    & 14 de agosto de 2026 \\
+  \end{tabular}\\[2cm]
+
+  \begin{tcolorbox}[colback=plano, colframe=verdeTerm, width=0.85\textwidth,
+                    arc=3pt, boxrule=1pt]
+    \small\itshape
+    Este documento cubre los fundamentos te\'oricos de biolog\'ia,
+    tecnolog\'ia, estad\'istica, aprendizaje autom\'atico y modelos de
+    lenguaje que soportan el TFM. Se organiza en 12 partes tem\'aticas,
+    cada una autocontenida. \'Usalo como referencia r\'apida ante
+    cualquier pregunta del tribunal.
+  \end{tcolorbox}
+\end{center}
+\newpage
+
+\tableofcontents
+\newpage
+
+% ========================================================
+\section{C\'ancer de pulm\'on: contexto cl\'inico}
+
+\subsection{Epidemiolog\'ia}
+
+El c\'ancer de pulm\'on es la primera causa de muerte por c\'ancer en el
+mundo. En 2022 se diagnosticaron $\approx 2{,}48$ millones de casos
+(GLOBOCAN, IARC) con $\approx 1{,}82$ millones de fallecimientos anuales
+atribuibles a la enfermedad. La supervivencia global a 5 a\~nos apenas
+supera el 20\,\%, muy por debajo de otros tumores s\'olidos (mama
+$\approx 90\,\%$, pr\'ostata $\approx 98\,\%$, colon $\approx 65\,\%$).
+
+Factores de riesgo principales: tabaco (85\,\% de los casos), exposici\'on
+a rad\'on, amianto, contaminaci\'on atmosf\'erica, historia familiar y
+alteraciones gen\'eticas hereditarias (aunque el componente hereditario
+es minoritario). En no fumadores, especialmente en mujeres asi\'aticas,
+predominan mutaciones activadoras en EGFR y ALK.
+
+\subsection{Clasificaci\'on histol\'ogica}
+
+El c\'ancer de pulm\'on se divide en dos grandes grupos:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{C\'ancer de pulm\'on de c\'elulas peque\~nas} (SCLC,
+  \emph{Small Cell Lung Cancer}). Aproximadamente el 15\,\% de los casos.
+  Muy agresivo, altamente asociado al tabaco, con tratamiento
+  quimioter\'apico distinto y peor pron\'ostico.
+  \item \textbf{C\'ancer de pulm\'on no microc\'itico} (NSCLC,
+  \emph{Non-Small Cell Lung Cancer}). El 85\,\% restante. Se subdivide en:
+  \begin{itemize}
+    \item \textbf{Adenocarcinoma (ADC)}: 40--50\,\% de los NSCLC. Origen
+    glandular. Aparece en la periferia del pulm\'on. M\'as com\'un en no
+    fumadores y en mujeres. Marcadores IHC: TTF-1/NKX2-1, napsina A.
+    \item \textbf{Carcinoma escamoso (SQC, LUSC)}: 25--30\,\%. Origen en
+    el epitelio bronquial. M\'as central. Fuerte asociaci\'on con el
+    tabaco. Marcadores IHC: p40 (isoforma TP63), CK5/6, DSG3.
+    \item \textbf{Carcinoma de c\'elulas grandes}: pooco frecuente,
+    diagn\'ostico de exclusi\'on.
+    \item \textbf{Tumores neuroendocrinos}: carcinoide t\'ipico y
+    at\'ipico. Perfil transcript\'omico muy distinto.
+  \end{itemize}
+\end{itemize}
+
+\begin{concepto}{Por qu\'e distinguir ADC de SQC es cr\'itico}
+El pemetrexed (antifolato) est\'a contraindicado en escamoso porque no
+funciona con el mismo mecanismo bioqu\'imico. El bevacizumab
+(antiangiog\'enico anti-VEGF) est\'a contraindicado en escamoso por
+\textbf{riesgo de hemorragia pulmonar mortal}. Diagnosticar
+err\'oneamente un escamoso como adenocarcinoma puede matar al paciente
+en las primeras semanas de tratamiento. Por eso todo el pipeline se
+centra en esta separaci\'on binaria.
+\end{concepto}
+
+\subsection{Diagn\'ostico cl\'inico actual}
+
+El est\'andar cl\'inico es la biopsia con estudio anatomopatol\'ogico e
+inmunohistoqu\'imica (IHC). La OMS publica desde 2015 un panel de
+marcadores recomendados (Travis et al., 2015):
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Escamoso}: KRT5, KRT6A, KRT6B, KRT13, KRT14, KRT15, KRT16,
+  KRT17, CDH3, DSG3, PKP1, TP63 (12 marcadores).
+  \item \textbf{Adenocarcinoma}: NKX2-1 (TTF-1), NAPSA (napsina A), SFTPB,
+  SFTPC, SFTPA1, SFTPA2, MUC1, CEACAM5, CEACAM6, KRT7 (8-10 marcadores).
+\end{itemize}
+
+Estos marcadores se detectan mediante anticuerpos con revelado
+crom\'ogeno. El pat\'ologo mira al microscopio la muestra te\~nida y
+determina el subtipo bas\'andose en el patr\'on de tinci\'on.
+
+\subsection{Estadificaci\'on TNM}
+
+Sistema TNM (\emph{Tumor, Nodes, Metastasis}) de la AJCC. T describe
+tama\~no e invasi\'on local, N el compromiso ganglionar, M la presencia
+de met\'astasis a distancia. Estadios I--IV. En este TFM las cohortes
+mezclan estadios variables y se trabaja sobre la clasificaci\'on
+histol\'ogica, no la TNM.
+
+% ========================================================
+\section{Biolog\'ia molecular esencial}
+
+\subsection{ADN, ARN, prote\'ina}
+
+El \textbf{dogma central de la biolog\'ia molecular} (Crick, 1958)
+establece el flujo de informaci\'on:
+
+\[ \text{ADN} \xrightarrow{\text{transcripci\'on}} \text{ARN}
+   \xrightarrow{\text{traducci\'on}} \text{prote\'ina} \]
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{ADN} (\'acido desoxirribonucleico): mol\'ecula que
+  contiene el genoma. Doble h\'elice de nucle\'otidos. En humanos, ${\sim}3$
+  mil millones de pares de bases y ${\sim}20\,000$ genes codificantes de
+  prote\'ina.
+  \item \textbf{Gen}: fragmento de ADN que codifica una prote\'ina o una
+  funci\'on reguladora (por ejemplo un ARN no codificante).
+  \item \textbf{ARN mensajero (mRNA)}: copia de un gen transcrito, que
+  sale del n\'ucleo hacia el citoplasma para ser traducido a prote\'ina.
+  \item \textbf{Prote\'ina}: producto funcional. Ejecuta la mayor parte
+  de las funciones celulares (estructural, cataltica, se\~nalizaci\'on).
+\end{itemize}
+
+\subsection{Expresi\'on g\'enica y transcriptoma}
+
+Aunque todas las c\'elulas de un individuo comparten el mismo ADN, no
+transcriben los mismos genes al mismo tiempo. La c\'elula \emph{expresa}
+un gen cuando lo transcribe activamente a mRNA. El conjunto de todos los
+mRNAs presentes en una muestra biol\'ogica en un momento dado se llama
+\textbf{transcriptoma}. Es un retrato din\'amico del estado funcional de
+la c\'elula.
+
+Medir el transcriptoma equivale a medir cu\'antas copias de mRNA hay de
+cada gen. Los valores se expresan t\'ipicamente en escala logar\'itmica
+($\log_2$) porque abarcan varios \'ordenes de magnitud y porque en escala
+log las diferencias biol\'ogicas se aproximan a una distribuci\'on
+gaussiana.
+
+\begin{concepto}{Qu\'e ``mide'' realmente el transcriptoma}
+No mide directamente actividad celular. Mide \textbf{abundancia relativa
+de mRNA}. Hay una correlaci\'on razonable entre nivel de mRNA y nivel de
+prote\'ina, pero no perfecta: los mRNAs pueden estar retenidos, no
+traducirse, o las prote\'inas pueden ser muy estables o degradarse
+r\'apidamente. En el TFM asumimos --- como toda la literatura de firmas
+g\'enicas --- que las diferencias sostenidas de mRNA reflejan cambios
+funcionales relevantes.
+\end{concepto}
+
+\subsection{S\'imbolos g\'enicos oficiales}
+
+Cada gen humano tiene un s\'imbolo oficial asignado por HGNC (\emph{HUGO
+Gene Nomenclature Committee}). Ejemplos: \gene{TP53}, \gene{EGFR},
+\gene{KRT5}, \gene{DSG3}. Los s\'imbolos evolucionan con el tiempo (algunos
+se renombran); las bases de datos de expresi\'on usan la versi\'on
+vigente en el momento en que el fabricante del chip anot\'o las sondas.
+
+% ========================================================
+\section{Tecnolog\'ias de medici\'on de expresi\'on}
+
+\subsection{Microarrays}
+
+Un microarray es un chip de vidrio del tama\~no de una diapositiva con
+decenas de miles de \textbf{sondas} de ADN adheridas en posiciones
+conocidas. Cada sonda es una secuencia de $\sim$25 nucle\'otidos
+complementaria a un fragmento de un mRNA espec\'ifico. Al hibridar una
+muestra biol\'ogica marcada con fluorescencia:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item Se extrae ARN total de la muestra.
+  \item Se retrotranscribe a cDNA con fluoref\'oros.
+  \item Se hibrida sobre el chip: los cDNAs se unen a sus sondas
+  complementarias.
+  \item Se escanea la fluorescencia: cada punto brilla proporcionalmente
+  a la cantidad de cDNA que se uni\'o.
+\end{enumerate}
+
+Plataforma m\'as com\'un en el TFM: \textbf{Affymetrix HG-U133 Plus 2.0}
+(identificador GEO \texttt{GPL570}), $\sim$54\,675 sondas para ${\sim}20\,000$
+genes. Redundancia (varias sondas por gen) para robustez estad\'istica.
+
+\subsubsection*{Ventajas y limitaciones}
+Ventajas: barato, r\'apido, gran base hist\'orica de datos.
+Limitaciones: rango din\'amico comprimido, dif\'icil detectar
+transcritos nuevos, sesgo por secuencia de sonda.
+
+\subsection{RNA-Seq}
+
+\textbf{RNA-Seq} secuencia directamente el mRNA:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item Se extrae mRNA y se fragmenta.
+  \item Se retrotranscribe a cDNA.
+  \item Se secuencian los fragmentos generando \emph{reads} de $\sim$100
+  bases (Illumina).
+  \item Cada read se alinea al genoma o transcriptoma de referencia.
+  \item Se cuentan reads por gen (o por transcrito).
+\end{enumerate}
+
+Ventajas: alto rango din\'amico, detecta variantes nuevas, cuantitativo.
+Limitaciones: coste (aunque cayendo), requerimientos computacionales.
+
+\textbf{Unidades t\'ipicas}:
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Raw counts}: n\'umero de reads por gen.
+  \item \textbf{TPM} (\emph{Transcripts Per Million}): normaliza por longitud del gen y por profundidad de secuenciaci\'on.
+  \item \textbf{FPKM} (\emph{Fragments Per Kilobase per Million}): similar, para paired-end.
+  \item \textbf{RSEM}: estimador estad\'istico que reparte reads que mapean ambiguamente. Usado por TCGA.
+\end{itemize}
+
+En el TFM: entrenamos en microarray, validamos en RNA-Seq (TCGA con RSEM).
+Que un panel funcione en ambas plataformas es evidencia de que la se\~nal
+es \textbf{biol\'ogica y no artefactual}.
+
+% ========================================================
+\section{GEO, TCGA y datos p\'ublicos}
+
+\subsection{Gene Expression Omnibus (GEO)}
+
+Repositorio del NCBI (EE.\ UU.) que aloja m\'as de 200\,000 estudios de
+expresi\'on g\'enica desde el a\~no 2000. Terminolog\'ia:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{GSE} (\emph{Gene Series}): un estudio completo, ejemplo
+  \texttt{GSE31210}.
+  \item \textbf{GSM} (\emph{Gene Sample}): una muestra individual dentro
+  de un estudio.
+  \item \textbf{GPL} (\emph{Gene Platform}): la plataforma tecnol\'ogica
+  usada (chip Affymetrix, etc.). Cada GPL trae su tabla de anotaci\'on
+  con la correspondencia sonda $\to$ gen.
+\end{itemize}
+
+Los metadatos cl\'inicos en GEO est\'an en \textbf{texto libre} sin
+estructura est\'andar. Cada laboratorio los redacta como quiere: en
+\texttt{characteristics\_ch1} puede aparecer ``\emph{primary lung tumor,
+LUSC, stage III}'' o ``\emph{sample from patient with squamous cell
+carcinoma}''. Automatizar la clasificaci\'on requiere leer y entender
+lenguaje natural: por eso el TFM usa un LLM.
+
+\subsection{The Cancer Genome Atlas (TCGA)}
+
+Gran consorcio del NIH americano que caracteriz\'o molecularmente ${\sim}11\,000$
+tumores humanos entre 2006 y 2018. Para pulm\'on hay dos proyectos:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{TCGA-LUAD}: $\sim$517 adenocarcinomas con expresi\'on
+  RNA-Seq, mutaciones, metilaci\'on, cl\'inicos.
+  \item \textbf{TCGA-LUSC}: $\sim$504 escamosos, misma caracterizaci\'on.
+\end{itemize}
+
+En el TFM se usan 230 LUAD + 178 LUSC = 408 muestras a trav\'es de la
+\textbf{API REST de cBioPortal}, que sirve datos TCGA ya limpios y
+homogeneizados. La transferencia del panel LASSO entrenado en microarray
+a TCGA RNA-Seq da AUC = 0,857 con IC 95\,\% [0,812; 0,899].
+
+% ========================================================
+\section{Preprocesado de expresi\'on: normalizaci\'on}
+
+Antes de cualquier an\'alisis estad\'istico hay tres transformaciones
+est\'andar sobre matrices de expresi\'on.
+
+\subsection{Transformaci\'on logar\'itmica}
+
+Las intensidades de sonda de microarray abarcan varios \'ordenes de
+magnitud (10 a 65\,000 en escala cruda). Aplicamos $x' = \log_2(x+1)$:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item Aproxima las distribuciones a gaussianas (requisito de tests
+  param\'etricos).
+  \item Convierte diferencias multiplicativas en aditivas: una diferencia
+  de $2 \times$ en escala cruda equivale a $+1$ en escala $\log_2$.
+  \item El ``+1'' evita $\log_2(0) = -\infty$.
+\end{itemize}
+
+En RNA-Seq (counts), el est\'andar equivalente es $\log_2(TPM+1)$ o
+transformaciones variance-stabilizing (VST, DESeq2).
+
+\subsection{Normalizaci\'on por cuantiles}
+
+Iguala las distribuciones de intensidad entre muestras. Algoritmo:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item Ordenar cada muestra de menor a mayor intensidad.
+  \item Reemplazar cada valor por la media de esa posici\'on entre todas
+  las muestras.
+  \item Devolver los valores a la posici\'on original de cada muestra.
+\end{enumerate}
+
+Resultado: todas las muestras tienen exactamente la misma distribuci\'on
+(mismo quantil, misma media, misma mediana). Asume que la distribuci\'on
+\emph{global} de expresi\'on es comparable entre muestras --- razonable
+cuando la mayor\'ia de genes no cambia entre condiciones.
+
+Alternativas: RMA (Robust Multi-array Average, espec\'ifica de
+Affymetrix), MAS5, VSN. En el TFM usamos $\log_2$ + cuantiles por su
+simplicidad y aceptaci\'on hist\'orica.
+
+\subsection{Por qu\'e normalizar dentro de cada estudio y no entre estudios}
+
+Normalizar por cuantiles \emph{entre estudios} es una forma implicita de
+correcci\'on de lote: fuerza a que las cohortes tengan la misma
+distribuci\'on, borrando diferencias t\'ecnicas... y biol\'ogicas. Si
+una cohorte est\'a enriquecida en tumores agresivos, cuantilar contra
+otra menos agresiva puede borrar la se\~nal. Por eso normalizamos
+\emph{dentro} de cada cohorte y confiamos en la exigencia del consenso
+multi-cohorte para descartar artefactos.
+
+% ========================================================
+\section{Estad\'istica para expresi\'on g\'enica}
+
+\subsection{Pruebas de hip\'otesis: Welch, Mann-Whitney}
+
+Comparar la expresi\'on media de un gen entre dos grupos (tumor vs sano):
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{t de Student} asume varianzas iguales y normalidad. Poco
+  robusto.
+  \item \textbf{t de Welch}: modificaci\'on que no asume varianzas
+  iguales. Es el est\'andar en expresi\'on g\'enica log-transformada.
+  Usado en el paso 5 del pipeline.
+  \item \textbf{Mann-Whitney U}: alternativa no param\'etrica. \'Util
+  cuando la distribuci\'on es muy asim\'etrica.
+\end{itemize}
+
+\begin{formula}
+\textbf{Estad\'istico $t$ de Welch}:
+\[ t = \frac{\bar{x}_1 - \bar{x}_2}{\sqrt{\dfrac{s_1^2}{n_1} + \dfrac{s_2^2}{n_2}}} \]
+
+Los grados de libertad se calculan con la aproximaci\'on de
+Welch-Satterthwaite:
+\[ \nu \approx \frac{\left(\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}\right)^2}{\dfrac{(s_1^2/n_1)^2}{n_1-1} + \dfrac{(s_2^2/n_2)^2}{n_2-1}} \]
+\end{formula}
+
+\textbf{Cu\'ando cada uno}:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item Con $n_i \geq 30$ por grupo y datos log-transformados: t de Welch
+  robusto.
+  \item Con $n_i < 20$ o distribuciones muy sesgadas: Mann-Whitney U
+  m\'as conservador.
+  \item Si se detecta bimodalidad severa: pruebas espec\'ificas de mezcla
+  (ejemplo: modelos de mezcla gaussiana).
+\end{itemize}
+
+\begin{peligro}
+Nunca se debe seleccionar el test tras mirar los datos y ver cu\'al da
+mejor p-valor: eso es \emph{p-hacking}. El TFM prefija Welch como test
+principal para toda la matriz de expresi\'on, con FDR de Benjamini-Hochberg.
+\end{peligro}
+
+\subsubsection*{Supuestos, robustez y qu\'e pasa si se violan}
+
+Los supuestos de la $t$ de Welch son:
+\begin{enumerate}[leftmargin=1.4em]
+  \item Muestras independientes entre y dentro de grupos.
+  \item Distribuci\'on aproximadamente sim\'etrica (no necesariamente
+  gaussiana con $n$ grande, por el TLC).
+  \item Sin outliers extremos.
+\end{enumerate}
+
+Violaciones y consecuencias:
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Dependencia entre muestras} (ejemplo: r\'eplicas t\'ecnicas
+  del mismo paciente): inflan la significancia. Se soluciona con modelos
+  mixtos (\texttt{lmer}) o promediando r\'eplicas antes del test.
+  \item \textbf{Asimetr\'ia severa}: el t-test sigue siendo v\'alido con
+  $n \geq 30$ por grupo pero pierde potencia. Alternativa: Mann-Whitney.
+  \item \textbf{Outliers}: el t-test es sensible. En gen\'omica, un
+  outlier de expresi\'on suele ser artefacto t\'ecnico. La normalizaci\'on
+  por cuantiles y el $\log_2$ los reducen; queda como l\'imite conocido.
+\end{itemize}
+
+\subsection{Correcci\'on de m\'ultiples pruebas: FDR}
+
+Cuando se hacen 20\,000 tests (uno por gen), a $\alpha = 0{,}05$ se
+esperan 1\,000 falsos positivos por azar. Soluciones:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Bonferroni}: dividir $\alpha$ por el n\'umero de tests.
+  Muy conservador, elimina se\~nal real.
+  \item \textbf{Benjamini-Hochberg (BH-FDR)}: controla la
+  \emph{proporci\'on esperada de falsos positivos entre los rechazos}.
+  Menos conservador, est\'andar en gen\'omica. El TFM usa BH-FDR.
+\end{itemize}
+
+\begin{formula}
+El \emph{q-value} (FDR-adjusted) de un gen se calcula ordenando los
+p-valores de menor a mayor y multiplicando cada uno por $m/i$ (con $m$ =
+n\'umero total de tests, $i$ = posici\'on en el ranking). Un q-value $<
+0{,}05$ significa: ``en el conjunto de genes con q $< 0{,}05$, esperamos
+menos del 5\,\% de falsos positivos''.
+\end{formula}
+
+\subsubsection*{FWER vs FDR}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{FWER} (Family-Wise Error Rate): probabilidad de cometer
+  \emph{al menos un} falso positivo. Controlado por Bonferroni.
+  \item \textbf{FDR} (False Discovery Rate): proporci\'on \emph{esperada}
+  de falsos positivos entre los resultados declarados positivos.
+  Controlado por BH.
+\end{itemize}
+
+\textbf{Cu\'ando cada uno}:
+\begin{itemize}[leftmargin=1.2em]
+  \item FWER cuando el coste de un falso positivo es cr\'itico (ensayos
+  cl\'inicos regulatorios).
+  \item FDR cuando se generan hip\'otesis para investigaci\'on posterior
+  (an\'alisis exploratorio de expresi\'on). \textbf{Est\'andar en
+  gen\'omica}.
+\end{itemize}
+
+Otros m\'etodos: Holm-Bonferroni (secuencial FWER, m\'as potente que
+Bonferroni), Storey-Tibshirani $q$-value (versi\'on m\'as sofisticada
+de FDR con estimaci\'on de $\pi_0$).
+
+\subsection{Tama\~no de efecto: $d$ de Cohen}
+
+El p-valor solo dice ``la diferencia es estad\'isticamente significativa''.
+No dice si la diferencia es \textbf{importante}. La $d$ de Cohen mide
+el tama\~no de efecto en unidades de desviaci\'on t\'ipica:
+
+\begin{formula}
+\[ d = \frac{\bar{x}_{\text{grupo A}} - \bar{x}_{\text{grupo B}}}{s_{\text{pooled}}} \]
+donde $s_{\text{pooled}}$ es la desviaci\'on t\'ipica combinada.
+Convenciones: $|d| < 0{,}2$ trivial, $0{,}2$-$0{,}5$ peque\~no, $0{,}5$-$0{,}8$
+moderado, $> 0{,}8$ grande.
+\end{formula}
+
+En el TFM: un gen entra en la firma de consenso s\'olo si $|d| > 0{,}5$
+y con el mismo signo en las 3 cohortes independientes.
+
+\subsubsection*{Otras medidas de tama\~no de efecto}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Hedges $g$}: variante de Cohen $d$ corregida por sesgo
+  para muestras peque\~nas. Multiplica $d$ por $J = 1 - 3/(4(n_1+n_2)-9)$.
+  \item \textbf{Glass $\Delta$}: usa solo la desviaci\'on del grupo
+  control. \'Util cuando los grupos difieren mucho en dispersi\'on.
+  \item \textbf{Log$_2$ Fold Change (log2FC)}: est\'andar en RNA-Seq.
+  Simplemente la diferencia de medias en escala log. Equivalente al
+  numerador de $d$ pero sin estandarizar.
+\end{itemize}
+
+\begin{concepto}{Por qu\'e $d$ y no log2FC en el TFM}
+El log2FC es la cantidad ``biol\'ogica'' (magnitud del cambio) pero no
+tiene en cuenta la dispersi\'on. Dos genes pueden tener el mismo log2FC
+pero uno con dispersi\'on pequenya (efecto claro) y otro con dispersi\'on
+enorme (mero ruido). El $d$ de Cohen combina magnitud y dispersi\'on en
+un solo n\'umero, m\'as robusto para meta-an\'alisis por consenso.
+\end{concepto}
+
+\subsection{Correlaci\'on de Spearman ($\rho$)}
+
+Mide asociaci\'on mon\'otona entre dos variables ordinales:
+
+\[ \rho = 1 - \frac{6 \sum d_i^2}{n(n^2-1)} \]
+
+donde $d_i$ es la diferencia de rangos. Rango $[-1, +1]$. Diferencia
+crucial vs Pearson: Spearman no asume linealidad, solo monotonicidad.
+\'Util cuando las escalas no son directamente comparables.
+
+Uso en el TFM: correlacionar el score LASSO con marcadores de composici\'on
+alv\'eolo-capilar. $\rho = -0{,}626$ media (4 cohortes con muestra
+suficiente), hasta $\rho = -0{,}858$ en GSE31210 con $p = 1{,}1 \cdot 10^{-66}$.
+
+\subsubsection*{Spearman vs Pearson}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Pearson $r$}: asume relaci\'on \emph{lineal}. Sensible a
+  outliers. \'Util cuando las dos variables est\'an en escalas
+  comparables y la relaci\'on es lineal.
+  \item \textbf{Spearman $\rho$}: transforma a rangos y aplica Pearson
+  sobre rangos. Captura cualquier relaci\'on \emph{mon\'otona}, no s\'olo
+  lineal. Robusto frente a outliers. \textbf{Est\'andar en gen\'omica}.
+  \item \textbf{Kendall $\tau$}: alternativa a Spearman m\'as robusta,
+  computacionalmente m\'as cara.
+\end{itemize}
+
+\subsection{Intervalos de confianza y bootstrap}
+
+Un \textbf{IC 95\,\%} no significa ``hay 95\,\% de probabilidad de que el
+valor real est\'e en el intervalo''. Significa: ``si repiti\'eramos el
+experimento muchas veces, el 95\,\% de los intervalos resultantes
+contendr\'ian el valor verdadero''.
+
+\textbf{Bootstrap}: t\'ecnica de remuestreo para estimar la distribuci\'on
+de una m\'etrica sin asumir distribuci\'on te\'orica:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item Del conjunto original de $n$ muestras, se toma una muestra de
+  $n$ con reemplazo (bootstrap sample).
+  \item Se calcula la m\'etrica.
+  \item Se repite $B$ veces (t\'ipicamente $B = 1\,000$).
+  \item El IC 95\,\% son los percentiles 2,5 y 97,5 de esos $B$ valores.
+\end{enumerate}
+
+En el TFM: $B = 1\,000$ bootstraps sobre las predicciones LODO. AUC
+pooled = 0,943 con IC 95\,\% [0,925; 0,959]. En TCGA: AUC 0,857 con IC
+[0,812; 0,899].
+
+% ========================================================
+\section{Aprendizaje autom\'atico: fundamentos}
+
+\subsection{Aprendizaje supervisado}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Regresi\'on}: predecir una variable continua (ejemplo:
+  supervivencia en meses).
+  \item \textbf{Clasificaci\'on}: predecir una etiqueta discreta
+  (ejemplo: tumor vs sano, ADC vs SQC).
+\end{itemize}
+
+En el TFM: dos problemas de clasificaci\'on binaria.
+
+\subsection{Sobreajuste y sesgo-varianza}
+
+El dilema fundamental del ML:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Sesgo alto (underfitting)}: modelo demasiado simple, no
+  captura la se\~nal.
+  \item \textbf{Varianza alta (overfitting)}: modelo demasiado complejo,
+  memoriza el ruido del entrenamiento y falla en datos nuevos.
+\end{itemize}
+
+En expresi\'on g\'enica ($p \gg n$, con $p = 20\,000$ genes y $n = 100$
+muestras) el riesgo de sobreajuste es extremo. Toda la metodolog\'ia
+del TFM (regularizaci\'on L1, validaci\'on LODO externa, consenso
+multi-cohorte) est\'a dise\~nada para \emph{controlar la varianza}.
+
+\subsection{Regularizaci\'on}
+
+Modificaci\'on de la funci\'on de coste para penalizar modelos complejos:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{L2 (Ridge)}: penaliza suma de coeficientes al cuadrado.
+  Suaviza. Todos los coeficientes se reducen pero ninguno llega a cero.
+  \item \textbf{L1 (LASSO)}: penaliza suma de valores absolutos. Fuerza
+  a que muchos coeficientes sean \textbf{exactamente cero}: selecci\'on
+  de variables autom\'atica.
+  \item \textbf{Elastic Net}: combinaci\'on L1 + L2.
+\end{itemize}
+
+\begin{formula}
+Funci\'on de coste LASSO para regresi\'on log\'istica:
+\[ \mathcal{L} = -\sum_i \log P(y_i|x_i, \beta) + \lambda \sum_j |\beta_j| \]
+$\lambda$ (o su inverso $C = 1/\lambda$) es el hiperpar\'ametro que
+controla la fuerza de la penalizaci\'on. Se ajusta por validaci\'on
+cruzada.
+\end{formula}
+
+\subsubsection*{Interpretaci\'on geom\'etrica L1 vs L2}
+
+L1 y L2 son b\'asicamente formas geom\'etricas distintas de la regi\'on
+factible:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{L2 (Ridge)}: regi\'on factible es una \emph{esfera}
+  ($\sum \beta_j^2 \leq t$). El \'optimo suele tocarla en un punto donde
+  todos los $\beta_j$ son peque\~nos pero no cero.
+  \item \textbf{L1 (LASSO)}: regi\'on factible es un \emph{rombo}
+  ($\sum |\beta_j| \leq t$). Las esquinas del rombo est\'an sobre los
+  ejes coordenados; el \'optimo tiende a tocar en una esquina,
+  \textbf{poniendo coeficientes a exactamente cero}.
+\end{itemize}
+
+Por eso L1 hace selecci\'on de variables autom\'atica y L2 no.
+
+\subsubsection*{Elecci\'on de $C$: validaci\'on cruzada anidada}
+
+El hiperpar\'ametro $C$ controla el tama\~no del panel:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item $C$ peque\~no $\to$ mucha regularizaci\'on $\to$ pocos genes
+  con coeficiente no-cero (panel muy peque\~no, quiz\'as sesgado).
+  \item $C$ grande $\to$ poca regularizaci\'on $\to$ muchos genes
+  seleccionados (panel grande, riesgo de sobreajuste).
+\end{itemize}
+
+Se ajusta con \textbf{CV anidada}:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item Bucle externo: LODO (cada cohorte fuera una vez).
+  \item Bucle interno: sobre las cohortes de entrenamiento, CV k-fold
+  para elegir el mejor $C$.
+  \item El $C$ elegido en el bucle interno se aplica al modelo final
+  del bucle externo.
+\end{enumerate}
+
+La CV anidada evita usar la cohorte de test para elegir el
+hiperpar\'ametro (data leakage sutil).
+
+\subsubsection*{Algoritmo de resoluci\'on: coordinate descent}
+
+El t\'ermino $|\beta_j|$ no es diferenciable en cero, por lo que no se
+puede resolver con Newton-Raphson est\'andar. La biblioteca
+\texttt{scikit-learn} usa \textbf{coordinate descent}: optimiza un
+coeficiente por vez manteniendo los dem\'as fijos, aprovechando que
+para un solo coeficiente el subproblema tiene soluci\'on cerrada
+(operador de \emph{soft-thresholding}).
+
+En el TFM: LASSO L1 sobre regresi\'on log\'istica, con $C$ ajustado por
+CV interna. Produce un panel de 20 genes con coeficientes distintos de
+cero. Los otros ${\sim}1\,150$ genes candidatos se descartan
+autom\'aticamente.
+
+\subsubsection*{Interpretar los coeficientes LASSO}
+
+Los coeficientes $\beta_j$ tras entrenar est\'an en escala
+\emph{estandarizada} (todas las variables escaladas a media 0 y
+desviaci\'on 1). Un coeficiente $\beta_j = +0{,}45$ significa: por cada
+desviaci\'on t\'ipica que aumenta la expresi\'on del gen $j$, el
+log-odds de la clase positiva aumenta en 0,45.
+
+\textbf{Cuidado}: en LASSO los coeficientes est\'an sesgados hacia cero
+por la penalizaci\'on. Para interpretaci\'on cuantitativa fina se
+recomienda \emph{post-selection inference} (reentrenar OLS sobre las
+variables seleccionadas) o intervalos de confianza por bootstrap sobre
+los coeficientes.
+
+\subsection{Random Forest}
+
+Ensamble de \textbf{\'arboles de decisi\'on} construidos con dos fuentes
+de aleatoriedad:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item \textbf{Bagging}: cada \'arbol se entrena sobre una muestra
+  bootstrap de los datos (subconjunto con reemplazo).
+  \item \textbf{Selecci\'on aleatoria de variables}: en cada divisi\'on
+  interna del \'arbol, solo se consideran $\sqrt{p}$ variables aleatorias.
+\end{enumerate}
+
+Predicci\'on final: voto mayoritario (clasificaci\'on) o promedio
+(regresi\'on). Random Forest ofrece \textbf{importancia de variable}
+(cu\'antas veces se selecciona cada gen en las divisiones) como
+complemento a la interpretaci\'on.
+
+\subsubsection*{Hiperpar\'ametros clave}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{\texttt{n\_estimators}}: n\'umero de \'arboles.
+  M\'as = mejor pero con retorno decreciente. 100-500 t\'ipico.
+  \item \textbf{\texttt{max\_depth}}: profundidad m\'axima de cada
+  \'arbol. Si \texttt{None}, crecen hasta hojas puras (overfitting en
+  algunos casos).
+  \item \textbf{\texttt{min\_samples\_leaf}}: m\'inimo de muestras por
+  hoja. Regularizaci\'on efectiva.
+  \item \textbf{\texttt{max\_features}}: variables consideradas en cada
+  divisi\'on. Por defecto $\sqrt{p}$ en clasificaci\'on.
+\end{itemize}
+
+\subsubsection*{Error OOB (out-of-bag)}
+
+Cada \'arbol se entrena con una muestra bootstrap ($\sim$63\,\% de las
+muestras originales). El $\sim$37\,\% restante son \emph{out-of-bag} para
+ese \'arbol. Se puede evaluar el error del bosque promediando
+predicciones OOB. \textbf{Es un estimador insesgado del error de
+generalizaci\'on sin necesidad de CV}.
+
+\subsubsection*{Importancia de variable}
+
+Dos m\'etodos principales:
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Mean Decrease Impurity (MDI, Gini importance)}:
+  cu\'anto reduce la impureza cada variable al usarse en divisiones. R\'apida
+  pero \emph{sesgada hacia variables continuas o con muchas categor\'ias}.
+  \item \textbf{Permutation importance}: permutar valores de una variable
+  y medir la ca\'ida de rendimiento. M\'as costosa pero no sesgada.
+\end{itemize}
+
+En el TFM: Random Forest se usa como \emph{sanity check} vs LASSO,
+confirmando que los genes seleccionados por LASSO tambi\'en aparecen
+altos en el ranking RF.
+
+\subsection{SVM lineal}
+
+Support Vector Machine busca el \textbf{hiperplano \'optimo} que separa
+dos clases maximizando el margen (distancia a los puntos m\'as cercanos
+de cada clase). En su versi\'on lineal es esencialmente una regresi\'on
+log\'istica con otra funci\'on de p\'erdida (\emph{hinge loss}) y otra
+regularizaci\'on. En dimensiones altas rinde bien, pero los pesos no
+son directamente interpretables como ``importancia de gen''.
+
+\begin{formula}
+\textbf{Formulaci\'on primal SVM lineal (soft-margin)}:
+\[ \min_{w, b, \xi} \quad \frac{1}{2}\|w\|^2 + C\sum_i \xi_i \]
+sujeto a $y_i(w \cdot x_i + b) \geq 1 - \xi_i$, $\xi_i \geq 0$.
+
+$C$ controla la tolerancia a errores: $C$ grande $\to$ margen estrecho,
+poca tolerancia; $C$ peque\~no $\to$ margen amplio, m\'as tolerancia.
+Los puntos con $\xi_i > 0$ son \emph{vectores soporte}: definen el
+hiperplano.
+\end{formula}
+
+\subsubsection*{Kernel trick}
+
+Para relaciones no lineales, SVM proyecta impl\'icitamente los datos a
+un espacio de mayor dimensi\'on donde s\'i son linealmente separables,
+usando funciones kernel $K(x_i, x_j)$:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Lineal}: $K(x,x') = x \cdot x'$. Es SVM lineal.
+  \item \textbf{Polinomial}: $K(x,x') = (\gamma \, x \cdot x' + r)^d$.
+  \item \textbf{RBF (Gaussiano)}: $K(x,x') = \exp(-\gamma \|x-x'\|^2)$.
+  El m\'as popular.
+\end{itemize}
+
+En el TFM se usa \emph{s\'olo} SVM lineal por interpretabilidad
+comparativa (kernel no lineal complica la extracci\'on de importancia
+de gen).
+
+\begin{concepto}{Por qu\'e LASSO y no SVM en el TFM}
+Comparativa LODO: LASSO 0,925, RF 0,933, SVM 0,957 (AUC media). SVM
+gana en rendimiento por 3 puntos, pero: (i) los coeficientes SVM no son
+directamente interpretables cl\'inicamente, (ii) LASSO ya produce un
+panel discreto de 20 genes traducible a NanoString / RT-qPCR, (iii) la
+diferencia de rendimiento es menor que la variabilidad entre cohortes.
+LASSO se elige por su balance \textbf{rendimiento-interpretabilidad}.
+\end{concepto}
+
+% ========================================================
+\section{Validaci\'on cruzada, LODO y por qu\'e importa}
+
+\subsection{Validaci\'on cruzada est\'andar (k-fold)}
+
+Se divide el conjunto de datos en $k$ partes iguales (folds). Se entrena
+con $k-1$ y se eval\'ua con la restante. Se rota $k$ veces. Al final se
+promedia el rendimiento. $k = 5$ o $k = 10$ son comunes.
+
+Problema en gen\'omica multi-cohorte: si mezclas muestras de todas las
+cohortes en los folds, dos muestras del mismo estudio pueden acabar una
+en train y otra en test. Como comparten sesgos t\'ecnicos (chip, lote,
+laboratorio), el modelo \emph{aprende} el sesgo t\'ecnico y da AUCs
+inflados.
+
+\subsection{Leave-One-Dataset-Out (LODO)}
+
+Variante estricta: cada \emph{cohorte completa} se retira una vez del
+entrenamiento y se usa como test. Si hay 8 cohortes:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item Iteraci\'on 1: entrenar con 7, testear con cohorte 1.
+  \item Iteraci\'on 2: entrenar con 7 (otra combinaci\'on), testear con 2.
+  \item \dots\ 8 iteraciones en total.
+\end{itemize}
+
+Ninguna muestra de la cohorte de test aparece nunca en el entrenamiento.
+Es el est\'andar oro de validaci\'on externa en meta-an\'alisis
+transcript\'omicos. El AUC bajo LODO es t\'ipicamente 5-15 puntos m\'as
+bajo que bajo CV est\'andar --- porque LODO \emph{no infla} por sesgo
+compartido de cohorte.
+
+\subsubsection*{Otras estrategias de partici\'on}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Hold-out}: dividir 80/20. R\'apido pero de alta varianza.
+  \item \textbf{Stratified k-fold}: mantiene la proporci\'on de clases
+  en cada fold.
+  \item \textbf{Group k-fold}: mantiene grupos (paciente, familia) sin
+  cruzar entre folds.
+  \item \textbf{Leave-One-Out (LOO)}: caso extremo con $k = n$. Muy caro
+  y de alta varianza en gen\'omica.
+  \item \textbf{Nested CV}: CV externa + CV interna para elegir
+  hiperpar\'ametros. Est\'andar cuando hay hiperpar\'ametros a ajustar.
+\end{itemize}
+
+En el TFM se combina \textbf{LODO externa} (cohorte fuera) con
+\textbf{k-fold interna} sobre las cohortes de train para elegir el
+$C$ del LASSO. Es CV anidada donde la partici\'on externa respeta grupos
+de cohorte.
+
+\begin{concepto}{Frase para la defensa}
+\emph{``LODO no corrige el efecto lote entre cohortes: lo mide. Si la
+firma resulta robusta bajo LODO, es porque los genes seleccionados
+mantienen su patr\'on de cambio a pesar del efecto lote, lo que es una
+propiedad deseable.''}
+\end{concepto}
+
+\subsection{Batch effect (efecto lote)}
+
+Diferencias sistem\'aticas entre muestras atribuibles al lote t\'ecnico
+(chip usado, reactivos, operador, fecha, laboratorio). En cohortes GEO
+combinadas, gran parte de la varianza total viene del efecto lote y no
+de la biolog\'ia.
+
+\subsubsection*{ComBat y por qu\'e NO lo usamos}
+ComBat (Johnson et al., 2007) es un m\'etodo bayesiano emp\'irico que
+``corrige'' el efecto lote normalizando las cohortes conjuntamente.
+Problema: si el efecto lote est\'a \emph{confundido} con la variable de
+inter\'es (ejemplo: un centro solo aporta tumores, otro solo controles),
+ComBat borra tambi\'en la se\~nal biol\'ogica.
+
+En el TFM: no aplicamos ComBat. En su lugar (i) normalizamos
+\emph{dentro} de cada cohorte, (ii) exigimos consenso multi-cohorte
+para seleccionar genes, (iii) usamos LODO como criterio de rendimiento.
+Estrategia conservadora pero honesta.
+
+% ========================================================
+\section{M\'etricas y calibraci\'on}
+
+\subsection{Matriz de confusi\'on y m\'etricas base}
+
+Para clasificaci\'on binaria (positivo/negativo):
+
+\begin{center}
+\small
+\begin{tabular}{lcc}
+\toprule
+ & \textbf{Predicho +} & \textbf{Predicho $-$} \\
+\midrule
+\textbf{Real +} & TP (verdadero positivo) & FN (falso negativo) \\
+\textbf{Real $-$} & FP (falso positivo) & TN (verdadero negativo) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+M\'etricas:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Sensibilidad (recall, TPR)}: $\text{TP} / (\text{TP} + \text{FN})$.
+  De todos los positivos reales, cu\'antos detecto.
+  \item \textbf{Especificidad (TNR)}: $\text{TN} / (\text{TN} + \text{FP})$.
+  De todos los negativos reales, cu\'antos descarto correctamente.
+  \item \textbf{Precisi\'on (PPV)}: $\text{TP} / (\text{TP} + \text{FP})$.
+  De los que predije positivos, cu\'antos lo son. \textbf{Depende de la
+  prevalencia}.
+  \item \textbf{Balanced Accuracy}: media de sensibilidad y especificidad.
+  \'Util con clases desbalanceadas.
+  \item \textbf{Accuracy ingenua}: $(\text{TP}+\text{TN})/N$. En clases
+  desbalanceadas puede ser enga\~nosa (predecir siempre la clase
+  mayoritaria puede dar 90\,\%).
+\end{itemize}
+
+\subsection{Curva ROC y AUC}
+
+\textbf{ROC} (Receiver Operating Characteristic): representa sensibilidad
+frente a $1-$especificidad para todos los umbrales de decisi\'on. El
+\'area bajo esta curva (\textbf{AUC}) es una m\'etrica \emph{umbral-independiente}:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item AUC = 0,5: modelo al azar.
+  \item AUC = 1,0: perfecto.
+  \item AUC $\geq 0{,}9$: excelente discriminaci\'on.
+  \item AUC $\geq 0{,}8$: buena discriminaci\'on.
+\end{itemize}
+
+Interpretaci\'on probabil\'istica: AUC es la probabilidad de que el
+modelo ordene una muestra positiva por encima de una negativa. \'Util
+para comparar modelos independientemente del umbral, pero \emph{no dice}
+si las probabilidades est\'an calibradas.
+
+\subsubsection*{Curva Precision-Recall (PR)}
+
+Alternativa a ROC especialmente \'util en \textbf{clases muy
+desbalanceadas}. Representa precisi\'on vs recall.
+
+\begin{itemize}[leftmargin=1.2em]
+  \item ROC puede parecer ``buena'' incluso con clasificador in\'util si
+  hay mucho desbalance (TNR alto por defecto).
+  \item PR es m\'as informativa cuando la clase positiva es rara.
+\end{itemize}
+
+En el TFM: las clases est\'an moderadamente balanceadas en las cohortes
+evaluables (ratio tumor:sano suele estar entre 1:1 y 3:1), por lo que
+ROC es adecuada. Cuando la desviaci\'on es extrema (GSE31210 tiene
+226 tumores vs 20 sanos), reportamos tambi\'en balanced accuracy y
+sensibilidad/especificidad por separado.
+
+\subsubsection*{DeLong test para comparar AUCs}
+
+Para comparar dos AUCs sobre el mismo conjunto de test (por ejemplo LASSO
+vs SVM), no se puede simplemente comparar los valores puntuales. El test
+de DeLong (1988) da un $p$-valor para $H_0: AUC_1 = AUC_2$ teniendo en
+cuenta la correlaci\'on entre los rankings.
+
+En el TFM no aplicamos DeLong formalmente porque nos apoyamos en los
+IC bootstrap para comparar modelos.
+
+\subsection{Calibraci\'on de probabilidades}
+
+Un modelo con AUC alto puede tener probabilidades \textbf{descalibradas}:
+predice 0,9 y en realidad la clase real ocurre el 60\,\% de las veces.
+La calibraci\'on es distinta de la discriminaci\'on:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Platt scaling}: ajusta una regresi\'on log\'istica sobre
+  la puntuaci\'on cruda del modelo. Asume forma sigmoidea.
+  \item \textbf{Regresi\'on isot\'onica}: aprende una funci\'on
+  \emph{mon\'otona no param\'etrica}. M\'as flexible pero requiere m\'as
+  datos.
+\end{itemize}
+
+En el TFM: se aplican ambas sobre las predicciones LODO. Isot\'onica
+mejora BalAcc de 0,772 $\to$ 0,810 y AUC de 0,925 $\to$ 0,953. Platt
+degrada el modelo (BalAcc 0,772 $\to$ 0,639). Por eso se selecciona
+isot\'onica.
+
+\begin{formula}
+\textbf{Brier score}: m\'etrica de calibraci\'on. Media del cuadrado
+del error entre probabilidad predicha $p_i$ y etiqueta real $y_i \in
+\{0,1\}$:
+\[ BS = \frac{1}{n}\sum_i (p_i - y_i)^2 \]
+Menor es mejor. $BS = 0$: perfecta calibraci\'on y discriminaci\'on.
+\end{formula}
+
+\subsubsection*{Diagrama de fiabilidad (reliability plot)}
+
+Herramienta visual de calibraci\'on:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item Se dividen las muestras en bins seg\'un su probabilidad
+  predicha (ejemplo: 10 bins de ancho 0,1).
+  \item Para cada bin se calcula la \emph{frecuencia observada} de la
+  clase positiva.
+  \item Se representa probabilidad predicha (x) vs frecuencia observada
+  (y).
+  \item Un modelo perfectamente calibrado cae sobre la diagonal $y = x$.
+\end{enumerate}
+
+Otras m\'etricas: ECE (Expected Calibration Error), MCE (Maximum
+Calibration Error).
+
+\subsubsection*{Por qu\'e isot\'onica gan\'o a Platt en el TFM}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item Platt scaling asume que la relaci\'on score-probabilidad es
+  sigmoidea. Si no lo es, no puede corregirla.
+  \item Isot\'onica es no param\'etrica: solo asume monotonicidad. En
+  cohortes heterog\'eneas, la relaci\'on real puede no ser sigmoidea y
+  isot\'onica la captura mejor.
+  \item Riesgo de isot\'onica: puede sobreajustar con pocas muestras.
+  Con $n < 100$ Platt suele ser preferible.
+\end{itemize}
+
+En el TFM los conjuntos LODO por cohorte son suficientes ($n \geq 100$
+en la mayor\'ia) para que isot\'onica sea robusta.
+
+\subsubsection*{Manejo del desbalance de clases}
+
+Cuando las clases est\'an muy desbalanceadas ($>1:5$), el modelo tiende
+a predecir la clase mayoritaria. Estrategias:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Pesos de clase}: multiplicar la p\'erdida por
+  $w_c = n / (K \cdot n_c)$. \textbf{Estrategia por defecto en el TFM}
+  (\texttt{class\_weight="balanced"} en scikit-learn).
+  \item \textbf{Oversampling}: duplicar la clase minoritaria (ejemplo:
+  SMOTE, que genera muestras sint\'eticas por interpolaci\'on).
+  \item \textbf{Undersampling}: submuestrear la clase mayoritaria. Pierde
+  informaci\'on.
+  \item \textbf{Ajustar el umbral de decisi\'on}: si el AUC es bueno pero
+  el modelo predice todo como mayoritario, bajar el umbral.
+\end{itemize}
+
+% ========================================================
+\section{Decisiones de dise\~no del pipeline}
+
+Anticipaci\'on a preguntas del tribunal ``por qu\'e X y no Y''.
+
+\subsection{Por qu\'e microarrays y no s\'olo RNA-Seq}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item Hay muchas m\'as cohortes de microarray en GEO con metadatos
+  ricos para ADC vs SQC.
+  \item RNA-Seq es plataforma m\'as reciente; combinar decenas de
+  cohortes RNA-Seq con metadatos consistentes es dif\'icil.
+  \item La firma se valida despu\'es en RNA-Seq (TCGA), demostrando
+  transferibilidad.
+\end{itemize}
+
+\subsection{Por qu\'e consenso multi-cohorte y no ComBat}
+
+Cubierto arriba: ComBat puede borrar se\~nal biol\'ogica cuando el lote
+confunde con la variable de inter\'es. Consenso es m\'as conservador.
+
+\subsection{Por qu\'e $|d| > 0{,}5$ y no otro umbral}
+
+Umbral cl\'asico de Cohen para efecto ``moderado''. Es un compromiso:
+\begin{itemize}[leftmargin=1.2em]
+  \item $|d| > 0{,}2$: demasiado permisivo, entran genes con efecto
+  peque\~no que pueden ser artefacto.
+  \item $|d| > 0{,}8$: demasiado exigente, se pierden genes con efecto
+  moderado pero muy reproducible.
+  \item $|d| > 0{,}5$: convenci\'on est\'andar, filtra ruido sin
+  descartar biolog\'ia leg\'itima.
+\end{itemize}
+
+\subsection{Por qu\'e 3 cohortes de consenso y no 5 o 8}
+
+Trade-off entre reproducibilidad y disponibilidad:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item Exigir 8 cohortes reduce dram\'aticamente el n\'umero de genes
+  que pasan y perder\'ia se\~nal cl\'inicamente relevante.
+  \item Exigir 3 cohortes independientes ya es m\'as estricto que la
+  mayor\'ia de firmas publicadas (que validan en 0 o 1 cohorte
+  independiente).
+  \item El resto de cohortes (5) se usan como test LODO, no como
+  entrenamiento, para validaci\'on externa adicional.
+\end{itemize}
+
+\subsection{Por qu\'e panel m\'inimo de 20 genes y no 5 o 50}
+
+Curva panel vs AUC (\texttt{PANEL\_MINIMO\_CURVA.csv}):
+
+\begin{itemize}[leftmargin=1.2em]
+  \item Con 5 genes: AUC $\approx 0{,}91$. Muy compacto pero pierde
+  redundancia biol\'ogica.
+  \item Con 20 genes: AUC $\approx 0{,}966$. Plateau: a\~nadir m\'as no
+  mejora significativamente.
+  \item Con 50 genes: AUC $\approx 0{,}97$. Rendimiento pr\'acticamente
+  id\'entico al panel completo.
+\end{itemize}
+
+20 es el ``codo'' de la curva y coincide con el tama\~no del panel OMS
+IHC, lo que facilita la interpretaci\'on comparativa.
+
+\subsection{Por qu\'e recalibraci\'on isot\'onica y no Platt}
+
+Cubierto arriba: isot\'onica gan\'o experimentalmente en el TFM
+(BalAcc 0,772 $\to$ 0,810 vs Platt 0,772 $\to$ 0,639).
+
+\subsection{Por qu\'e bootstrap y no otro m\'etodo de IC}
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{IC anal\'iticos} (asumen normalidad): AUC no tiene una
+  distribuci\'on cerrada simple.
+  \item \textbf{Jackknife}: variante de bootstrap con leave-one-out.
+  M\'as barato pero de mayor sesgo.
+  \item \textbf{Bootstrap percentil}: est\'andar oro para m\'etricas
+  no lineales como AUC. \textbf{Elegido en el TFM}.
+\end{itemize}
+
+% ========================================================
+\section{Modelos de lenguaje aplicados a bioinform\'atica}
+
+\subsection{Qu\'e es un LLM}
+
+Un modelo de lenguaje grande (LLM) es una red neuronal profunda
+entrenada con enormes cantidades de texto para predecir la siguiente
+palabra dado un contexto. Arquitectura dominante: \textbf{transformer}
+(Vaswani et al., 2017), basado en el mecanismo de \emph{atenci\'on}.
+
+Escalas modernas: 1--700 mil millones de par\'ametros. Modelos
+representativos: GPT-4 (OpenAI, cerrado), Claude (Anthropic, cerrado),
+Gemini (Google), Llama (Meta, abierto), Mistral (europeo, abierto).
+
+\subsection{Llama 3.3-70b}
+
+Publicado por Meta AI a finales de 2024. 70 mil millones de par\'ametros.
+Rendimiento comparable a GPT-4o en benchmarks acad\'emicos. Ventaja
+clave: es \textbf{open weights}, se puede desplegar donde uno quiera,
+sin depender de una API cerrada ni exponer datos sensibles.
+
+\subsection{Groq}
+
+Empresa que desarrolla hardware espec\'ifico (\textbf{LPU},
+\emph{Language Processing Unit}) optimizado para inferencia de LLMs.
+Consigue latencias 5--10$\times$ m\'as r\'apidas que GPU tradicionales
+para el mismo modelo. Ofrece API p\'ublica que sirve Llama con costes
+muy bajos y velocidad de decenas de tokens por segundo.
+
+\subsection{Rol del LLM en el TFM}
+
+Tarea \'unica y bien delimitada: leer una descripci\'on de muestra GEO
+(texto libre) y devolver una etiqueta can\'onica del grupo experimental.
+
+\textbf{Prompt estructurado}:
+\begin{itemize}[leftmargin=1.2em]
+  \item Rol: ``eres un experto anotador de datos biom\'edicos''.
+  \item Contexto: descripci\'on de la muestra + metadatos del estudio.
+  \item Instrucci\'on: elige entre lista cerrada de etiquetas.
+  \item Regla de escape: si no encaja ninguna, devuelve \texttt{unknown}.
+\end{itemize}
+
+Tasa de \'exito global: 82,8\,\% (curados sobre descargados). Las
+muestras que el LLM no puede clasificar se descartan, no se fuerzan.
+
+\subsection{Alucinaciones y c\'omo se controlan}
+
+\emph{Alucinaci\'on}: el LLM inventa informaci\'on que no est\'a en el
+prompt. Es un modo de fallo conocido.
+
+Mitigaciones en el TFM:
+\begin{itemize}[leftmargin=1.2em]
+  \item Tarea de clasificaci\'on cerrada, no generaci\'on abierta.
+  \item Lista de etiquetas explicitada; ``unknown'' permitido.
+  \item El LLM no participa en el an\'alisis estad\'istico ni en la
+  selecci\'on de genes.
+  \item Auditor\'ia manual sobre un subconjunto para verificar la
+  precisi\'on real.
+\end{itemize}
+
+\begin{peligro}
+El uso de LLMs en bioinform\'atica todav\'ia levanta escepticismo. Si te
+preguntan ``no le est\'as dando poder al modelo?'' responde con claridad:
+el LLM \textbf{s\'olo cura metadatos}. Todo el an\'alisis estad\'istico,
+la selecci\'on de genes, la clasificaci\'on y la validaci\'on son
+determin\'isticos, reproducibles con \texttt{random\_state=42} y no
+dependen del LLM.
+\end{peligro}
+
+% ========================================================
+\section{Consenso multi-cohorte y meta-an\'alisis}
+
+\subsection{Por qu\'e integrar cohortes}
+
+Un solo estudio tiene poder estad\'istico limitado, sesgos particulares y
+puede detectar se\~nales que no replican. Integrar varios estudios
+aumenta el tama\~no muestral efectivo y permite distinguir se\~nales
+reproducibles de artefactos.
+
+Dos estrategias generales:
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Combinaci\'on con correcci\'on de lote} (ejemplo: ComBat).
+  Simple pero arriesgado si el lote confunde con la variable de inter\'es.
+  \item \textbf{Meta-an\'alisis por consenso}. Cada cohorte se analiza
+  por separado; se combinan los resultados con criterios estad\'isticos.
+\end{itemize}
+
+El TFM adopta la segunda.
+
+\subsection{Consenso en el TFM}
+
+Para cada gen $g$ y cada cohorte $c$:
+\begin{itemize}[leftmargin=1.2em]
+  \item Se calcula el $d$ de Cohen entre grupos (ejemplo: ADC vs SQC).
+  \item Se registra el signo y la magnitud.
+\end{itemize}
+
+Un gen \emph{sobrevive} al consenso si en \textbf{las 3 cohortes
+independientes}:
+\begin{itemize}[leftmargin=1.2em]
+  \item Mantiene el \emph{mismo signo} (misma direcci\'on de cambio).
+  \item Alcanza $|d| > 0{,}5$ (efecto moderado o mayor).
+\end{itemize}
+
+Resultado: de $\sim$22\,880 genes evaluados, sobreviven \textbf{1\,174}.
+Es un filtro exigente que garantiza reproducibilidad biol\'ogica.
+
+% ========================================================
+\section{Interpretabilidad: ejes biol\'ogicos}
+
+Una firma de 1\,174 genes puede parecer una caja negra. En el TFM se
+analiza la estructura interna con dos preguntas:
+
+\begin{enumerate}[leftmargin=1.4em]
+  \item \textbf{Los genes seleccionados coinciden con marcadores
+  cl\'inicos ya conocidos?} S\'i: 18 de 20 marcadores IHC del panel OMS
+  aparecen en la firma sin haberse declarado.
+  \item \textbf{Existen ejes biol\'ogicos coherentes en la firma?} S\'i,
+  dos:
+\end{enumerate}
+
+\subsubsection*{Eje 1: p\'erdida alv\'eolo-capilar}
+Genes como \gene{SFTPC}, \gene{SFTPB}, \gene{AGER}, \gene{CLDN18},
+\gene{FABP4}, marcadores canonicos de neumocitos y capilares alveolares.
+En muestras tumorales la expresi\'on de estos marcadores cae. La firma
+correlaciona negativamente con estos marcadores ($\rho = -0{,}626$ media
+en 4 cohortes con muestra suficiente). Biol\'ogicamente coherente: el
+tumor sustituye al par\'enquima alveolar sano.
+
+\subsubsection*{Eje 2: proliferaci\'on tumoral}
+Genes como \gene{MKI67}, \gene{TOP2A}, \gene{CCNB1}, \gene{BIRC5},
+\gene{AURKA}. Marcadores cl\'asicos de proliferaci\'on que el pat\'ologo
+usa en cl\'inica (Ki-67 en biopsias). Un score alto en este eje
+correlaciona con tumores m\'as agresivos.
+
+\begin{concepto}{Frase para el tribunal}
+\emph{``La firma no es una caja negra. Captura la transici\'on biol\'ogica
+del pulm\'on sano al tejido tumoral en dos ejes que un pat\'ologo
+reconoce: p\'erdida de arquitectura alveolar y ganancia de actividad
+proliferativa.''}
+\end{concepto}
+
+% ========================================================
+\section{Transferibilidad cl\'inica}
+
+\subsection{NanoString nCounter}
+
+Tecnolog\'ia que mide expresi\'on de un panel peque\~no de genes
+(decenas a cientos) directamente sobre tejido fijado en formalina
+(\textbf{FFPE}). El tejido FFPE es el est\'andar cl\'inico en anatom\'ia
+patol\'ogica (se conserva a\~nos, es barato). NanoString no requiere
+RT-PCR y da lecturas cuantitativas robustas. Ideal para paneles
+diagn\'osticos multiplexados.
+
+\subsection{RT-qPCR}
+
+PCR cuantitativa a tiempo real. Est\'andar cl\'inico para paneles muy
+peque\~nos (1-20 genes). Alta sensibilidad, coste bajo, resultado en
+horas. Requiere ARN de buena calidad (m\'as exigente que NanoString).
+
+\subsection{Por qu\'e importa al TFM}
+
+Los 20 genes del panel m\'inimo son \emph{traducibles} a estas
+plataformas. Podr\'ian construirse ensayos NanoString / qPCR para uso
+diagn\'ostico. Diferencia clave respecto a firmas basadas en RNA-Seq
+completo, que no son viables en flujo cl\'inico rutinario.
+
+% ========================================================
+\section{Reproducibilidad}
+
+\subsection{Principios}
+
+Una investigaci\'on reproducible cumple: cualquier persona con acceso
+al c\'odigo y a los datos originales puede regenerar todas las cifras y
+figuras publicadas.
+
+Elementos del TFM que garantizan reproducibilidad:
+
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Semilla aleatoria fija}: \texttt{random\_state=42} en
+  todos los pasos aleatorizados.
+  \item \textbf{C\'odigo p\'ublico}: repositorio Git p\'ublico con
+  historial completo.
+  \item \textbf{Datos p\'ublicos}: cohortes GEO y TCGA descargables por
+  cualquiera.
+  \item \textbf{Artefactos intermedios versionados}: cada paso escribe
+  CSV/JSON que se pueden auditar.
+  \item \textbf{Especificaci\'on de entorno}: \texttt{requirements.txt}
+  con versiones exactas.
+\end{itemize}
+
+\subsection{Data leakage}
+
+\emph{Data leakage} (fuga de datos): informaci\'on del conjunto de test
+se filtra al entrenamiento. Es el error m\'as com\'un en ML aplicado a
+gen\'omica.
+
+Fuentes t\'ipicas:
+\begin{itemize}[leftmargin=1.2em]
+  \item Selecci\'on de features en todo el conjunto antes de dividir.
+  \item Normalizaci\'on aplicada al conjunto completo.
+  \item Uso de la misma cohorte en train y test (por descuido).
+\end{itemize}
+
+En el TFM: la selecci\'on de genes y la calibraci\'on se hacen
+\emph{dentro} de cada iteraci\'on LODO, usando s\'olo las cohortes de
+entrenamiento. Ninguna muestra de la cohorte test se ve nunca durante
+el ajuste.
+
+En TCGA: las 408 muestras TCGA se aplican \emph{despu\'es} de entrenar
+todo el pipeline en microarray. Ninguna muestra TCGA particip\'o en la
+selecci\'on de features ni en la calibraci\'on.
+
+% ========================================================
+\newpage
+\section{Glosario r\'apido}
+
+\begin{description}[leftmargin=0em, style=nextline]
+  \item[ADC] Adenocarcinoma. Subtipo de NSCLC de origen glandular.
+  \item[ARN mensajero (mRNA)] Copia funcional de un gen, sustrato de la traducci\'on.
+  \item[AUC] Area Under the ROC Curve. Discriminaci\'on de un clasificador.
+  \item[Balanced accuracy] Media de sensibilidad y especificidad.
+  \item[Batch effect] Diferencias t\'ecnicas sistem\'aticas entre lotes.
+  \item[Bootstrap] Remuestreo con reemplazo para estimar incertidumbre.
+  \item[cBioPortal] Portal p\'ublico que sirve datos TCGA v\'ia API.
+  \item[Cohen ($d$)] Tama\~no de efecto estandarizado.
+  \item[ComBat] Algoritmo bayesiano de correcci\'on de efecto lote.
+  \item[Data leakage] Contaminaci\'on inadvertida train-test.
+  \item[$d$ de Cohen] Ver ``Cohen''.
+  \item[FDR] False Discovery Rate. Correcci\'on por m\'ultiples tests (BH).
+  \item[FFPE] Tejido fijado en formalina y embebido en parafina. Est\'andar cl\'inico.
+  \item[Firma g\'enica] Conjunto de genes cuya expresi\'on caracteriza un fenotipo.
+  \item[GEO] Gene Expression Omnibus. Repositorio p\'ublico del NCBI.
+  \item[GPL] Identificador de plataforma tecnol\'ogica en GEO.
+  \item[Groq] Empresa de inferencia LLM sobre hardware LPU.
+  \item[GSE] Identificador de estudio en GEO.
+  \item[GSM] Identificador de muestra individual en GEO.
+  \item[HGNC] Human Genome Organisation. Nomenclatura g\'enica oficial.
+  \item[IHC] Inmunohistoqu\'imica. T\'ecnica anatomopatol\'ogica.
+  \item[Isot\'onica (regresi\'on)] M\'etodo de calibraci\'on no param\'etrico.
+  \item[Ki-67 (MKI67)] Marcador cl\'asico de proliferaci\'on.
+  \item[k-fold CV] Validaci\'on cruzada en $k$ particiones.
+  \item[LASSO] Regresi\'on con penalizaci\'on L1. Selecciona variables.
+  \item[Llama] Familia de LLMs abiertos de Meta.
+  \item[LODO] Leave-One-Dataset-Out. Validaci\'on externa por cohorte.
+  \item[LPU] Hardware espec\'ifico de Groq para inferencia LLM.
+  \item[LUAD / LUSC] Nombres TCGA para adenocarcinoma / escamoso de pulm\'on.
+  \item[Microarray] Chip que mide expresi\'on por hibridaci\'on.
+  \item[NanoString] Plataforma comercial para paneles de genes en FFPE.
+  \item[NCBI] National Center for Biotechnology Information (EE.UU.).
+  \item[NSCLC] Non-Small Cell Lung Cancer.
+  \item[OMS] Organizaci\'on Mundial de la Salud. Publica clasificaci\'on de tumores.
+  \item[Panel OMS 2015] 20 marcadores IHC est\'andar para NSCLC (Travis et al., 2015).
+  \item[Pipeline] Cadena de pasos automatizados que produce resultados.
+  \item[Platt scaling] Calibraci\'on sigmoidea con regresi\'on log\'istica.
+  \item[Random Forest] Ensamble de \'arboles de decisi\'on con bagging.
+  \item[Reproducibilidad] Capacidad de regenerar todas las cifras publicadas.
+  \item[RNA-Seq] Secuenciaci\'on del transcriptoma.
+  \item[ROC] Curva sensibilidad vs 1-especificidad.
+  \item[RSEM] Estimador estad\'istico para cuantificar RNA-Seq. Usado por TCGA.
+  \item[SCLC] Small Cell Lung Cancer. Subtipo minoritario y agresivo.
+  \item[Sensibilidad (recall, TPR)] TP / (TP + FN).
+  \item[Spearman ($\rho$)] Correlaci\'on por rangos, mide monoton\'ia.
+  \item[SQC / LUSC] Squamous Cell Carcinoma (escamoso).
+  \item[SVM] Support Vector Machine. Clasificador de m\'aximo margen.
+  \item[TCGA] The Cancer Genome Atlas. Consorcio NIH de caracterizaci\'on tumoral.
+  \item[TNM] Sistema de estadificaci\'on tumor-ganglios-met\'astasis.
+  \item[TPM] Transcripts Per Million. Unidad de normalizaci\'on RNA-Seq.
+  \item[Transcriptoma] Conjunto de mRNAs presentes en una muestra.
+  \item[Transformer] Arquitectura de red neuronal base de los LLMs.
+  \item[TTF-1 (NKX2-1)] Marcador IHC de adenocarcinoma.
+  \item[Welch (t de)] Test t para varianzas desiguales.
+\end{description}
+
+\newpage
+
+\begin{tcolorbox}[colback=plano, colframe=verdeTerm, arc=3pt, boxrule=1pt]
+\centering\itshape
+Este manual cubre los fundamentos que sostienen el TFM. Si te preguntan
+algo que no est\'a aqu\'i, la respuesta honesta ``no lo s\'e con
+precisi\'on, pero mi trabajo se apoya en \dots'' es preferible a
+inventar. La memoria est\'a bien construida y los resultados son
+reproducibles: no necesitas defender m\'as de lo que ya has hecho.
+\end{tcolorbox}
+
+\end{document}

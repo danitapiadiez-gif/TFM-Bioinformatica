@@ -1,0 +1,260 @@
+\documentclass[10pt, a4paper, landscape]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper, landscape, margin=1.2cm, top=1cm, bottom=1cm]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{amssymb, amsmath}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{titlesec}
+\usepackage{tikz}
+
+% ---- Paleta ----
+\definecolor{verdeTerm}{HTML}{1C8A3F}
+\definecolor{verdeOsc}{HTML}{146A2F}
+\definecolor{tinta}{HTML}{0B0B0B}
+\definecolor{tinta2}{HTML}{4A4948}
+\definecolor{mute}{HTML}{8F8D87}
+\definecolor{plano}{HTML}{F7F4EB}
+\definecolor{planoOsc}{HTML}{EFEBDD}
+\definecolor{linea}{HTML}{DAD6C8}
+\definecolor{ambar}{HTML}{C78A1E}
+
+\hypersetup{
+  colorlinks=true, linkcolor=verdeTerm, urlcolor=verdeTerm,
+  pdftitle={Resumen ejecutivo - TFM data.lung},
+  pdfauthor={Daniel Tapia Diez}
+}
+
+\pagenumbering{gobble}
+\setlength{\parskip}{0.15em}
+
+\titleformat{\section}
+  {\small\bfseries\color{tinta}\MakeUppercase}
+  {}{0em}{}
+  [\vspace{-0.3em}{\color{verdeTerm}\rule{1.5cm}{1.2pt}}\vspace{-0.1em}]
+\titlespacing*{\section}{0pt}{0.4em}{0.15em}
+
+\newtcolorbox{destacado}{
+  enhanced, breakable=false,
+  colback=plano, colframe=verdeTerm,
+  boxrule=0.7pt, arc=2pt,
+  left=6pt, right=6pt, top=4pt, bottom=4pt,
+  fontupper=\footnotesize,
+  before skip=0.3em, after skip=0.3em
+}
+
+\newtcolorbox{kpi}[1]{
+  enhanced, breakable=false,
+  colback=planoOsc, colframe=verdeTerm,
+  boxrule=0.7pt, arc=2pt,
+  left=4pt, right=4pt, top=3pt, bottom=3pt,
+  title={\bfseries\scriptsize\color{white}\MakeUppercase{#1}},
+  colbacktitle=verdeTerm,
+  attach boxed title to top left={xshift=3pt, yshift=-4pt},
+  boxed title style={colback=verdeTerm, sharp corners, boxrule=0pt},
+  halign=center, valign=center,
+  height=1.7cm
+}
+
+\newcommand{\gene}[1]{\textit{#1}}
+\newcommand{\bignum}[1]{{\fontsize{20pt}{20pt}\selectfont\color{verdeTerm}\textbf{#1}}}
+\newcommand{\mednum}[1]{{\fontsize{15pt}{15pt}\selectfont\color{verdeTerm}\textbf{#1}}}
+\newcommand{\lbl}[1]{{\ttfamily\scriptsize\color{mute}\MakeUppercase{#1}}}
+\newcommand{\framework}{{\ttfamily\color{verdeOsc}data\textcolor{verdeTerm}{.}lung}}
+
+\begin{document}
+
+% =================== CABECERA COMPACTA =========================
+\noindent
+\begin{minipage}[c]{0.55\textwidth}
+  {\ttfamily\fontsize{28pt}{28pt}\selectfont\bfseries
+   data\textcolor{verdeTerm}{.}lung}\quad
+  {\small\itshape\color{tinta2}Del dataset a una firma g\'enica replicable}\\[0.15em]
+  \textcolor{verdeTerm}{\rule{2cm}{1.2pt}}\\[0.15em]
+  {\small\bfseries\color{tinta}Resumen ejecutivo}\;
+  {\scriptsize\color{tinta2}$\cdot$ TFM $\cdot$ M\'aster en Bioinform\'atica UAX}
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.44\textwidth}
+  \raggedleft\scriptsize
+  \textbf{Framework transcript\'omico basado en la integraci\'on de modelos\\
+  de lenguaje y aprendizaje autom\'atico para la identificaci\'on\\
+  de biomarcadores en c\'ancer de pulm\'on}\\[0.35em]
+  {\color{mute}\textbf{Autor}}~Daniel Tapia D\'iez\quad
+  {\color{mute}\textbf{Tutor}}~Leonardo Dulcetti\quad
+  {\color{mute}\textbf{Fecha}}~14 ago 2026
+\end{minipage}
+
+\vspace{0.15em}
+\textcolor{linea}{\rule{\textwidth}{0.5pt}}
+\vspace{0.15em}
+
+% =================== KPIs =========================
+\noindent
+\begin{minipage}[t]{0.195\textwidth}\begin{kpi}{Cohortes GEO}
+  \bignum{11}\\\lbl{8 evaluables}
+\end{kpi}\end{minipage}\hfill
+\begin{minipage}[t]{0.195\textwidth}\begin{kpi}{Muestras curadas}
+  \bignum{1157}\\\lbl{82{,}8\,\% LLM}
+\end{kpi}\end{minipage}\hfill
+\begin{minipage}[t]{0.195\textwidth}\begin{kpi}{Panel m\'inimo}
+  \bignum{20}\\\lbl{de 1174 genes}
+\end{kpi}\end{minipage}\hfill
+\begin{minipage}[t]{0.195\textwidth}\begin{kpi}{AUC LODO subtipo}
+  \bignum{0{,}968}\\\lbl{3 cohortes indep.}
+\end{kpi}\end{minipage}\hfill
+\begin{minipage}[t]{0.195\textwidth}\begin{kpi}{AUC TCGA RNA-Seq}
+  \bignum{0{,}857}\\\lbl{IC 95 [0{,}812; 0{,}899]}
+\end{kpi}\end{minipage}
+
+\vspace{0.4em}
+
+% =================== 3 COLUMNAS =========================
+\begin{multicols}{3}
+
+\section{Problema}
+\footnotesize
+El c\'ancer de pulm\'on es la primera causa de muerte oncol\'ogica
+mundial: \textbf{2,48\,M casos/a\~no}, supervivencia a 5\,a\~nos
+\textbf{$<$\,20\,\%}. En NSCLC, distinguir adenocarcinoma de carcinoma
+escamoso es cr\'itico: pemetrexed y bevacizumab est\'an
+\textbf{contraindicados en escamoso} por riesgo de hemorragia mortal.
+Existen cientos de estudios en GEO, pero integrarlos es dif\'icil:
+plataformas heterog\'eneas, metadatos en texto libre y firmas
+publicadas que \textbf{rara vez replican} en cohortes independientes.
+
+\section{Objetivo}
+\footnotesize
+Construir un \textbf{framework reproducible extremo a extremo} que
+integre cohortes p\'ublicas de expresi\'on g\'enica mediante
+(i) curaci\'on autom\'atica de metadatos con LLM, (ii) meta-an\'alisis
+por consenso multi-cohorte, y (iii) clasificaci\'on supervisada con
+validaci\'on externa LODO. Producir una firma g\'enica interpretable,
+cl\'inicamente traducible y validada contra el panel diagn\'ostico
+IHC de la OMS.
+
+\section{Metodolog\'ia}
+\footnotesize
+Pipeline de 9 pasos en 4 fases:
+\begin{itemize}[leftmargin=1em, itemsep=0pt, topsep=1pt]
+  \item \textbf{Ingesta}: 11 cohortes GEO ($n=1{,}397$), normalizaci\'on
+  $\log_2$ + cuantiles dentro de cada estudio (sin ComBat).
+  \item \textbf{Curaci\'on cl\'inica}: Llama 3.3-70b v\'ia Groq sobre
+  metadatos textuales. Tarea acotada con lista cerrada.
+  \item \textbf{Consenso}: $d$ de Cohen por cohorte; gen valida si
+  mantiene signo y $|d|>0{,}5$ en 3 cohortes.
+  \item \textbf{Clasificaci\'on}: LASSO L1 en regresi\'on log\'istica,
+  LODO externa, recalibraci\'on isot\'onica, validaci\'on TCGA RNA-Seq
+  v\'ia cBioPortal.
+\end{itemize}
+
+\columnbreak
+
+\section{Resultados}
+\scriptsize
+\begin{tabular}{@{}p{2.7cm}r@{}}
+\toprule
+\textbf{Firma completa} & 1\,174 g. \\
+\ Cohortes de consenso & 3 indep. \\
+\ Umbral $|d|$ & $>0{,}5$ \\
+\midrule
+\textbf{Panel m\'inimo} & 20 g. \\
+\ AUC panel & 0,966 \\
+\ AUC firma completa & 0,974 \\
+\midrule
+\textbf{Subtipo (LODO)} &  \\
+\ AUC media & \textbf{0,968} \\
+\ BalAcc & 0,940 \\
+\midrule
+\textbf{Tumor vs sano (LODO)} &  \\
+\ AUC sin recalibraci\'on & 0,925 \\
+\ AUC con isot\'onica & \textbf{0,953} \\
+\ BalAcc 0,772 & $\to$ \textbf{0,810} \\
+\ Sensibilidad & 0,988 \\
+\ Especificidad & 0,632 \\
+\midrule
+\textbf{Comparativa ML} & AUC \\
+\ LASSO L1 & 0,925 \\
+\ Random Forest & 0,933 \\
+\ SVM lineal & 0,957 \\
+\midrule
+\textbf{TCGA RNA-Seq} & \\
+\ $n$ total (LUAD + LUSC) & 408 \\
+\ AUC transferido & \textbf{0,857} \\
+\ IC 95\,\% (bootstrap) & [0,812; 0,899] \\
+\midrule
+\textbf{Panel IHC OMS} & \\
+\ Recuperaci\'on total & \textbf{18/20} \\
+\ Escamoso & 12/12 \\
+\ Adenocarcinoma & 6/8 \\
+\bottomrule
+\end{tabular}
+
+\columnbreak
+
+\section{Hallazgos}
+
+\begin{destacado}
+\textbf{Validaci\'on biol\'ogica sin datos cl\'inicos.} La firma
+seleccionada de forma puramente estad\'istica recupera \textbf{18 de
+los 20 marcadores IHC del panel OMS 2015} sin declararlos.
+Coincidencia entre selecci\'on autom\'atica y pr\'actica cl\'inica.
+\end{destacado}
+
+\begin{destacado}
+\textbf{Dos ejes biol\'ogicos coherentes.} (Eje 1) P\'erdida
+alv\'eolo-capilar: $\rho=-0{,}626$ media (hasta $-0{,}858$ en GSE31210,
+$p=1{,}1\!\cdot\!10^{-66}$); (Eje 2) Proliferaci\'on tumoral
+(\gene{MKI67}, \gene{TOP2A}, \gene{CCNB1}, \gene{BIRC5}, \gene{AURKA}).
+Ambos emergen sin declararlos.
+\end{destacado}
+
+\begin{destacado}
+\textbf{Transferibilidad entre plataformas.} Panel LASSO entrenado en
+microarray Affymetrix $\to$ RNA-Seq TCGA con AUC 0,857. Ninguna
+muestra TCGA particip\'o en selecci\'on de genes ni en calibraci\'on.
+Se\~nal biol\'ogica, no artefactual.
+\end{destacado}
+
+\section{Conclusiones}
+\footnotesize
+La combinaci\'on de LLM para curaci\'on cl\'inica, meta-an\'alisis por
+consenso y validaci\'on LODO produce firmas g\'enicas
+\emph{reproducibles, interpretables y transferibles}. Los 20 genes son
+medibles con NanoString o RT-qPCR sobre FFPE, viables como test
+diagn\'ostico complementario.
+
+\section{Trabajo futuro}
+\footnotesize
+\begin{itemize}[leftmargin=1em, itemsep=0pt, topsep=1pt]
+  \item Validaci\'on cl\'inica prospectiva sobre biopsias frescas.
+  \item Ampliaci\'on a subtipos neuroendocrinos y otros tumores.
+  \item Sustituci\'on del LLM externo por modelo local.
+  \item Firmas pron\'osticas con Cox sobre TCGA.
+\end{itemize}
+
+\end{multicols}
+
+% =================== FOOTER =========================
+\vspace{-0.4em}
+\textcolor{linea}{\rule{\textwidth}{0.5pt}}
+\vspace{-0.1em}
+
+\begin{center}
+{\ttfamily\scriptsize\color{mute}
+\textbf{>}\;REPOSITORIO\quad\color{tinta2}github.com/danitapiadiez-gif/TFM-Bioinformatica
+\quad\color{mute}\textbf{|}\quad
+\textbf{>}\;INTERFAZ\quad\color{tinta2}\framework{} (Streamlit multip\'agina)
+\quad\color{mute}\textbf{|}\quad
+\textbf{>}\;CONTACTO\quad\color{tinta2}danitapiadiez@gmail.com}
+\end{center}
+
+\end{document}
