@@ -1,8 +1,0 @@
-$pdf_mode = 1;
-$pdflatex = 'pdflatex -interaction=nonstopmode -shell-escape %O %S';
-$bibtex_use = 2;
-@default_files = ('main.tex');
-
-# No compilar los .tex de los diagramas standalone (ya estan como PDFs)
-$do_cd = 1;
-push @generated_exts, 'synctex.gz';

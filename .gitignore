@@ -1,6 +1,9 @@
 # Secretos
 .env
 
+# Node (dep del generador de la presentacion pptx)
+node_modules/
+
 # Python basura
 __pycache__/
 *.py[cod]
@@ -48,3 +51,8 @@ SINTESIS_MOLECULAR.json
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+
+# Documentos de entrega (se entregan en PDF a la universidad, no van al repo)
+memoria/
+presentacion/
+DEFENSA_TFM.pptx

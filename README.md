@@ -46,7 +46,7 @@ La aplicación web `data.lung` expone los resultados navegables y un asistente c
                                                              └─────────────────────────────┘
 ```
 
-Los pasos se ejecutan como módulos Python independientes y depositan sus outputs en rutas predecibles. La app y la memoria leen esos artefactos: **ninguna cifra está hard-coded**.
+Los pasos se ejecutan como módulos Python independientes y depositan sus outputs en rutas predecibles. La app lee esos artefactos: **ninguna cifra está hard-coded**.
 
 ---
 
@@ -73,12 +73,6 @@ Los pasos se ejecutan como módulos Python independientes y depositan sus output
 │   ├── recalibracion/          #   recalibración isotónica + IC bootstrap
 │   ├── comparativa_ml/         #   LASSO vs RF vs SVM
 │   └── tcga/                   #   validación externa TCGA RNA-Seq
-├── memoria/                    # Fuente LaTeX de la memoria del TFM
-│   ├── main.tex + main.pdf     #   100 páginas, PDF final
-│   ├── capitulos/              #   8 capítulos + 7 anexos
-│   ├── figuras/                #   diagramas y figuras
-│   └── bibliografia.bib
-├── presentacion/               # Defensa Beamer + resumen ejecutivo UAX
 ├── datasets.txt                # Lista de cohortes GEO a descargar
 ├── requirements.txt            # Dependencias Python
 ├── pyproject.toml              # Paquete tfm/ instalable
@@ -195,22 +189,11 @@ Invariantes garantizadas por el paquete `tfm/`:
 
 ---
 
-## Compilar la memoria y la defensa
+## Documentos del TFM
 
-```bash
-# Memoria
-cd memoria
-latexmk -pdf main.tex           # 100 páginas, ~3 MB
-
-# Presentación de defensa (LaTeX)
-cd presentacion
-pdflatex defensa.tex
-
-# Resumen ejecutivo (LaTeX horizontal 1 hoja)
-pdflatex resumen_uax.tex
-```
-
-Los ficheros oficiales para entregar a UAX están en la carpeta `~/Desktop/ENTREGA_TFM/` (fuera de este repo, con formato `2526_TFM_OMBF_NPxxxxx_*`).
+La memoria, la presentación de defensa y el resumen ejecutivo **no forman parte de
+este repositorio**: se entregan directamente a la universidad en PDF. Este repo
+contiene únicamente el framework (pipeline, paquete `tfm/` e interfaz web).
 
 ---
 
@@ -221,7 +204,6 @@ Los ficheros oficiales para entregar a UAX están en la carpeta `~/Desktop/ENTRE
 - **Acceso a datos**: `GEOparse` (NCBI GEO), API REST de cBioPortal (TCGA)
 - **LLM**: Llama 3.3-70b servido vía [Groq](https://groq.com) (hardware LPU)
 - **Interfaz web**: [Streamlit](https://streamlit.io)
-- **Memoria y defensa**: LaTeX (pdflatex, beamer, tikz)
 - **Control de versiones**: Git + GitHub Actions
 
 ---
@@ -247,8 +229,6 @@ El refactor no altera ninguna cifra publicada: verificado sobre las diez princip
 - Subramanian & Simon, *JNCI* 2010 — revisión de firmas génicas: por qué la mayoría no replica.
 - Travis et al., *J Thorac Oncol* 2015 — clasificación OMS 2015 con panel IHC de referencia.
 - Johnson et al., *Biostatistics* 2007 — algoritmo ComBat para corrección de efecto lote.
-
-Referencias completas en `memoria/bibliografia.bib`.
 
 ---
 
