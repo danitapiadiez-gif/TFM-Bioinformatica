@@ -7,7 +7,7 @@ name = "tfm-transcriptomica"
 version = "1.0.0"
 description = "Framework transcriptomico para la identificacion y validacion de biomarcadores en cancer de pulmon"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [{name = "Daniel Tapia Diez"}]
 dependencies = [
     "pandas>=2.0",

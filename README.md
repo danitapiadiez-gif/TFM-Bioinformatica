@@ -1,5 +1,7 @@
 # data.lung
 
+[![tests](https://github.com/danitapiadiez-gif/TFM-Bioinformatica/actions/workflows/tests.yml/badge.svg)](https://github.com/danitapiadiez-gif/TFM-Bioinformatica/actions/workflows/tests.yml)
+
 > **Framework transcriptómico basado en la integración de modelos de lenguaje y aprendizaje automático para la identificación de biomarcadores en cáncer de pulmón.**
 
 Trabajo Fin de Máster — Máster Universitario en Bioinformática, Universidad Alfonso X el Sabio (UAX), curso 2025-2026.
@@ -23,7 +25,7 @@ La aplicación web `data.lung` expone los resultados navegables y un asistente c
 | Cohortes GEO descargadas | 11 (8 evaluables) |
 | Muestras curadas por LLM | 1.157 (82,8 % de éxito) |
 | Firma génica validada | **1.174 genes** replicados en 3 cohortes independientes |
-| Panel mínimo clínicamente traducible | **20 genes** (AUC 0,966 vs 0,974 firma completa) |
+| Panel mínimo clínicamente traducible | **20 genes** (AUC 0,966 vs 0,970 firma completa) |
 | AUC LODO subtipo ADC vs SQC | **0,968** |
 | AUC LODO tumor vs sano (con recalibración isotónica) | **0,953** (BalAcc 0,772 → 0,810) |
 | AUC transferido a RNA-Seq (TCGA n=408) | **0,857** [IC 95 % 0,812–0,899] |
@@ -54,13 +56,15 @@ Los pasos se ejecutan como módulos Python independientes y depositan sus output
 
 ```
 .
-├── agentes/                    # 24 pasos del pipeline (paso1..paso24)
+├── agentes/                    # 9 pasos del pipeline + scripts de auditoria
 ├── tfm/                        # Paquete Python con utilidades reutilizables
+│   ├── cli.py                  #   punto de entrada `tfm`
 │   ├── cohortes.py             #   carga y alineamiento por geo_accession
 │   ├── tareas.py               #   tareas biológicas definidas en YAML
 │   ├── validacion.py           #   una sola implementación de LODO
 │   ├── firma.py                #   criterios de replicación y panel mínimo
-│   └── comprobaciones.py       #   controles automáticos previos
+│   ├── comprobaciones.py       #   controles automáticos previos
+│   └── rutas.py                #   rutas de resultados/
 ├── tests/                      # Pytest (~17 tests incluido regresión GSE30219)
 ├── configuracion/
 │   └── tareas.yaml             # Tareas biológicas (subtipo, tumor/sano...)
